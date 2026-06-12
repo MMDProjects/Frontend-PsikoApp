@@ -12,7 +12,8 @@ import { Badge } from '@/core/components/atoms/Badge'
 
 function ExpertHomeScreen() {
   const router = useRouter()
-  const { data: clients, isLoading } = useClientListQuery()
+  const { data: clientsResponse, isLoading } = useClientListQuery()
+  const clients = clientsResponse?.data
 
   return (
     <View className="flex-1 bg-surface-base">

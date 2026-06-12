@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { FlatList, Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
 
@@ -26,7 +26,7 @@ export default function OffersScreen() {
   const isExpert = user?.role === 'expert'
   const [filter, setFilter] = useState<OfferStatus | 'ALL'>('ALL')
 
-  const { data: offers, isLoading } = useOfferListQuery(
+  const { data: offers, isLoading, isError, refetch } = useOfferListQuery(
     filter !== 'ALL' ? { status: filter } : {}
   )
 
@@ -83,7 +83,17 @@ export default function OffersScreen() {
         </View>
       )}
 
-      {offers && offers.length === 0 && (
+      {isError && (
+        <EmptyState
+          icon="WifiOff"
+          title="Yüklenemedi"
+          description="Teklifler alınamadı. İnternet bağlantınızı kontrol edin."
+          ctaLabel="Tekrar Dene"
+          onCta={refetch}
+        />
+      )}
+
+      {!isError && offers && offers.length === 0 && (
         <EmptyState
           icon="FileText"
           title="Teklif bulunamadı"
@@ -93,7 +103,7 @@ export default function OffersScreen() {
         />
       )}
 
-      {offers && offers.length > 0 && (
+      {!isError && offers && offers.length > 0 && (
         <FlatList
           data={offers}
           keyExtractor={(item) => item.id}

@@ -8,6 +8,11 @@ const nativeWindConfig = withNativeWind(config, { input: './global.css' })
 nativeWindConfig.resolver.unstable_enablePackageExports = true
 nativeWindConfig.resolver.unstable_conditionNames = ['require', 'default']
 
-console.log('METRO_CONFIG_V3_FRESH')
+// MOCK — remove this block when connecting real API (delete psikoAL/mock-db/ folder too)
+nativeWindConfig.watchFolders = [
+  ...(nativeWindConfig.watchFolders ?? []),
+  path.resolve(__dirname, '../mock-db'),
+]
+// END MOCK
 
 module.exports = nativeWindConfig

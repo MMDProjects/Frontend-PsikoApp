@@ -150,6 +150,16 @@ instance.interceptors.response.use(
   },
 )
 
+// ⚠️ MOCK — delete this block + psikoAL/mock-db/ folder when connecting real API
+if (process.env.EXPO_PUBLIC_APP_ENV === 'mock') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const MockAdapter = require('axios-mock-adapter')
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { setupMocks } = require('../../../mock-db/handlers')
+  setupMocks(new MockAdapter(instance, { delayResponse: 600 }))
+}
+// END MOCK
+
 // ─── Typed request wrappers ───────────────────────────────────────────────────
 
 export async function get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {

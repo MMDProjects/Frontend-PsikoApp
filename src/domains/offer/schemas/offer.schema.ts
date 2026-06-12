@@ -17,7 +17,7 @@ export const OfferSchema = z.object({
   tiers:       z.array(OfferTierSchema).min(1).max(3),
   currentTier: z.number().int().min(0),
   sessionType: z.enum(['online', 'in_person']),
-  notes:       z.string().max(1000).optional(),
+  notes:       z.string().max(1000).nullish(),
   createdAt:   z.string().datetime(),
   expiresAt:   z.string().datetime().nullable(),
   sentAt:      z.string().datetime().nullable(),
