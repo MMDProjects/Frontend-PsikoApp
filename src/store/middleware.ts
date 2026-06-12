@@ -3,9 +3,10 @@ import { devtools } from 'zustand/middleware'
 
 import { zustandStorage } from '@/lib/storage'
 
-// Pre-configured MMKV-backed storage — pass to persist() in domain slices.
+// Pre-configured AsyncStorage-backed storage — pass to persist() in domain slices.
 // Usage:
-//   create<MyState>()(persist(initializer, { name: 'my-slice', storage: mmkvStorage }))
+//   create<MyState>()(persist(initializer, { name: 'my-slice', storage: asyncStorage }))
 export const mmkvStorage = createJSONStorage(() => zustandStorage)
+export const asyncStorage = mmkvStorage
 
 export { devtools, persist }

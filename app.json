@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "core-rn",
-    "slug": "core-rn",
+    "name": "PsikoAl",
+    "slug": "psikoal",
     "version": "1.0.0",
-    "scheme": "core-rn",
+    "scheme": "psikoal",
     "orientation": "portrait",
     "newArchEnabled": true,
     "icon": "./assets/icon.png",

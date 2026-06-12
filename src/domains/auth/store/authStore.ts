@@ -1,27 +1,38 @@
 import { create } from 'zustand'
 
-import { mmkvStorage } from '@/store/middleware'
-import { persist } from '@/store/middleware'
+import { mmkvStorage, persist } from '@/store/middleware'
+
+import type { AuthUser, UserRole } from '../types/auth.types'
 
 type AuthState = {
   userId: string | null
-  role: 'expert' | 'client' | null
+  role: UserRole | null
   isAuthenticated: boolean
+  user: AuthUser | null
 }
 
 type AuthActions = {
-  setAuth: (userId: string, role: AuthState['role']) => void
+  setAuth: (user: AuthUser, accessToken: string, refreshToken: string) => void
   clearAuth: () => void
+  updateUser: (partial: Partial<AuthUser>) => void
 }
 
 export const useAuthStore = create<AuthState & AuthActions>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       userId: null,
       role: null,
       isAuthenticated: false,
-      setAuth: (userId, role) => set({ userId, role, isAuthenticated: true }),
-      clearAuth: () => set({ userId: null, role: null, isAuthenticated: false }),
+      user: null,
+      setAuth: (user, _accessToken, _refreshToken) =>
+        set({ userId: user.id, role: user.role, isAuthenticated: true, user }),
+      clearAuth: () =>
+        set({ userId: null, role: null, isAuthenticated: false, user: null }),
+      updateUser: (partial) => {
+        const current = get().user
+        if (!current) return
+        set({ user: { ...current, ...partial } })
+      },
     }),
     {
       name: 'auth-storage',

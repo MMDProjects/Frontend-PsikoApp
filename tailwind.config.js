@@ -8,22 +8,24 @@ module.exports = {
   theme: {
     extend: {
       // ─── COLORS ──────────────────────────────────────────────────────────
+      // Note: hardcoded hex values (not var()) — react-native-css-interop@0.1.x
+      // does not resolve CSS custom properties in React Native StyleSheet.
       colors: {
         brand: {
-          DEFAULT:  'var(--color-brand)',
-          hover:    'var(--color-brand-hover)',
-          subtle:   'var(--color-brand-subtle)',
-          muted:    'var(--color-brand-muted)',
-          border:   'var(--color-brand-border)',
-          text:     'var(--color-brand-text)',
+          DEFAULT:  '#0EA5E9',  // sky-500
+          hover:    '#0284C7',  // sky-600
+          subtle:   '#F0F9FF',  // sky-50
+          muted:    '#BAE6FD',  // sky-200
+          border:   '#7DD3FC',  // sky-300
+          text:     '#0369A1',  // sky-700
         },
         accent: {
-          DEFAULT:  'var(--color-accent)',
-          hover:    'var(--color-accent-hover)',
-          subtle:   'var(--color-accent-subtle)',
-          muted:    'var(--color-accent-muted)',
-          border:   'var(--color-accent-border)',
-          text:     'var(--color-accent-text)',
+          DEFAULT:  '#0284C7',  // sky-600
+          hover:    '#0369A1',  // sky-700
+          subtle:   '#E0F2FE',  // sky-100
+          muted:    '#BAE6FD',  // sky-200
+          border:   '#38BDF8',  // sky-400
+          text:     '#075985',  // sky-800
         },
         neutral: {
           50:  '#FAFAFA',
@@ -40,64 +42,64 @@ module.exports = {
           950: '#0A0A0A',
         },
         surface: {
-          base:   'var(--color-surface-base)',
-          raised: 'var(--color-surface-raised)',
-          sunken: 'var(--color-surface-sunken)',
+          base:   '#FFFFFF',
+          raised: '#FAFAFA',
+          sunken: '#F5F5F5',
         },
         content: {
-          primary:   'var(--color-content-primary)',
-          secondary: 'var(--color-content-secondary)',
-          tertiary:  'var(--color-content-tertiary)',
-          disabled:  'var(--color-content-disabled)',
-          inverse:   'var(--color-content-inverse)',
-          link:      'var(--color-content-link)',
+          primary:   '#171717',
+          secondary: '#404040',
+          tertiary:  '#737373',
+          disabled:  '#A3A3A3',
+          inverse:   '#FFFFFF',
+          link:      '#0EA5E9',  // sky-500
         },
         border: {
-          DEFAULT: 'var(--color-border)',
-          muted:   'var(--color-border-muted)',
-          strong:  'var(--color-border-strong)',
+          DEFAULT: '#E5E5E5',
+          muted:   '#F5F5F5',
+          strong:  '#A3A3A3',
         },
         semantic: {
           success: {
-            light:   'var(--color-success-light)',
-            DEFAULT: 'var(--color-success)',
-            dark:    'var(--color-success-dark)',
+            light:   '#DCFCE7',
+            DEFAULT: '#16A34A',
+            dark:    '#14532D',
           },
           warning: {
-            light:   'var(--color-warning-light)',
-            DEFAULT: 'var(--color-warning)',
-            dark:    'var(--color-warning-dark)',
+            light:   '#FEF9C3',
+            DEFAULT: '#CA8A04',
+            dark:    '#713F12',
           },
           error: {
-            light:   'var(--color-error-light)',
-            DEFAULT: 'var(--color-error)',
-            dark:    'var(--color-error-dark)',
+            light:   '#FEE2E2',
+            DEFAULT: '#DC2626',
+            dark:    '#7F1D1D',
           },
           info: {
-            light:   'var(--color-info-light)',
-            DEFAULT: 'var(--color-info)',
-            dark:    'var(--color-info-dark)',
+            light:   '#DBEAFE',
+            DEFAULT: '#2563EB',
+            dark:    '#1E3A8A',
           },
         },
       },
 
       // ─── TYPOGRAPHY ──────────────────────────────────────────────────────
       fontFamily: {
-        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
-        body:    ['var(--font-body)',    'system-ui', 'sans-serif'],
-        mono:    ['var(--font-mono)',    'ui-monospace', 'monospace'],
+        display: ['PlusJakartaSans_700Bold'],
+        body:    ['PlusJakartaSans_400Regular'],
+        mono:    ['Courier New'],
       },
       fontSize: {
-        xs:   ['clamp(0.70rem, 0.68rem + 0.10vw, 0.75rem)',  { lineHeight: '1rem' }],
-        sm:   ['clamp(0.82rem, 0.80rem + 0.12vw, 0.875rem)', { lineHeight: '1.25rem' }],
-        base: ['clamp(0.95rem, 0.92rem + 0.15vw, 1rem)',     { lineHeight: '1.5rem' }],
-        lg:   ['clamp(1.05rem, 1.01rem + 0.20vw, 1.125rem)', { lineHeight: '1.75rem' }],
-        xl:   ['clamp(1.18rem, 1.13rem + 0.25vw, 1.25rem)',  { lineHeight: '1.75rem' }],
-        '2xl':['clamp(1.38rem, 1.30rem + 0.40vw, 1.5rem)',   { lineHeight: '2rem' }],
-        '3xl':['clamp(1.6rem,  1.50rem + 0.50vw, 1.875rem)', { lineHeight: '2.25rem' }],
-        '4xl':['clamp(2rem,    1.85rem + 0.75vw, 2.25rem)',  { lineHeight: '2.5rem' }],
-        '5xl':['clamp(2.4rem,  2.20rem + 1.00vw, 3rem)',     { lineHeight: '1.1' }],
-        '6xl':['clamp(2.9rem,  2.60rem + 1.50vw, 3.75rem)',  { lineHeight: '1' }],
+        xs:   ['12px',  { lineHeight: '16px'   }],
+        sm:   ['14px',  { lineHeight: '20px'   }],
+        base: ['16px',  { lineHeight: '24px'   }],
+        lg:   ['18px',  { lineHeight: '28px'   }],
+        xl:   ['20px',  { lineHeight: '28px'   }],
+        '2xl':['24px',  { lineHeight: '32px'   }],
+        '3xl':['30px',  { lineHeight: '36px'   }],
+        '4xl':['36px',  { lineHeight: '40px'   }],
+        '5xl':['48px',  { lineHeight: '52px'   }],
+        '6xl':['60px',  { lineHeight: '60px'   }],
       },
       fontWeight: {
         light:     '300',
@@ -151,20 +153,6 @@ module.exports = {
         '2xl': '32px',
         '3xl': '48px',
         full:  '9999px',
-      },
-
-      // ─── BOX SHADOW ──────────────────────────────────────────────────────
-      boxShadow: {
-        xs:   '0 1px 2px 0 var(--shadow-color, rgba(0,0,0,0.05))',
-        sm:   '0 1px 3px 0 var(--shadow-color, rgba(0,0,0,0.08)), 0 1px 2px -1px var(--shadow-color, rgba(0,0,0,0.06))',
-        md:   '0 4px 6px -1px var(--shadow-color, rgba(0,0,0,0.08)), 0 2px 4px -2px var(--shadow-color, rgba(0,0,0,0.06))',
-        lg:   '0 10px 15px -3px var(--shadow-color, rgba(0,0,0,0.08)), 0 4px 6px -4px var(--shadow-color, rgba(0,0,0,0.06))',
-        xl:   '0 20px 25px -5px var(--shadow-color, rgba(0,0,0,0.08)), 0 8px 10px -6px var(--shadow-color, rgba(0,0,0,0.06))',
-        '2xl':'0 25px 50px -12px var(--shadow-color, rgba(0,0,0,0.15))',
-        // Focus ring shadows — web/Expo Web only; border-color change is the RN indicator
-        'focus-brand':   '0 0 0 3px var(--color-brand-border)',
-        'focus-error':   '0 0 0 3px var(--color-error-light)',
-        'focus-success': '0 0 0 3px var(--color-success-light)',
       },
 
       // ─── TRANSITIONS ─────────────────────────────────────────────────────

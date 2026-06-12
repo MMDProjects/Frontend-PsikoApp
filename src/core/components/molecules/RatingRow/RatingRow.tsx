@@ -25,9 +25,9 @@ export type RatingRowProps = {
 type StarType = 'full' | 'half' | 'empty'
 
 const STAR_COUNT = 5
-const FILLED_COLOR = '#F59E0B'
+const FILLED_COLOR = '#0EA5E9'  // sky-500 — PsikoAL brand color
 const EMPTY_COLOR = '#D4D4D4'
-const STROKE_COLOR = '#F59E0B'
+const STROKE_COLOR = '#0EA5E9'  // sky-500
 
 const sizeConfig = {
   sm: { star: 14, gap: 'gap-0.5', text: 'caption' as const },

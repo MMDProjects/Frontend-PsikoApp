@@ -23,9 +23,9 @@ export type ChipProps = {
   className?: string
 }
 
-const filterUnselected = 'border border-border bg-surface-raised'
-const filterSelected = 'border border-brand bg-brand'
-const inputStyle = 'border border-brand-border bg-brand-subtle'
+const filterUnselected = 'border border-neutral-200 bg-surface-raised'
+const filterSelected   = 'border border-sky-200 bg-sky-50'
+const inputStyle       = 'border border-sky-200 bg-sky-50'
 
 export function Chip({
   label,
@@ -47,7 +47,7 @@ export function Chip({
     className
   )
 
-  const labelColor = isFilter && isSelected ? 'inverse' : ('secondary' as const)
+  const labelColor = 'secondary' as const
 
   const content = (
     <>
@@ -62,7 +62,7 @@ export function Chip({
           disabled={isDisabled}
           className="ml-0.5"
         >
-          <XIcon size={14} stroke={isSelected ? '#FFFFFF' : '#525252'} />
+          <XIcon size={14} stroke="#525252" />
         </Pressable>
       )}
     </>

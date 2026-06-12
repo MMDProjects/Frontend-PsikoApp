@@ -1,34 +1,31 @@
+import '../../global.css'
+
 import { useEffect } from 'react'
 import {
-  BricolageGrotesque_400Regular,
-  BricolageGrotesque_600SemiBold,
-  BricolageGrotesque_700Bold,
-  BricolageGrotesque_800ExtraBold,
-} from '@expo-google-fonts/bricolage-grotesque'
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-} from '@expo-google-fonts/inter'
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from '@expo-google-fonts/plus-jakarta-sans'
 import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
+import { Stack, useRouter } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 
 import { AppProviders } from '@/core/components/templates/AppProviders'
+import { registerUnauthenticatedHandler } from '@/lib/api'
 
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
+  const router = useRouter()
+
   const [fontsLoaded, fontError] = useFonts({
-    BricolageGrotesque_400Regular,
-    BricolageGrotesque_600SemiBold,
-    BricolageGrotesque_700Bold,
-    BricolageGrotesque_800ExtraBold,
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
   })
 
   useEffect(() => {
@@ -36,6 +33,13 @@ export default function RootLayout() {
       SplashScreen.hideAsync()
     }
   }, [fontsLoaded, fontError])
+
+  // Register handler so Axios 401 refresh failure can navigate to login
+  useEffect(() => {
+    registerUnauthenticatedHandler(() => {
+      router.replace('/(auth)/login')
+    })
+  }, [router])
 
   if (!fontsLoaded && !fontError) return null
 

@@ -69,7 +69,7 @@ export function StatCard({
 
   return (
     <View
-      className={cn('bg-surface-raised rounded-xl p-4', className)}
+      className={cn('bg-surface-raised rounded-xl p-4 border border-neutral-100', className)}
       // accentColor cannot be expressed as a static Tailwind class
       style={accentColor ? { borderLeftWidth: 3, borderLeftColor: accentColor } : undefined}
     >

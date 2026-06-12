@@ -43,10 +43,10 @@ export type InputProps = {
 const MULTILINE_MAX_HEIGHT = 120
 
 const containerStateStyles: Record<InputState, string> = {
-  default: 'border border-border bg-surface-raised',
-  focused: 'border-2 border-brand bg-surface-raised shadow-focus-brand',
-  error: 'border-2 border-semantic-error bg-surface-raised shadow-focus-error',
-  success: 'border-2 border-semantic-success bg-surface-raised shadow-focus-success',
+  default:  'border border-border bg-surface-raised',
+  focused:  'border-2 border-sky-400 bg-surface-raised',
+  error:    'border-2 border-semantic-error bg-semantic-error-light',
+  success:  'border-2 border-semantic-success bg-surface-raised',
   disabled: 'border border-border bg-surface-sunken opacity-40',
 }
 

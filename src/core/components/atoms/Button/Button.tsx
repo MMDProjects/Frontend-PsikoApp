@@ -24,12 +24,12 @@ export type ButtonProps = {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-brand active:bg-brand-hover shadow-sm',
+  primary:   'bg-brand border border-sky-400 active:bg-brand-hover',
   secondary: 'bg-brand-subtle border border-brand-border active:bg-brand-muted',
-  ghost: 'border border-border active:bg-surface-sunken',
-  danger: 'bg-semantic-error-light border border-semantic-error',
-  accent: 'bg-accent active:bg-accent-hover shadow-sm',
-  link: 'px-0',
+  ghost:     'border border-border active:bg-surface-sunken',
+  danger:    'bg-semantic-error-light border border-semantic-error active:bg-red-100',
+  accent:    'bg-accent border border-accent-border active:bg-accent-hover',
+  link:      'px-0',
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -57,12 +57,12 @@ const labelSizeStyles: Record<ButtonSize, 'xs' | 'sm' | 'base' | 'base'> = {
 
 // ActivityIndicator requires a string color value, CSS variables are not supported
 const indicatorColor: Record<ButtonVariant, string> = {
-  primary: '#FFFFFF',
-  secondary: '#404040',
-  ghost: '#171717',
-  danger: '#7F1D1D',
-  accent: '#FFFFFF',
-  link: '#404040',
+  primary:   '#FFFFFF',
+  secondary: '#0EA5E9',  // sky-500
+  ghost:     '#171717',
+  danger:    '#7F1D1D',
+  accent:    '#FFFFFF',
+  link:      '#0EA5E9',  // sky-500
 }
 
 const SPRING_CONFIG = { mass: 0.5, stiffness: 400, damping: 20 }

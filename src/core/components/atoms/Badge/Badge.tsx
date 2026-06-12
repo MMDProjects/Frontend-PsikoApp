@@ -5,7 +5,9 @@ import { Text } from '@/core/components/atoms/Text'
 
 import type { ReactNode } from 'react'
 
-export type BadgeVariant = 'brand' | 'accent' | 'success' | 'warning' | 'error' | 'neutral'
+// PsikoAl variant spec: sky | sage | warning | error | neutral
+// + success/info semantic aliases kept for programmatic use
+export type BadgeVariant = 'sky' | 'sage' | 'warning' | 'error' | 'neutral' | 'success' | 'info'
 export type BadgeSize = 'sm' | 'md'
 
 export type BadgeProps = {
@@ -18,30 +20,33 @@ export type BadgeProps = {
 }
 
 const containerVariantStyles: Record<BadgeVariant, string> = {
-  brand: 'bg-brand-subtle border border-brand-border',
-  accent: 'bg-accent-subtle border border-accent-border',
-  success: 'bg-semantic-success-light',
+  sky:     'bg-sky-50 border border-sky-200',
+  sage:    'bg-green-50 border border-green-200',
   warning: 'bg-semantic-warning-light',
-  error: 'bg-semantic-error-light',
+  error:   'bg-semantic-error-light',
   neutral: 'bg-neutral-100',
+  success: 'bg-semantic-success-light',
+  info:    'bg-sky-50 border border-sky-200',
 }
 
 const textVariantStyles: Record<BadgeVariant, string> = {
-  brand: 'text-brand-text',
-  accent: 'text-accent-text',
-  success: 'text-semantic-success-dark',
+  sky:     'text-sky-700',
+  sage:    'text-green-700',
   warning: 'text-semantic-warning-dark',
-  error: 'text-semantic-error-dark',
+  error:   'text-semantic-error-dark',
   neutral: 'text-neutral-700',
+  success: 'text-semantic-success-dark',
+  info:    'text-sky-700',
 }
 
 const dotVariantStyles: Record<BadgeVariant, string> = {
-  brand: 'bg-brand',
-  accent: 'bg-accent',
-  success: 'bg-semantic-success',
+  sky:     'bg-sky-500',
+  sage:    'bg-green-500',
   warning: 'bg-semantic-warning',
-  error: 'bg-semantic-error',
+  error:   'bg-semantic-error',
   neutral: 'bg-neutral-500',
+  success: 'bg-semantic-success',
+  info:    'bg-sky-400',
 }
 
 const containerSizeStyles: Record<BadgeSize, string> = {

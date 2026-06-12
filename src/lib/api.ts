@@ -46,9 +46,10 @@ const instance: AxiosInstance = axios.create({
 })
 
 // ─── Request interceptor: attach Bearer token ────────────────────────────────
+// tokenStorage.getAccessToken() is async (AsyncStorage), so the interceptor must be async
 
-instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = tokenStorage.getAccessToken()
+instance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  const token = await tokenStorage.getAccessToken()
   if (token) {
     config.headers.set('Authorization', `Bearer ${token}`)
   }
@@ -97,7 +98,7 @@ instance.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const refreshToken = tokenStorage.getRefreshToken()
+        const refreshToken = await tokenStorage.getRefreshToken()
         if (!refreshToken) throw new Error('No refresh token')
 
         const { data: refreshData } = await instance.post<{ accessToken: string; refreshToken: string }>(
@@ -105,15 +106,15 @@ instance.interceptors.response.use(
           { refreshToken },
         )
 
-        tokenStorage.setAccessToken(refreshData.accessToken)
-        tokenStorage.setRefreshToken(refreshData.refreshToken)
+        await tokenStorage.setAccessToken(refreshData.accessToken)
+        await tokenStorage.setRefreshToken(refreshData.refreshToken)
         instance.defaults.headers.common['Authorization'] = `Bearer ${refreshData.accessToken}`
 
         processQueue(null, refreshData.accessToken)
         return instance(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
-        tokenStorage.clearTokens()
+        await tokenStorage.clearTokens()
         _onUnauthenticated?.()
         return Promise.reject(new ApiError('UNAUTHORIZED', 'Session expired. Please log in again.', 401))
       } finally {

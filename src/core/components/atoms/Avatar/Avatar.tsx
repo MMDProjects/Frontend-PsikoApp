@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { Image, View } from 'react-native'
-import { User } from 'lucide-react-native'
+import { Check, User } from 'lucide-react-native'
 
 import { cn } from '@/core/utils/cn'
 import { Text } from '@/core/components/atoms/Text'
 
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import type { SvgProps } from 'react-native-svg'
 
-type IconProps = Pick<SvgProps, 'stroke'> & { size?: number }
+type IconProps = Pick<SvgProps, 'stroke'> & { size?: number; strokeWidth?: number }
 const UserIcon = User as ComponentType<IconProps>
+const CheckIcon = Check as ComponentType<IconProps>
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
 
@@ -18,7 +19,8 @@ export type AvatarProps = {
   src?: string
   initials?: string
   fallbackColor?: string
-  badge?: React.ReactNode
+  isVerified?: boolean
+  badge?: ReactNode
   borderWidth?: number
   borderColor?: string
   className?: string
@@ -58,11 +60,21 @@ const iconSizeMap: Record<AvatarSize, number> = {
   '2xl': 60,
 }
 
+const verifiedSizeMap: Record<AvatarSize, number> = {
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 20,
+  xl: 26,
+  '2xl': 36,
+}
+
 export function Avatar({
   size = 'md',
   src,
   initials,
   fallbackColor,
+  isVerified = false,
   badge,
   borderWidth,
   borderColor,
@@ -72,48 +84,72 @@ export function Avatar({
 
   const px = sizeMap[size]
   const showImg = Boolean(src) && !hasError
+  const verifiedPx = verifiedSizeMap[size]
 
   return (
+    // Outer wrapper has no overflow:hidden so the verified badge can bleed outside bounds
     <View
-      className={cn('relative', className)}
-      // Avatar dimensions and optional border are dynamic numeric values
-      style={{
-        width: px,
-        height: px,
-        borderRadius: px / 2,
-        borderWidth,
-        borderColor,
-        overflow: 'hidden',
-      }}
-      accessibilityRole="image"
+      className={cn('relative self-start', className)}
+      style={{ width: px, height: px }}
     >
-      {showImg ? (
-        <Image
-          source={{ uri: src }}
-          style={{ width: px, height: px }}
-          onError={() => setHasError(true)}
-          accessibilityIgnoresInvertColors
-        />
-      ) : (
+      {/* Inner circle — overflow:hidden clips image/fallback to circular shape */}
+      <View
+        style={{
+          width: px,
+          height: px,
+          borderRadius: px / 2,
+          borderWidth,
+          borderColor,
+          overflow: 'hidden',
+        }}
+        accessibilityRole="image"
+      >
+        {showImg ? (
+          <Image
+            source={{ uri: src }}
+            style={{ width: px, height: px }}
+            onError={() => setHasError(true)}
+            accessibilityIgnoresInvertColors
+          />
+        ) : (
+          <View
+            // Dynamic fallbackColor cannot be a static Tailwind class
+            style={{ backgroundColor: fallbackColor ?? undefined }}
+            className={cn('flex-1 items-center justify-center', !fallbackColor && 'bg-brand-subtle')}
+          >
+            {initials ? (
+              <Text
+                style={{ fontSize: fontSizeMap[size], lineHeight: fontSizeMap[size] * 1.2 }}
+                className="text-brand-text font-semibold"
+              >
+                {initials.slice(0, 2).toUpperCase()}
+              </Text>
+            ) : (
+              <UserIcon size={iconSizeMap[size]} stroke="#737373" />
+            )}
+          </View>
+        )}
+      </View>
+
+      {/* Verified badge — outside overflow:hidden so it bleeds past the circle edge */}
+      {isVerified && (
         <View
-          // Dynamic fallbackColor cannot be a static Tailwind class
-          style={{ backgroundColor: fallbackColor ?? undefined }}
-          className={cn('flex-1 items-center justify-center', !fallbackColor && 'bg-brand-subtle')}
+          className="absolute bg-sky-500 items-center justify-center rounded-full border-2 border-white"
+          style={{
+            width: verifiedPx,
+            height: verifiedPx,
+            bottom: -(verifiedPx * 0.15),
+            right: -(verifiedPx * 0.15),
+          }}
         >
-          {initials ? (
-            <Text
-              style={{ fontSize: fontSizeMap[size], lineHeight: fontSizeMap[size] * 1.2 }}
-              className="text-brand-text font-semibold"
-            >
-              {initials.slice(0, 2).toUpperCase()}
-            </Text>
-          ) : (
-            <UserIcon size={iconSizeMap[size]} stroke="#737373" />
-          )}
+          <CheckIcon size={verifiedPx * 0.6} stroke="#FFFFFF" strokeWidth={3} />
         </View>
       )}
 
-      {badge && <View className="absolute bottom-0 right-0">{badge}</View>}
+      {/* Generic badge slot — only rendered when isVerified is not set */}
+      {badge && !isVerified && (
+        <View className="absolute bottom-0 right-0">{badge}</View>
+      )}
     </View>
   )
 }

@@ -23,7 +23,7 @@ export function SearchBar({
   onChangeText,
   onSearch,
   onClear,
-  placeholder = 'Search…',
+  placeholder = 'Ara...',
   isLoading = false,
   autoFocus = false,
   className,

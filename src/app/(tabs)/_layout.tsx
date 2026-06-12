@@ -29,7 +29,7 @@ const CLIENT_TABS: TabConfig[] = [
 const DEFAULT_TABS = CLIENT_TABS
 
 // Design token colors — hardcoded because tab bar is rendered outside NativeWind className context
-const TAB_ACTIVE_TINT   = '#5C4FD6' // iris-500
+const TAB_ACTIVE_TINT   = '#0EA5E9' // sky-500
 const TAB_INACTIVE_TINT = '#737373' // neutral-500
 const TAB_BG            = '#FFFFFF'
 const TAB_BORDER        = '#E5E5E5'
@@ -56,7 +56,7 @@ export default function TabsLayout() {
               height:          56,
             },
         tabBarLabelStyle: {
-          fontFamily: 'Inter_500Medium',
+          fontFamily: 'PlusJakartaSans_500Medium',
           fontSize:   11,
         },
       }}

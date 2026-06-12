@@ -1,15 +1,12 @@
-import { createMMKV } from 'react-native-mmkv'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import type { MMKV } from 'react-native-mmkv'
 import type { StateStorage } from 'zustand/middleware'
 
-export const storage: MMKV = createMMKV()
-
-// ─── Zustand persist adapter ────────────────────────────────────────────────
+// AsyncStorage is synchronous-compatible via Zustand's async persist
 export const zustandStorage: StateStorage = {
-  getItem:    (key) => storage.getString(key) ?? null,
-  setItem:    (key, value) => storage.set(key, value),
-  removeItem: (key) => storage.remove(key),
+  getItem:    (key) => AsyncStorage.getItem(key),
+  setItem:    (key, value) => AsyncStorage.setItem(key, value),
+  removeItem: (key) => AsyncStorage.removeItem(key),
 }
 
 // ─── Token helpers ───────────────────────────────────────────────────────────
@@ -17,24 +14,24 @@ const TOKEN_KEY         = 'auth.accessToken'
 const REFRESH_TOKEN_KEY = 'auth.refreshToken'
 
 export const tokenStorage = {
-  getAccessToken:  (): string | null => storage.getString(TOKEN_KEY) ?? null,
-  setAccessToken:  (token: string)   => storage.set(TOKEN_KEY, token),
-  getRefreshToken: (): string | null => storage.getString(REFRESH_TOKEN_KEY) ?? null,
-  setRefreshToken: (token: string)   => storage.set(REFRESH_TOKEN_KEY, token),
-  clearTokens:     ()                => { storage.remove(TOKEN_KEY); storage.remove(REFRESH_TOKEN_KEY) },
+  getAccessToken:  () => AsyncStorage.getItem(TOKEN_KEY),
+  setAccessToken:  (token: string) => AsyncStorage.setItem(TOKEN_KEY, token),
+  getRefreshToken: () => AsyncStorage.getItem(REFRESH_TOKEN_KEY),
+  setRefreshToken: (token: string) => AsyncStorage.setItem(REFRESH_TOKEN_KEY, token),
+  clearTokens:     () => AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY]),
 }
 
 // ─── Generic typed helpers ──────────────────────────────────────────────────
-export function storageGet<T>(key: string): T | null {
-  const raw = storage.getString(key)
+export async function storageGet<T>(key: string): Promise<T | null> {
+  const raw = await AsyncStorage.getItem(key)
   if (raw == null) return null
   try { return JSON.parse(raw) as T } catch { return null }
 }
 
-export function storageSet<T>(key: string, value: T): void {
-  storage.set(key, JSON.stringify(value))
+export async function storageSet<T>(key: string, value: T): Promise<void> {
+  await AsyncStorage.setItem(key, JSON.stringify(value))
 }
 
-export function storageRemove(key: string): void {
-  storage.remove(key)
+export async function storageRemove(key: string): Promise<void> {
+  await AsyncStorage.removeItem(key)
 }

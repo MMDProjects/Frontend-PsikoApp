@@ -74,7 +74,7 @@ export function PriceDisplay({
           </Text>
         )}
         {discount !== undefined && discount > 0 && (
-          <Badge label={`%${discount}`} variant="success" size="sm" />
+          <Badge label={`%${discount}`} variant="sky" size="sm" />
         )}
       </View>
     )
@@ -100,7 +100,7 @@ export function PriceDisplay({
         )}
 
         {discount !== undefined && discount > 0 && (
-          <Badge label={`%${discount}`} variant="success" size="sm" className="mb-0.5" />
+          <Badge label={`%${discount}`} variant="sky" size="sm" className="mb-0.5" />
         )}
       </View>
 
