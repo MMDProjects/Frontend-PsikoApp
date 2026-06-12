@@ -1,0 +1,179 @@
+import axios from 'axios'
+
+import { env } from './env'
+import { tokenStorage } from './storage'
+
+import type { AxiosError, AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
+
+// ─── Error types ─────────────────────────────────────────────────────────────
+
+export type ValidationError = { field: string; message: string }
+
+export class ApiError extends Error {
+  constructor(
+    public readonly code: string,
+    message: string,
+    public readonly status: number,
+    public readonly validationErrors?: ValidationError[],
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
+export class NetworkError extends Error {
+  constructor() {
+    super('No network connection. Please check your internet and try again.')
+    this.name = 'NetworkError'
+  }
+}
+
+// ─── Navigation callback ──────────────────────────────────────────────────────
+// Set by the root layout so the lib layer can trigger navigation without
+// importing expo-router directly (avoids circular deps).
+let _onUnauthenticated: (() => void) | null = null
+
+export function registerUnauthenticatedHandler(handler: () => void): void {
+  _onUnauthenticated = handler
+}
+
+// ─── Axios instance ───────────────────────────────────────────────────────────
+
+const instance: AxiosInstance = axios.create({
+  baseURL: env.EXPO_PUBLIC_API_URL,
+  timeout: 15_000,
+  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+})
+
+// ─── Request interceptor: attach Bearer token ────────────────────────────────
+
+instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = tokenStorage.getAccessToken()
+  if (token) {
+    config.headers.set('Authorization', `Bearer ${token}`)
+  }
+  return config
+})
+
+// ─── Token refresh state ──────────────────────────────────────────────────────
+
+let isRefreshing = false
+let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = []
+
+function processQueue(error: unknown, token: string | null): void {
+  failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(token!)))
+  failedQueue = []
+}
+
+// ─── Response interceptor ────────────────────────────────────────────────────
+
+instance.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError<{ code?: string; message?: string; errors?: unknown[] }>) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+
+    // Network error (no response at all)
+    if (!error.response) {
+      return Promise.reject(new NetworkError())
+    }
+
+    const { status, data } = error.response
+
+    // 401 — attempt one token refresh then retry
+    if (status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve: (token) => {
+              originalRequest.headers.set('Authorization', `Bearer ${token}`)
+              resolve(instance(originalRequest))
+            },
+            reject,
+          })
+        })
+      }
+
+      originalRequest._retry = true
+      isRefreshing = true
+
+      try {
+        const refreshToken = tokenStorage.getRefreshToken()
+        if (!refreshToken) throw new Error('No refresh token')
+
+        const { data: refreshData } = await instance.post<{ accessToken: string; refreshToken: string }>(
+          '/auth/refresh',
+          { refreshToken },
+        )
+
+        tokenStorage.setAccessToken(refreshData.accessToken)
+        tokenStorage.setRefreshToken(refreshData.refreshToken)
+        instance.defaults.headers.common['Authorization'] = `Bearer ${refreshData.accessToken}`
+
+        processQueue(null, refreshData.accessToken)
+        return instance(originalRequest)
+      } catch (refreshError) {
+        processQueue(refreshError, null)
+        tokenStorage.clearTokens()
+        _onUnauthenticated?.()
+        return Promise.reject(new ApiError('UNAUTHORIZED', 'Session expired. Please log in again.', 401))
+      } finally {
+        isRefreshing = false
+      }
+    }
+
+    // 422 — normalize validation errors
+    if (status === 422) {
+      const rawErrors = (data?.errors ?? []) as Array<{ field?: string; message?: string }>
+      const validationErrors: ValidationError[] = rawErrors.map((e) => ({
+        field:   e.field   ?? 'unknown',
+        message: e.message ?? 'Invalid value',
+      }))
+      return Promise.reject(
+        new ApiError(
+          'VALIDATION_ERROR',
+          data?.message ?? 'Validation failed.',
+          422,
+          validationErrors,
+        ),
+      )
+    }
+
+    // All other errors
+    return Promise.reject(
+      new ApiError(
+        data?.code    ?? 'UNKNOWN_ERROR',
+        data?.message ?? 'An unexpected error occurred.',
+        status,
+      ),
+    )
+  },
+)
+
+// ─── Typed request wrappers ───────────────────────────────────────────────────
+
+export async function get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  const res = await instance.get<T>(url, config)
+  return res.data
+}
+
+export async function post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  const res = await instance.post<T>(url, data, config)
+  return res.data
+}
+
+export async function put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  const res = await instance.put<T>(url, data, config)
+  return res.data
+}
+
+export async function patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  const res = await instance.patch<T>(url, data, config)
+  return res.data
+}
+
+export async function del<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  const res = await instance.delete<T>(url, config)
+  return res.data
+}
+
+export { instance as axiosInstance }
