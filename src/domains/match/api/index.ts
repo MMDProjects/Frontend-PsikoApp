@@ -1,5 +1,4 @@
-export { useMatchRequestDetailQuery } from './useMatchRequestDetailQuery'
-export { useMatchListQuery } from './useMatchListQuery'
-export { useSendMatchRequestMutation } from './useSendMatchRequestMutation'
-export { useAcceptMatchMutation } from './useAcceptMatchMutation'
+export { useMyMatchQuery } from './useMyMatchQuery'
+export { useMatchesQuery } from './useMatchesQuery'
+export { useMatchDetailQuery } from './useMatchDetailQuery'
 export { useReleaseMatchMutation } from './useReleaseMatchMutation'

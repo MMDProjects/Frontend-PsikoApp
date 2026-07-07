@@ -1,54 +1,44 @@
 import { z } from 'zod'
 
-export const OfferStatusSchema = z.enum(['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED'])
-
-export const OfferTierSchema = z.object({
-  tierNumber:    z.number().int().min(1).max(3),
-  price:         z.number().positive(),
-  durationHours: z.number().positive(),
-  activatedAt:   z.string().datetime().nullable(),
-})
+export const OfferStatusSchema = z.enum(['PENDING', 'ACCEPTED', 'REJECTED', 'WITHDRAWN'])
 
 export const OfferSchema = z.object({
   id:          z.string().uuid(),
+  listingId:   z.string().uuid(),
   expertId:    z.string().uuid(),
-  clientId:    z.string().uuid(),
+  title:       z.string().max(100).optional(),
+  price:       z.number().positive(),
+  description: z.string().max(300).default(''),
+  sessionType: z.enum(['online', 'yüz_yüze', 'yüz_yüze_online']),
   status:      OfferStatusSchema,
-  tiers:       z.array(OfferTierSchema).min(1).max(3),
-  currentTier: z.number().int().min(0),
-  sessionType: z.enum(['online', 'in_person']),
-  notes:       z.string().max(1000).nullish(),
+  matchId:     z.string().uuid().optional(),
   createdAt:   z.string().datetime(),
-  expiresAt:   z.string().datetime().nullable(),
-  sentAt:      z.string().datetime().nullable(),
-  respondedAt: z.string().datetime().nullable(),
-  client: z.object({
+  listing: z.object({
     id:       z.string().uuid(),
-    fullName: z.string(),
+    title:    z.string(),
+    clientId: z.string().uuid(),
+    city:     z.string().optional(),
+    assessmentResult: z.object({
+      id:              z.string(),
+      score:           z.number(),
+      level:           z.enum(['low', 'moderate', 'high']),
+      summary:         z.string(),
+      assessmentTitle: z.string(),
+    }).optional(),
   }).optional(),
   expert: z.object({
-    id:       z.string().uuid(),
-    name:     z.string(),
-    title:    z.string(),
+    id:        z.string().uuid(),
+    name:      z.string(),
+    title:     z.string(),
     avatarUrl: z.string().url().nullable().optional(),
+    rating:    z.number(),
   }).optional(),
 })
 
-export const CreateOfferSchema = z.object({
-  clientId:    z.string().uuid({ message: 'Danışan seçiniz' }),
-  sessionType: z.enum(['online', 'in_person']),
-  notes:       z.string().max(1000).optional(),
-  tiers: z
-    .array(
-      z.object({
-        price:         z.number({ required_error: 'Fiyat giriniz' }).positive({ message: 'Fiyat 0\'dan büyük olmalıdır' }),
-        durationHours: z.number({ required_error: 'Süre giriniz' }).positive({ message: 'Süre 0\'dan büyük olmalıdır' }),
-      })
-    )
-    .min(1, 'En az 1 kademe gerekli')
-    .max(3, 'En fazla 3 kademe olabilir')
-    .refine(
-      (tiers) => tiers.every((t, i) => i === 0 || t.price < tiers[i - 1].price),
-      'Her kademenin fiyatı bir öncekinden düşük olmalıdır'
-    ),
+export const SendOfferSchema = z.object({
+  listingId:   z.string().uuid({ message: 'İlan seçiniz' }),
+  title:       z.string().min(3, 'En az 3 karakter').max(100, 'En fazla 100 karakter').optional(),
+  price:       z.number({ required_error: 'Fiyat giriniz' }).positive('Geçerli fiyat giriniz'),
+  sessionType: z.enum(['online', 'yüz_yüze', 'yüz_yüze_online']),
+  description: z.string().max(300, 'En fazla 300 karakter').optional(),
 })

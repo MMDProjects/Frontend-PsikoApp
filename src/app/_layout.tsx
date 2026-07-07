@@ -10,15 +10,23 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans'
 import { useFonts } from 'expo-font'
 import { Stack, useRouter } from 'expo-router'
+import { useColorScheme } from 'nativewind'
 import * as SplashScreen from 'expo-splash-screen'
 
 import { AppProviders } from '@/core/components/templates/AppProviders'
 import { registerUnauthenticatedHandler } from '@/lib/api'
+import { useThemeStore } from '@/store/themeStore'
 
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   const router = useRouter()
+  const { setColorScheme } = useColorScheme()
+  const preference = useThemeStore((s) => s.preference)
+
+  useEffect(() => {
+    setColorScheme(preference)
+  }, [preference])
 
   const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_400Regular,
@@ -34,7 +42,6 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError])
 
-  // Register handler so Axios 401 refresh failure can navigate to login
   useEffect(() => {
     registerUnauthenticatedHandler(() => {
       router.replace('/(auth)/login')

@@ -1,0 +1,33 @@
+import type { IconName } from '@/core/components/atoms/Icon'
+import type { ListingStatus } from './types/listing.types'
+
+export const listingKeys = {
+  all:    ['listings'] as const,
+  lists:  () => [...listingKeys.all, 'list'] as const,
+  my:     () => [...listingKeys.all, 'my'] as const,
+  detail: (id: string) => [...listingKeys.all, 'detail', id] as const,
+} as const
+
+export const LISTING_STALE_TIME = 60 * 1000
+export const LISTING_EXPIRE_DAYS = 30
+export const LISTING_MAX_ACTIVE = 3
+
+export const LISTING_STATUS_CONFIG: Record<ListingStatus, { label: string; icon: IconName; iconColor: string }> = {
+  OPEN:    { label: 'Yayında',       icon: 'Radio',        iconColor: '#0EA5E9' },
+  MATCHED: { label: 'Eşleşildi',    icon: 'CheckCircle2', iconColor: '#16A34A' },
+  CLOSED:  { label: 'Kapatıldı',    icon: 'CircleX',      iconColor: '#737373' },
+  EXPIRED: { label: 'Süresi Doldu', icon: 'Clock',        iconColor: '#D97706' },
+} as const
+
+export const SESSION_TYPE_LABELS: Record<string, string> = {
+  online:      'Online',
+  'yüz_yüze': 'Yüz Yüze',
+  yüz_yüze_online: 'Yüz Yüze / Online',
+} as const
+
+export const SPECIALIZATION_OPTIONS = [
+  'Anksiyete', 'Depresyon', 'Kaygı Bozukluğu', 'Panik Atak', 'OKB',
+  'Travma & PTSD', 'İlişki Sorunları', 'Aile Terapisi', 'Çocuk & Ergen',
+  'Uyku Bozukluğu', 'Stres Yönetimi', 'Yeme Bozukluğu', 'Bağımlılık',
+  'Kişilik Bozuklukları', 'Motivasyon', 'İş Stresi', 'Yas & Kayıp',
+] as const

@@ -42,3 +42,16 @@ export const AssessmentResultSchema = z.object({
   suggestions: z.array(z.string()),
   createdAt:   z.string().datetime(),
 })
+
+export const AssessmentListItemSchema = z.object({
+  id:               z.string(),
+  title:            z.string(),
+  category:         z.string(),
+  estimatedMinutes: z.number(),
+  questionCount:    z.number(),
+})
+
+export const MyAssessmentResultSchema = AssessmentResultSchema.extend({
+  assessmentId:    z.string(),
+  assessmentTitle: z.string(),
+})

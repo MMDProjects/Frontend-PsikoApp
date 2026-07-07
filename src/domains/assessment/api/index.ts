@@ -1,2 +1,4 @@
 export { useAssessmentQuery } from './useAssessmentQuery'
 export { useSubmitAssessmentMutation } from './useSubmitAssessmentMutation'
+export { useAssessmentListQuery } from './useAssessmentListQuery'
+export { useMyAssessmentResultsQuery } from './useMyAssessmentResultsQuery'

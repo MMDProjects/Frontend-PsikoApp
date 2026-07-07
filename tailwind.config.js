@@ -5,6 +5,7 @@ module.exports = {
     './app/**/*.{js,jsx,ts,tsx}',
   ],
   presets: [require('nativewind/preset')],
+  darkMode: 'class',
   theme: {
     extend: {
       // ─── COLORS ──────────────────────────────────────────────────────────
@@ -42,9 +43,9 @@ module.exports = {
           950: '#0A0A0A',
         },
         surface: {
-          base:   '#FFFFFF',
-          raised: '#FAFAFA',
-          sunken: '#F5F5F5',
+          base:   '#F2F2F7',  // iOS Health gray
+          raised: '#FFFFFF',
+          sunken: '#E8E8ED',
         },
         content: {
           primary:   '#171717',
@@ -58,6 +59,36 @@ module.exports = {
           DEFAULT: '#E5E5E5',
           muted:   '#F5F5F5',
           strong:  '#A3A3A3',
+        },
+        tag: {
+          DEFAULT: '#10B981',  // emerald-500 — dark bg opacity base
+          subtle:  '#ECFDF5',  // emerald-50
+          muted:   '#A7F3D0',  // emerald-200
+          border:  '#6EE7B7',  // emerald-300 — also dark mode text
+          text:    '#047857',  // emerald-700
+        },
+        session: {
+          DEFAULT: '#F59E0B',  // amber-500 — dark bg opacity base
+          subtle:  '#FFFBEB',  // amber-50
+          muted:   '#FDE68A',  // amber-200
+          border:  '#FCD34D',  // amber-300 — also dark mode text
+          text:    '#B45309',  // amber-700
+        },
+        price: {
+          DEFAULT: '#22C55E',  // green-500 — dark bg opacity base
+          subtle:  '#F0FDF4',  // green-50
+          muted:   '#BBF7D0',  // green-200
+          border:  '#86EFAC',  // green-300 — also dark mode text
+          text:    '#15803D',  // green-700
+        },
+        // iOS-style dark mode surfaces — used with dark: prefix
+        dark: {
+          bg:        '#000000',  // system background
+          card:      '#1C1C1E',  // grouped / card
+          elevated:  '#2C2C2E',  // elevated card
+          control:   '#3A3A3C',  // control fill
+          border:    '#38383A',  // separator
+          border2:   '#48484A',  // secondary border
         },
         semantic: {
           success: {
@@ -85,7 +116,7 @@ module.exports = {
 
       // ─── TYPOGRAPHY ──────────────────────────────────────────────────────
       fontFamily: {
-        display: ['PlusJakartaSans_700Bold'],
+        display: ['PlusJakartaSans_800ExtraBold'],
         body:    ['PlusJakartaSans_400Regular'],
         mono:    ['Courier New'],
       },

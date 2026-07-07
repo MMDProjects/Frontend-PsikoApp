@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, useColorScheme, View } from 'react-native'
 import { useRouter } from 'expo-router'
 
 import { Button } from '@/core/components/atoms/Button'
@@ -24,11 +24,12 @@ type StepHeaderProps = {
 }
 
 function StepHeader({ step, total, title, subtitle, onBack }: StepHeaderProps) {
+  const isDark = useColorScheme() === 'dark'
   return (
     <View className="mb-8">
       <View className="flex-row items-center mb-6">
-        <Pressable onPress={onBack} className="p-2 -ml-2 rounded-full active:bg-neutral-100">
-          <Icon name="ArrowLeft" size={22} color="#171717" />
+        <Pressable onPress={onBack} className="p-2 -ml-2 rounded-full active:bg-neutral-100 dark:active:bg-dark-control">
+          <Icon name="ArrowLeft" size={22} color={isDark ? '#F5F5F7' : '#171717'} />
         </Pressable>
         <Text variant="caption" color="secondary" className="ml-2">
           {step}/{total}
@@ -42,7 +43,7 @@ function StepHeader({ step, total, title, subtitle, onBack }: StepHeaderProps) {
             key={i}
             className={[
               'h-1.5 flex-1 rounded-full',
-              i < step ? 'bg-sky-500' : 'bg-neutral-200',
+              i < step ? 'bg-sky-500' : 'bg-neutral-200 dark:bg-dark-control',
             ].join(' ')}
           />
         ))}
@@ -62,6 +63,7 @@ function StepHeader({ step, total, title, subtitle, onBack }: StepHeaderProps) {
 
 export default function ExpertOnboardingScreen() {
   const router = useRouter()
+  const isDark = useColorScheme() === 'dark'
   const [step, setStep] = useState(1)
   const { mutate: createProfile, isPending, error } = useCreateExpertProfileMutation()
 
@@ -131,7 +133,7 @@ export default function ExpertOnboardingScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-surface-base"
+      className="flex-1 bg-surface-base dark:bg-dark-bg"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
@@ -183,12 +185,12 @@ export default function ExpertOnboardingScreen() {
         {/* Step 3 — Deneyim yılı */}
         {step === 3 && (
           <View className="gap-4">
-            <View className="flex-row items-center justify-between border border-neutral-200 rounded-xl px-5 py-4 bg-surface-raised">
+            <View className="flex-row items-center justify-between border border-neutral-200 dark:border-dark-border rounded-xl px-5 py-4 bg-surface-raised dark:bg-dark-card">
               <Pressable
                 onPress={() => setExperienceYears((y) => Math.max(0, y - 1))}
-                className="w-10 h-10 rounded-full bg-neutral-100 items-center justify-center active:bg-neutral-200"
+                className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-dark-control items-center justify-center active:bg-neutral-200 dark:active:bg-dark-elevated"
               >
-                <Icon name="Minus" size={20} color="#171717" />
+                <Icon name="Minus" size={20} color={isDark ? '#F5F5F7' : '#171717'} />
               </Pressable>
 
               <View className="items-center">
@@ -198,7 +200,7 @@ export default function ExpertOnboardingScreen() {
 
               <Pressable
                 onPress={() => setExperienceYears((y) => Math.min(50, y + 1))}
-                className="w-10 h-10 rounded-full bg-sky-50 border border-sky-200 items-center justify-center active:bg-sky-100"
+                className="w-10 h-10 rounded-full bg-sky-50 dark:bg-sky-950 border border-sky-200 dark:border-sky-800 items-center justify-center active:bg-sky-100 dark:active:bg-sky-900"
               >
                 <Icon name="Plus" size={20} color="#0EA5E9" />
               </Pressable>
@@ -226,14 +228,14 @@ export default function ExpertOnboardingScreen() {
         {step === 5 && (
           <View className="gap-4">
             <View className="items-center gap-4">
-              <View className="w-28 h-28 rounded-full bg-neutral-100 items-center justify-center border-2 border-dashed border-neutral-300">
+              <View className="w-28 h-28 rounded-full bg-neutral-100 dark:bg-dark-control items-center justify-center border-2 border-dashed border-neutral-300 dark:border-dark-border2">
                 <Icon name="Camera" size={32} color="#A3A3A3" />
               </View>
               <Text variant="body" color="secondary" align="center">
                 Profil fotoğrafı danışanların sizi tanımasına yardımcı olur.
               </Text>
               {/* expo-image-picker entegrasyonu Faza 3'te eklenir */}
-              <View className="bg-sky-50 border border-sky-200 rounded-xl px-4 py-3 w-full">
+              <View className="bg-sky-50 dark:bg-sky-950 border border-sky-200 dark:border-sky-800 rounded-xl px-4 py-3 w-full">
                 <Text variant="caption" color="brand" align="center">
                   Fotoğraf yükleme özelliği yakında aktif olacak.
                 </Text>
@@ -243,7 +245,7 @@ export default function ExpertOnboardingScreen() {
         )}
 
         {apiErrorMessage && (
-          <View className="mt-4 bg-semantic-error-light border border-red-200 rounded-xl px-4 py-3">
+          <View className="mt-4 bg-semantic-error-light dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
             <Text variant="caption" className="text-semantic-error">
               {apiErrorMessage}
             </Text>

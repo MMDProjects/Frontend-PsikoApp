@@ -1,80 +1,143 @@
-import { Tabs } from 'expo-router'
+import { useEffect } from 'react'
+import { Platform } from 'react-native'
+import { Tabs, useRouter } from 'expo-router'
+import { useColorScheme } from 'nativewind'
+import { NativeTabs, Label, Icon as NativeIcon } from 'expo-router/unstable-native-tabs'
 
-import { Icon } from '@/core/components/atoms/Icon'
 import { useAuthStore } from '@/domains/auth'
-import { useKeyboard } from '@/core/hooks/useKeyboard'
-
-import type { IconName } from '@/core/components/atoms/Icon'
-
-type TabConfig = {
-  name: string
-  title: string
-  icon: IconName
-}
-
-const EXPERT_TABS: TabConfig[] = [
-  { name: 'index',   title: 'Danışanlar', icon: 'Users'  },
-  { name: 'offers',  title: 'Teklifler',  icon: 'FileText' },
-  { name: 'explore', title: 'Keşfet',     icon: 'Compass' },
-  { name: 'profile', title: 'Profil',     icon: 'User'   },
-]
-
-const CLIENT_TABS: TabConfig[] = [
-  { name: 'index',   title: 'Ana Sayfa',  icon: 'Home'   },
-  { name: 'explore', title: 'Keşfet',     icon: 'Search' },
-  { name: 'offers',  title: 'Teklifler',  icon: 'Bell'   },
-  { name: 'profile', title: 'Profil',     icon: 'User'   },
-]
-
-const DEFAULT_TABS = CLIENT_TABS
-
-// Design token colors — hardcoded because tab bar is rendered outside NativeWind className context
-const TAB_ACTIVE_TINT   = '#0EA5E9' // sky-500
-const TAB_INACTIVE_TINT = '#737373' // neutral-500
-const TAB_BG            = '#FFFFFF'
-const TAB_BORDER        = '#E5E5E5'
+import { Icon } from '@/core/components/atoms/Icon'
 
 export default function TabsLayout() {
-  const { isVisible: keyboardVisible } = useKeyboard()
+  const router = useRouter()
   const role = useAuthStore((s) => s.role)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isExpert = role === 'expert'
+  const { colorScheme } = useColorScheme()
+  const isDark = colorScheme === 'dark'
 
-  const tabs = role === 'expert' ? EXPERT_TABS : DEFAULT_TABS
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/(auth)/login')
+    }
+  }, [isAuthenticated, router])
+
+  // ── iOS: Liquid Glass NativeTabs (SF Symbols) ────────────────
+  if (Platform.OS === 'ios') {
+    return (
+      <NativeTabs>
+        <NativeTabs.Trigger name="index">
+          <NativeIcon sf={isExpert ? 'doc.text.fill' : 'safari.fill'} />
+          <Label>{isExpert ? 'Fırsatlar' : 'Keşfet'}</Label>
+        </NativeTabs.Trigger>
+
+        <NativeTabs.Trigger name="offers">
+          <NativeIcon sf={isExpert ? 'paperplane.fill' : 'list.bullet'} />
+          <Label>{isExpert ? 'Tekliflerim' : 'İlanlarım'}</Label>
+        </NativeTabs.Trigger>
+
+        <NativeTabs.Trigger name="matches">
+          <NativeIcon sf="person.2.fill" />
+          <Label>Eşleşmelerim</Label>
+        </NativeTabs.Trigger>
+
+        <NativeTabs.Trigger name="profile">
+          <NativeIcon sf="gearshape.fill" />
+          <Label>Ayarlar</Label>
+        </NativeTabs.Trigger>
+      </NativeTabs>
+    )
+  }
+
+  // ── Android: Flat bottom nav (Lucide icons, dark mode aware) ─
+  const tabBg        = isDark ? '#1C1C1E' : '#FFFFFF'
+  const tabBorder    = isDark ? '#38383A' : '#F0F0F0'
+  const tabActive    = isDark ? '#38BDF8' : '#0EA5E9'   // sky-400 dark / sky-500 light
+  const tabInactive  = isDark ? '#525252' : '#A3A3A3'   // neutral-600 dark / neutral-400 light
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor:   TAB_ACTIVE_TINT,
-        tabBarInactiveTintColor: TAB_INACTIVE_TINT,
-        tabBarStyle: keyboardVisible
-          ? { display: 'none' }
-          : {
-              backgroundColor: TAB_BG,
-              borderTopColor:  TAB_BORDER,
-              borderTopWidth:  1,
-              paddingBottom:   4,
-              height:          56,
-            },
+        tabBarActiveTintColor: tabActive,
+        tabBarInactiveTintColor: tabInactive,
+        tabBarStyle: {
+          backgroundColor: tabBg,
+          borderTopWidth: 1,
+          borderTopColor: tabBorder,
+          elevation: 0,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 6,
+        },
         tabBarLabelStyle: {
-          fontFamily: 'PlusJakartaSans_500Medium',
-          fontSize:   11,
+          fontSize: 10,
+          fontWeight: '600',
+          marginTop: 2,
         },
       }}
     >
-      {tabs.map(({ name, title, icon }) => (
-        <Tabs.Screen
-          key={name}
-          name={name}
-          options={{
-            title,
-            tabBarIcon: ({ color, size }) => (
-              // REASON: Expo Router's tabBarIcon passes ColorValue; Icon expects string
-              <Icon name={icon} size={size ?? 22} color={color as string} />
-            ),
-          }}
-        />
-      ))}
-
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: isExpert ? 'Fırsatlar' : 'Keşfet',
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              name={isExpert ? 'Briefcase' : 'Compass'}
+              size={22}
+              color={color}
+              strokeWidth={focused ? 2.25 : 1.75}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="offers"
+        options={{
+          title: isExpert ? 'Tekliflerim' : 'İlanlarım',
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              name={isExpert ? 'Send' : 'ClipboardList'}
+              size={22}
+              color={color}
+              strokeWidth={focused ? 2.25 : 1.75}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="matches"
+        options={{
+          title: 'Eşleşmelerim',
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              name="Users"
+              size={22}
+              color={color}
+              strokeWidth={focused ? 2.25 : 1.75}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Ayarlar',
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              name="Settings"
+              size={22}
+              color={color}
+              strokeWidth={focused ? 2.25 : 1.75}
+            />
+          ),
+        }}
+      />
     </Tabs>
   )
 }

@@ -25,11 +25,17 @@ export default function LoginScreen() {
     })
   }
 
+  const quickLogin = (email: string) => {
+    login({ email, password: 'password123' }, {
+      onSuccess: () => router.replace('/(tabs)/'),
+    })
+  }
+
   const apiErrorMessage = error instanceof Error ? error.message : undefined
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-surface-base"
+      className="flex-1 bg-surface-base dark:bg-dark-bg"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
@@ -84,7 +90,7 @@ export default function LoginScreen() {
           />
 
           {apiErrorMessage && (
-            <View className="bg-semantic-error-light border border-red-200 rounded-xl px-4 py-3">
+            <View className="bg-semantic-error-light dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
               <Text variant="caption" className="text-semantic-error">
                 {apiErrorMessage}
               </Text>
@@ -106,6 +112,36 @@ export default function LoginScreen() {
             <Text variant="body" color="brand" className="font-semibold">Kayıt Ol</Text>
           </Pressable>
         </View>
+
+        {/* DEV: Hızlı giriş */}
+        {process.env.EXPO_PUBLIC_APP_ENV !== 'production' && (
+          <View className="mt-8 gap-2">
+            <View className="flex-row items-center gap-3">
+              <View className="flex-1 h-px bg-neutral-200 dark:bg-dark-control" />
+              <Text variant="caption" color="tertiary">Test Girişi</Text>
+              <View className="flex-1 h-px bg-neutral-200 dark:bg-dark-control" />
+            </View>
+            <View className="flex-row gap-3">
+              <Pressable
+                onPress={() => quickLogin('uzman@psikoal.com')}
+                disabled={isPending}
+                className="flex-1 border border-neutral-200 dark:border-dark-border2 rounded-xl py-3 items-center active:bg-neutral-50 dark:active:bg-dark-elevated"
+              >
+                <Text variant="caption" className="font-semibold text-neutral-600">Uzman Girişi</Text>
+                <Text variant="caption" color="tertiary">Dr. Ayşe Kaya</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => quickLogin('danisan@psikoal.com')}
+                disabled={isPending}
+                className="flex-1 border border-neutral-200 dark:border-dark-border2 rounded-xl py-3 items-center active:bg-neutral-50 dark:active:bg-dark-elevated"
+              >
+                <Text variant="caption" className="font-semibold text-neutral-600">Danışan Girişi</Text>
+                <Text variant="caption" color="tertiary">Zeynep Yılmaz</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
       </ScrollView>
     </KeyboardAvoidingView>
   )

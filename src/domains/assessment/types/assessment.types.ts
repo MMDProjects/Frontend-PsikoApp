@@ -7,6 +7,8 @@ import type {
   AssessmentAnswerSchema,
   SubmitAssessmentSchema,
   AssessmentResultSchema,
+  AssessmentListItemSchema,
+  MyAssessmentResultSchema,
 } from '../schemas/assessment.schema'
 
 export type QuestionType = z.infer<typeof QuestionTypeSchema>
@@ -16,3 +18,5 @@ export type Assessment = z.infer<typeof AssessmentSchema>
 export type AssessmentAnswer = z.infer<typeof AssessmentAnswerSchema>
 export type SubmitAssessmentRequest = z.infer<typeof SubmitAssessmentSchema>
 export type AssessmentResult = z.infer<typeof AssessmentResultSchema>
+export type AssessmentListItem = z.infer<typeof AssessmentListItemSchema>
+export type MyAssessmentResult = z.infer<typeof MyAssessmentResultSchema>

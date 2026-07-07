@@ -26,7 +26,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <View className={cn('flex-1 items-center justify-center px-8 py-12', className)}>
-      <View className="w-20 h-20 rounded-full bg-neutral-100 items-center justify-center mb-4">
+      <View className="w-20 h-20 rounded-full bg-neutral-100 dark:bg-dark-control items-center justify-center mb-4">
         <Icon name={icon} size={36} color="#A3A3A3" strokeWidth={1.5} />
       </View>
 

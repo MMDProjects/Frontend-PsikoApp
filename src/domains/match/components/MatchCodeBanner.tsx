@@ -1,95 +1,85 @@
-import { Pressable, View } from 'react-native'
+import { Pressable, useColorScheme, View } from 'react-native'
 
-import { Badge } from '@/core/components/atoms/Badge'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
+import { cn } from '@/core/utils/cn'
 
-import { MATCH_STATE_CONFIG } from '../match.constants'
+import { MATCH_STATUS_CONFIG } from '../match.constants'
 
-import type { MatchState } from '../types/match.types'
+import type { Match } from '../types/match.types'
 
-type MatchCodeBannerProps = {
-  state: MatchState
-  matchCode?: string
-  expiresAt?: string | null
+export type MatchCodeBannerProps = {
+  match: Match
   onRelease?: () => void
   isReleasing?: boolean
   className?: string
 }
 
-export function MatchCodeBanner({
-  state,
-  matchCode,
-  expiresAt,
-  onRelease,
-  isReleasing = false,
-  className,
-}: MatchCodeBannerProps) {
-  const config = MATCH_STATE_CONFIG[state]
+export function MatchCodeBanner({ match, onRelease, isReleasing = false, className }: MatchCodeBannerProps) {
+  const config = MATCH_STATUS_CONFIG[match.status]
+  const isActive = match.status === 'ACTIVE'
+  const isDark = useColorScheme() === 'dark'
 
-  const isMatched = state === 'MATCHED'
-  const isPending = state === 'PENDING'
-
-  const containerStyle = isMatched
-    ? 'bg-sky-50 border border-sky-200'
-    : isPending
-      ? 'bg-amber-50 border border-amber-200'
-      : 'bg-neutral-50 border border-neutral-200'
+  const otherPartyName = match.expert?.name ?? match.client?.fullName
 
   return (
-    <View className={`rounded-2xl px-4 py-4 gap-3 ${containerStyle} ${className ?? ''}`}>
+    <View
+      className={cn(
+        'rounded-2xl px-4 py-4 gap-3',
+        isActive
+          ? 'bg-sky-50 dark:bg-sky-950 border border-sky-200 dark:border-sky-800'
+          : 'bg-neutral-50 dark:bg-dark-elevated border border-neutral-200 dark:border-dark-border2',
+        className
+      )}
+    >
       {/* Başlık satırı */}
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <Icon
-            name={isMatched ? 'LinkIcon' : isPending ? 'Clock' : 'Unlink'}
+            name={isActive ? 'Link' : 'Unlink'}
             size={16}
-            color={isMatched ? '#0369A1' : isPending ? '#D97706' : '#737373'}
+            color={isActive ? (isDark ? '#38BDF8' : '#0369A1') : (isDark ? '#A3A3A3' : '#737373')}
           />
-          <Text
-            variant="label"
-            className={
-              isMatched
-                ? 'text-sky-800 font-semibold'
-                : isPending
-                  ? 'text-amber-800 font-semibold'
-                  : 'text-neutral-600 font-semibold'
-            }
-          >
+          <Text variant="label" className={isActive ? 'text-sky-800 dark:text-sky-300 font-semibold' : 'text-neutral-600 dark:text-neutral-400 font-semibold'}>
             Eşleşme Durumu
           </Text>
         </View>
-        <Badge label={config.label} variant={config.badgeVariant as 'sky' | 'warning' | 'neutral'} />
+        <View className="flex-row items-center gap-1">
+          <Icon name={config.icon} size={13} color={config.iconColor} />
+          <Text variant="caption" className="font-medium" style={{ color: config.iconColor }}>
+            {config.label}
+          </Text>
+        </View>
       </View>
 
-      {/* Kod + süre */}
-      {matchCode && (isMatched || isPending) && (
+      {/* Diğer taraf bilgisi */}
+      {otherPartyName && (
         <View className="flex-row items-center justify-between">
-          <Text variant="caption" color="secondary">Kod</Text>
-          <Text variant="label" className="font-mono text-sky-700 tracking-widest">
-            {matchCode.slice(0, 8).toUpperCase()}
+          <Text variant="caption" color="secondary">
+            {match.expert ? 'Uzman' : 'Danışan'}
+          </Text>
+          <Text variant="label" className={isActive ? 'text-sky-700 dark:text-sky-400' : 'text-neutral-700 dark:text-neutral-300'}>
+            {otherPartyName}
           </Text>
         </View>
       )}
 
-      {isPending && expiresAt && (
-        <View className="flex-row items-center gap-1.5">
-          <Icon name="AlertCircle" size={13} color="#D97706" />
-          <Text variant="caption" className="text-amber-700 flex-1">
-            Danışanın onayı bekleniyor. 48 saat içinde onay gelmezse talep iptal edilir.
-          </Text>
+      {match.expert?.title && (
+        <View className="flex-row items-center justify-between">
+          <Text variant="caption" color="tertiary">Ünvan</Text>
+          <Text variant="caption" color="secondary">{match.expert.title}</Text>
         </View>
       )}
 
-      {/* Eşleşmeyi sonlandır */}
-      {isMatched && onRelease && (
+      {/* Eşleşmeyi sonlandır (ACTIVE) */}
+      {isActive && onRelease && (
         <Pressable
           onPress={onRelease}
           disabled={isReleasing}
-          className="flex-row items-center justify-center gap-2 border border-sky-200 rounded-xl py-2.5 active:bg-sky-100"
+          className="flex-row items-center justify-center gap-2 border border-sky-200 dark:border-sky-800 rounded-xl py-2.5 active:bg-sky-100 dark:active:bg-sky-900"
         >
-          <Icon name="Unlink" size={14} color="#0369A1" />
-          <Text variant="caption" className="text-sky-700 font-semibold">
+          <Icon name="Unlink" size={14} color={isDark ? '#38BDF8' : '#0369A1'} />
+          <Text variant="caption" className="text-sky-700 dark:text-sky-400 font-semibold">
             {isReleasing ? 'İşleniyor...' : 'Eşleşmeyi Sonlandır'}
           </Text>
         </Pressable>
@@ -97,5 +87,3 @@ export function MatchCodeBanner({
     </View>
   )
 }
-
-export type { MatchCodeBannerProps }

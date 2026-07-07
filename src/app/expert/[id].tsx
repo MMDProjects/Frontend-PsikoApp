@@ -1,5 +1,7 @@
 import { Pressable, ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useColorScheme } from 'nativewind'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '@/core/components/atoms/Button'
 import { Icon } from '@/core/components/atoms/Icon'
@@ -14,26 +16,32 @@ export default function ExpertProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const role = useAuthStore((s) => s.role)
+  const { colorScheme } = useColorScheme()
+  const arrowColor = colorScheme === 'dark' ? '#F5F5F7' : '#171717'
 
   const { data: expert, isLoading, isError } = useExpertProfileQuery(id ?? '')
+  const insets = useSafeAreaInsets()
 
   return (
-    <View className="flex-1 bg-surface-base">
-      {/* Header */}
-      <View className="flex-row items-center px-4 pt-14 pb-3 border-b border-neutral-100 bg-white">
-        <Pressable
-          onPress={() => router.back()}
-          className="p-2 -ml-2 rounded-full active:bg-neutral-100"
-        >
-          <Icon name="ArrowLeft" size={22} color="#171717" />
-        </Pressable>
-        <Text variant="label" className="ml-2 font-semibold">Uzman Profili</Text>
-      </View>
+    <View className="flex-1 bg-surface-base dark:bg-dark-bg">
+      {/* Floating back button */}
+      <Pressable
+        onPress={() => router.back()}
+        style={{ position: 'absolute', top: insets.top + 8, left: 16, zIndex: 10 }}
+        className="w-10 h-10 rounded-full bg-white dark:bg-dark-card items-center justify-center active:bg-neutral-100 dark:active:bg-dark-elevated"
+      >
+        <Icon name="ArrowLeft" size={20} color={arrowColor} />
+      </Pressable>
 
       <ScrollView
-        contentContainerClassName="px-4 py-5 gap-4 pb-10"
+        contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 40, paddingHorizontal: 16, gap: 16 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Sayfa başlığı — scroll içinde */}
+        <View className="pt-2 pb-3 items-center">
+          <Text variant="label" className="font-semibold">Uzman Profili</Text>
+        </View>
+
         {isLoading && <ExpertProfileSkeleton />}
 
         {isError && (
@@ -54,7 +62,6 @@ export default function ExpertProfileScreen() {
           <>
             <ExpertProfileHero expert={expert} />
 
-            {/* İstatistikler */}
             <View className="flex-row gap-3">
               <StatCard
                 value={`${expert.experienceYears} yıl`}
@@ -76,25 +83,22 @@ export default function ExpertProfileScreen() {
               />
             </View>
 
-            {/* Biyografi */}
             {expert.bio ? (
-              <View className="bg-white border border-neutral-100 rounded-2xl p-5 gap-2">
+              <View className="bg-white dark:bg-dark-card border border-neutral-100 dark:border-dark-border rounded-2xl p-5 gap-2">
                 <Text variant="label" className="font-semibold">Hakkında</Text>
                 <Text variant="body" color="secondary">{expert.bio}</Text>
               </View>
             ) : null}
 
-            {/* Onay bekliyor uyarısı */}
             {expert.status === 'pending' && (
-              <View className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 flex-row items-center gap-3">
+              <View className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-xl px-4 py-3 flex-row items-center gap-3">
                 <Icon name="Clock" size={18} color="#CA8A04" />
-                <Text variant="caption" className="text-yellow-700 flex-1">
+                <Text variant="caption" className="text-yellow-700 dark:text-yellow-400 flex-1">
                   Bu profil henüz admin onayı bekliyor.
                 </Text>
               </View>
             )}
 
-            {/* CTA — sadece danışanlar görebilir */}
             {role === 'client' && expert.status === 'approved' && (
               <View className="mt-2">
                 <Button
@@ -113,8 +117,7 @@ export default function ExpertProfileScreen() {
 function ExpertProfileSkeleton() {
   return (
     <View className="gap-4">
-      {/* Hero skeleton */}
-      <View className="bg-white border border-neutral-100 rounded-2xl p-5 gap-4">
+      <View className="bg-white dark:bg-dark-card border border-neutral-100 dark:border-dark-border rounded-2xl p-5 gap-4">
         <View className="flex-row items-center gap-4">
           <Skeleton variant="circle" height={80} width={80} />
           <SkeletonGroup className="flex-1" gap="sm">
@@ -130,7 +133,6 @@ function ExpertProfileSkeleton() {
         </View>
       </View>
 
-      {/* Stats skeleton */}
       <View className="flex-row gap-3">
         {[1, 2, 3].map((i) => (
           <View key={i} className="flex-1">
@@ -139,8 +141,7 @@ function ExpertProfileSkeleton() {
         ))}
       </View>
 
-      {/* Bio skeleton */}
-      <View className="bg-white border border-neutral-100 rounded-2xl p-5 gap-2">
+      <View className="bg-white dark:bg-dark-card border border-neutral-100 dark:border-dark-border rounded-2xl p-5 gap-2">
         <Skeleton variant="line" width="30%" height={16} />
         <SkeletonGroup gap="sm">
           <Skeleton variant="line" />

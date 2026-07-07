@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import { Pressable, View } from 'react-native'
 import WebView from 'react-native-webview'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useColorScheme } from 'nativewind'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
@@ -12,9 +14,12 @@ import { useInitiateCheckoutMutation } from '@/domains/payment'
 export default function CheckoutScreen() {
   const { packageId } = useLocalSearchParams<{ packageId: string }>()
   const router = useRouter()
+  const { colorScheme } = useColorScheme()
+  const arrowColor = colorScheme === 'dark' ? '#F5F5F7' : '#171717'
 
   const { mutate: initiateCheckout, data: session, isPending, isError } = useInitiateCheckoutMutation()
   const hasInitiated = useRef(false)
+  const insets = useSafeAreaInsets()
 
   useEffect(() => {
     if (packageId && !hasInitiated.current) {
@@ -32,15 +37,21 @@ export default function CheckoutScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface-base">
-      {/* Header */}
-      <View className="flex-row items-center px-4 pt-14 pb-3 border-b border-neutral-100 bg-white">
-        <Pressable onPress={() => router.back()} className="p-2 -ml-2 rounded-full active:bg-neutral-100">
-          <Icon name="ArrowLeft" size={22} color="#171717" />
-        </Pressable>
-        <Text variant="label" className="ml-2 font-semibold">Güvenli Ödeme</Text>
-        <View className="ml-auto flex-row items-center gap-1">
-          <Icon name="Lock" size={12} color="#737373" />
+    <View className="flex-1 bg-surface-base dark:bg-dark-bg">
+      {/* Floating back button */}
+      <Pressable
+        onPress={() => router.back()}
+        style={{ position: 'absolute', top: insets.top + 8, left: 16, zIndex: 10 }}
+        className="w-10 h-10 rounded-full bg-white dark:bg-dark-card items-center justify-center active:bg-neutral-100 dark:active:bg-dark-elevated"
+      >
+        <Icon name="ArrowLeft" size={20} color={arrowColor} />
+      </Pressable>
+
+      {/* Başlık + güvenlik etiketi — WebView üstünde sabit */}
+      <View style={{ paddingTop: insets.top + 8 }} className="pb-3 items-center border-b border-neutral-100 dark:border-dark-border">
+        <Text variant="label" className="font-semibold">Güvenli Ödeme</Text>
+        <View className="flex-row items-center gap-1">
+          <Icon name="Lock" size={10} color={colorScheme === 'dark' ? '#A3A3A3' : '#737373'} />
           <Text variant="caption" color="secondary">Iyzico ile güvenli</Text>
         </View>
       </View>
@@ -69,7 +80,7 @@ export default function CheckoutScreen() {
           onNavigationStateChange={handleNavigationChange}
           startInLoadingState
           renderLoading={() => (
-            <View className="absolute inset-0 items-center justify-center bg-surface-base">
+            <View className="absolute inset-0 items-center justify-center bg-surface-base dark:bg-dark-bg">
               <Skeleton variant="rect" height={300} borderRadius="xl" />
             </View>
           )}

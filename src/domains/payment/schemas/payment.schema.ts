@@ -31,3 +31,17 @@ export const CheckoutSessionSchema = z.object({
 export const InitiateCheckoutSchema = z.object({
   packageId: z.string(),
 })
+
+export const WalletTransactionSchema = z.object({
+  id:          z.string(),
+  type:        z.enum(['credit', 'debit']),
+  amount:      z.number().positive(),
+  description: z.string(),
+  createdAt:   z.string().datetime(),
+})
+
+export const WalletSchema = z.object({
+  balance:      z.number().min(0),
+  currency:     z.string().default('TRY'),
+  transactions: z.array(WalletTransactionSchema),
+})

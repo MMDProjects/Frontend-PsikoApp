@@ -1,76 +1,118 @@
-import { useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { Controller, useFieldArray, useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
+import { useColorScheme } from 'nativewind'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Button } from '@/core/components/atoms/Button'
+import { Chip } from '@/core/components/atoms/Chip'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
 import { InputField } from '@/core/components/molecules/InputField'
-import { useCreateOfferMutation, CreateOfferSchema } from '@/domains/offer'
+import { useSendOfferMutation, SendOfferSchema } from '@/domains/offer'
 
-import type { CreateOfferRequest } from '@/domains/offer'
+import type { SendOfferRequest } from '@/domains/offer'
 
 export default function NewOfferScreen() {
   const router = useRouter()
-  const { clientId } = useLocalSearchParams<{ clientId?: string }>()
+  const { listingId } = useLocalSearchParams<{ listingId?: string }>()
+  const { colorScheme } = useColorScheme()
+  const arrowColor = colorScheme === 'dark' ? '#F5F5F7' : '#171717'
 
-  const { mutate: createOffer, isPending, error } = useCreateOfferMutation()
+  const { mutate: sendOffer, isPending, error } = useSendOfferMutation()
 
   const {
     control,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<CreateOfferRequest>({
-    resolver: zodResolver(CreateOfferSchema),
+  } = useForm<SendOfferRequest>({
+    resolver: zodResolver(SendOfferSchema),
     defaultValues: {
-      clientId: clientId ?? '',
+      listingId: listingId ?? '',
+      title: '',
       sessionType: 'online',
-      notes: '',
-      tiers: [{ price: 0, durationHours: 24 }],
+      description: '',
+      price: 0,
     },
   })
 
-  const { fields: tierFields, append, remove } = useFieldArray({ control, name: 'tiers' })
-
   const sessionType = watch('sessionType')
+  const insets = useSafeAreaInsets()
+  const bottomBarHeight = 56 + insets.bottom
 
-  const onSubmit = (data: CreateOfferRequest) => {
-    createOffer(data, {
-      onSuccess: (offer) => {
-        router.replace(`/offer/${offer.id}`)
+  const onSubmit = (data: SendOfferRequest) => {
+    sendOffer(data, {
+      onSuccess: () => {
+        router.back()
       },
     })
   }
 
   const apiError = error instanceof Error ? error.message : undefined
 
-  return (
-    <View className="flex-1 bg-surface-base">
-      {/* Header */}
-      <View className="flex-row items-center px-4 pt-14 pb-3 border-b border-neutral-100 bg-white">
-        <Pressable onPress={() => router.back()} className="p-2 -ml-2 rounded-full active:bg-neutral-100">
-          <Icon name="ArrowLeft" size={22} color="#171717" />
+  if (!listingId) {
+    return (
+      <View className="flex-1 bg-surface-base dark:bg-dark-bg items-center justify-center px-6 gap-4">
+        <Icon name="AlertCircle" size={36} color="#D97706" />
+        <Text variant="label" align="center" color="secondary">
+          İlan belirtilmedi. Lütfen bir ilanın sayfasından teklif gönderin.
+        </Text>
+        <Pressable
+          onPress={() => router.back()}
+          className="bg-green-600 border border-green-200 rounded-xl px-5 py-3 active:bg-green-700"
+        >
+          <Text variant="label" className="text-white font-semibold">Geri Dön</Text>
         </Pressable>
-        <Text variant="label" className="ml-2 font-semibold">Yeni Teklif Oluştur</Text>
       </View>
+    )
+  }
 
-      <ScrollView contentContainerClassName="px-4 py-5 gap-5 pb-10" showsVerticalScrollIndicator={false}>
+  return (
+    <View className="flex-1 bg-surface-base dark:bg-dark-bg">
+      {/* Floating back button */}
+      <Pressable
+        onPress={() => router.back()}
+        style={{ position: 'absolute', top: insets.top + 8, left: 16, zIndex: 10 }}
+        className="w-10 h-10 rounded-full bg-white dark:bg-dark-card items-center justify-center active:bg-neutral-100 dark:active:bg-dark-elevated"
+      >
+        <Icon name="ArrowLeft" size={20} color={arrowColor} />
+      </Pressable>
 
-        {/* Danışan ID (prefilled) */}
+      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: bottomBarHeight + 16, gap: 20 }} showsVerticalScrollIndicator={false}>
+        <View className="pt-2 pb-3 items-center">
+          <Text variant="label" className="font-semibold">Teklif Gönder</Text>
+        </View>
+
+        {/* Teklif Başlığı */}
         <Controller
           control={control}
-          name="clientId"
+          name="title"
           render={({ field: { onChange, onBlur, value } }) => (
             <InputField
-              label="Danışan ID"
-              placeholder="Danışan UUID"
-              value={value}
+              label="Teklif Başlığı (opsiyonel)"
+              placeholder="örn. BDT ile Kaygı Yönetimi"
+              value={value ?? ''}
               onChangeText={onChange}
               onBlur={onBlur}
-              errorMessage={errors.clientId?.message}
+              errorMessage={errors.title?.message}
+            />
+          )}
+        />
+
+        {/* Fiyat */}
+        <Controller
+          control={control}
+          name="price"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <InputField
+              label="Seans Ücreti (₺)"
+              placeholder="örn. 750"
+              keyboardType="numeric"
+              value={value ? String(value) : ''}
+              onChangeText={(v) => onChange(Number(v.replace(/[^0-9]/g, '')) || 0)}
+              onBlur={onBlur}
+              errorMessage={errors.price?.message}
               isRequired
             />
           )}
@@ -78,144 +120,72 @@ export default function NewOfferScreen() {
 
         {/* Seans tipi */}
         <View className="gap-2">
-          <Text variant="label" className="font-semibold">Seans Tipi</Text>
-          <View className="flex-row gap-3">
-            {(['online', 'in_person'] as const).map((type) => (
-              <Controller
-                key={type}
-                control={control}
-                name="sessionType"
-                render={({ field: { onChange } }) => (
-                  <Pressable
-                    onPress={() => onChange(type)}
-                    className={`flex-1 flex-row items-center justify-center gap-2 rounded-xl py-3 border ${
-                      sessionType === type
-                        ? 'bg-sky-50 border-sky-300'
-                        : 'bg-white border-neutral-200'
-                    }`}
-                  >
-                    <Icon
-                      name={type === 'online' ? 'Video' : 'MapPin'}
-                      size={16}
-                      color={sessionType === type ? '#0369A1' : '#737373'}
-                    />
-                    <Text
-                      variant="label"
-                      className={sessionType === type ? 'text-sky-700' : 'text-neutral-500'}
-                    >
-                      {type === 'online' ? 'Online' : 'Yüz Yüze'}
-                    </Text>
-                  </Pressable>
-                )}
-              />
-            ))}
-          </View>
-        </View>
-
-        {/* Kademeler */}
-        <View className="gap-3">
-          <View className="flex-row items-center justify-between">
-            <Text variant="label" className="font-semibold">Fiyat Kademeleri</Text>
-            <Text variant="caption" color="secondary">Her kademe bir öncekinden ucuz olmalı</Text>
-          </View>
-
-          {tierFields.map((field, index) => (
-            <View key={field.id} className="bg-white border border-neutral-100 rounded-xl p-4 gap-3">
-              <View className="flex-row items-center justify-between">
-                <Text variant="label" className="text-sky-700 font-semibold">
-                  {index + 1}. Kademe
-                </Text>
-                {index > 0 && (
-                  <Pressable onPress={() => remove(index)} className="p-1">
-                    <Icon name="Trash2" size={16} color="#DC2626" />
-                  </Pressable>
-                )}
-              </View>
-              <View className="flex-row gap-3">
-                <View className="flex-1">
-                  <Controller
-                    control={control}
-                    name={`tiers.${index}.price`}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <InputField
-                        label="Fiyat (₺)"
-                        placeholder="0"
-                        keyboardType="numeric"
-                        value={value ? String(value) : ''}
-                        onChangeText={(v) => onChange(Number(v) || 0)}
-                        onBlur={onBlur}
-                        errorMessage={errors.tiers?.[index]?.price?.message}
-                      />
-                    )}
+          <Text variant="label" className="font-semibold">
+            Seans Tipi <Text variant="caption" color="error">*</Text>
+          </Text>
+          <Controller
+            control={control}
+            name="sessionType"
+            render={({ field: { onChange } }) => (
+              <View className="flex-row flex-wrap gap-2">
+                {([
+                  { value: 'online',      label: 'Online'           },
+                  { value: 'yüz_yüze',   label: 'Yüz Yüze'        },
+                  { value: 'yüz_yüze_online', label: 'Yüz Yüze / Online' },
+                ] as const).map(({ value, label }) => (
+                  <Chip
+                    key={value}
+                    label={label}
+                    variant="session"
+                    size="md"
+                    isSelected={sessionType === value}
+                    onPress={() => onChange(value)}
                   />
-                </View>
-                <View className="flex-1">
-                  <Controller
-                    control={control}
-                    name={`tiers.${index}.durationHours`}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <InputField
-                        label="Süre (saat)"
-                        placeholder="24"
-                        keyboardType="numeric"
-                        value={value ? String(value) : ''}
-                        onChangeText={(v) => onChange(Number(v) || 0)}
-                        onBlur={onBlur}
-                        errorMessage={errors.tiers?.[index]?.durationHours?.message}
-                      />
-                    )}
-                  />
-                </View>
+                ))}
               </View>
-            </View>
-          ))}
-
-          {errors.tiers?.root?.message && (
-            <Text variant="caption" className="text-semantic-error">
-              {errors.tiers.root.message}
-            </Text>
-          )}
-
-          {tierFields.length < 3 && (
-            <Pressable
-              onPress={() => append({ price: 0, durationHours: 24 })}
-              className="flex-row items-center justify-center gap-2 border border-dashed border-sky-300 rounded-xl py-3 active:bg-sky-50"
-            >
-              <Icon name="Plus" size={16} color="#0EA5E9" />
-              <Text variant="label" className="text-sky-600">Kademe Ekle</Text>
-            </Pressable>
+            )}
+          />
+          {errors.sessionType && (
+            <Text variant="caption" color="error">{errors.sessionType.message}</Text>
           )}
         </View>
 
-        {/* Notlar */}
+        {/* Açıklama */}
         <Controller
           control={control}
-          name="notes"
+          name="description"
           render={({ field: { onChange, onBlur, value } }) => (
             <InputField
-              label="Not (opsiyonel)"
-              placeholder="Danışana iletilecek kısa not..."
+              label="Açıklama (opsiyonel)"
+              placeholder="Danışana iletilecek kısa açıklama, en fazla 300 karakter..."
               multiline
               value={value ?? ''}
               onChangeText={onChange}
               onBlur={onBlur}
-              errorMessage={errors.notes?.message}
+              errorMessage={errors.description?.message}
             />
           )}
         />
 
         {apiError && (
-          <View className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-            <Text variant="caption" className="text-semantic-error">{apiError}</Text>
+          <View className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
+            <Text variant="caption" color="error">{apiError}</Text>
           </View>
         )}
-
-        <Button
-          label="Teklif Gönder"
-          onPress={handleSubmit(onSubmit)}
-          isLoading={isPending}
-        />
       </ScrollView>
+
+      {/* Fixed bottom bar */}
+      <View style={{ position: 'absolute', bottom: insets.bottom, left: 16, right: 16 }}>
+        <Pressable
+          onPress={isPending ? undefined : handleSubmit(onSubmit)}
+          disabled={isPending}
+          className="bg-brand rounded-full h-14 items-center justify-center active:bg-brand-hover"
+        >
+          <Text variant="label" className="text-white font-semibold">
+            {isPending ? 'Gönderiliyor...' : 'Teklif Gönder'}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   )
 }

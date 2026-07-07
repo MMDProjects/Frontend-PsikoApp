@@ -1,0 +1,49 @@
+import { z } from 'zod'
+
+export const ListingStatusSchema = z.enum(['OPEN', 'MATCHED', 'CLOSED', 'EXPIRED'])
+
+export const ListingSchema = z.object({
+  id:                   z.string().uuid(),
+  clientId:             z.string().uuid(),
+  client: z.object({
+    id:        z.string().uuid(),
+    fullName:  z.string(),
+    avatarUrl: z.string().url().nullable().optional(),
+    createdAt: z.string().datetime().optional(),
+  }).optional(),
+  title:                z.string().min(10).max(100),
+  description:          z.string().max(500),
+  specialization:       z.array(z.string()),
+  budgetMin:            z.number().positive(),
+  budgetMax:            z.number().positive(),
+  preferredSessionType: z.preprocess(
+    (v) => v === 'fark_etmez' ? 'yüz_yüze_online' : v,
+    z.enum(['online', 'yüz_yüze', 'yüz_yüze_online'])
+  ),
+  city:                 z.string().optional(),
+  offerCount:           z.number().int().min(0).default(0),
+  status:               ListingStatusSchema,
+  expiresAt:            z.string().datetime(),
+  createdAt:            z.string().datetime(),
+  assessmentResult: z.object({
+    id:              z.string(),
+    score:           z.number(),
+    level:           z.enum(['low', 'moderate', 'high']),
+    summary:         z.string(),
+    assessmentTitle: z.string(),
+  }).optional(),
+})
+
+export const CreateListingSchema = z.object({
+  title:                z.string().min(10, 'En az 10 karakter giriniz').max(100, 'En fazla 100 karakter giriniz'),
+  description:          z.string().max(500, 'En fazla 500 karakter giriniz').optional(),
+  specialization:       z.array(z.string()).min(1, 'En az 1 uzmanlık alanı seçiniz'),
+  budgetMin:            z.number({ required_error: 'Minimum bütçe giriniz' }).positive('Geçerli tutar giriniz'),
+  budgetMax:            z.number({ required_error: 'Maksimum bütçe giriniz' }).positive('Geçerli tutar giriniz'),
+  preferredSessionType: z.enum(['online', 'yüz_yüze', 'yüz_yüze_online']),
+  city:                 z.string().optional(),
+  assessmentResultId:   z.string().optional(),
+}).refine(
+  (d) => d.budgetMax >= d.budgetMin,
+  { message: 'Maksimum bütçe minimumdan küçük olamaz', path: ['budgetMax'] }
+)

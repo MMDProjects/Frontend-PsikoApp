@@ -7,7 +7,7 @@ import { Text } from '@/core/components/atoms/Text'
 
 import type { ReactNode } from 'react'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'link'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'link' | 'success'
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
 
 export type ButtonProps = {
@@ -20,32 +20,35 @@ export type ButtonProps = {
   leftIcon?: ReactNode
   rightIcon?: ReactNode
   fullWidth?: boolean
+  width?: number
   className?: string
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary:   'bg-brand border border-sky-400 active:bg-brand-hover',
-  secondary: 'bg-brand-subtle border border-brand-border active:bg-brand-muted',
-  ghost:     'border border-border active:bg-surface-sunken',
-  danger:    'bg-semantic-error-light border border-semantic-error active:bg-red-100',
+  primary:   'bg-brand border border-sky-400 active:bg-brand-hover dark:bg-sky-400 dark:border-sky-300 dark:active:bg-sky-300',
+  secondary: 'bg-brand-subtle border border-brand-border active:bg-brand-muted dark:bg-sky-950 dark:border-sky-800 dark:active:bg-sky-900',
+  ghost:     'border border-border active:bg-surface-sunken dark:border-dark-border dark:active:bg-dark-elevated',
+  danger:    'bg-semantic-error-light border border-semantic-error active:bg-red-100 dark:bg-red-950 dark:border-red-800 dark:active:bg-red-900',
   accent:    'bg-accent border border-accent-border active:bg-accent-hover',
   link:      'px-0',
+  success:   'bg-green-600 border border-green-200 active:bg-green-700 dark:bg-green-600 dark:border-green-200 dark:active:bg-green-700',
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
-  xs: 'h-8  px-3   rounded-md',
-  sm: 'h-9  px-3.5 rounded-md',
+  xs: 'h-8  px-3   rounded-lg',
+  sm: 'h-9  px-3.5 rounded-xl',
   md: 'h-11 px-5   rounded-xl',
   lg: 'h-13 px-6   rounded-xl',
 }
 
 const labelVariantStyles: Record<ButtonVariant, string> = {
-  primary: 'text-white',
+  primary:   'text-white',
   secondary: 'text-brand-text',
-  ghost: 'text-content-primary',
-  danger: 'text-semantic-error-dark',
-  accent: 'text-content-inverse',
-  link: 'text-content-link underline',
+  ghost:     'text-content-primary',
+  danger:    'text-semantic-error-dark',
+  accent:    'text-content-inverse',
+  link:      'text-content-link underline',
+  success:   'text-white',
 }
 
 const labelSizeStyles: Record<ButtonSize, 'xs' | 'sm' | 'base' | 'base'> = {
@@ -58,11 +61,12 @@ const labelSizeStyles: Record<ButtonSize, 'xs' | 'sm' | 'base' | 'base'> = {
 // ActivityIndicator requires a string color value, CSS variables are not supported
 const indicatorColor: Record<ButtonVariant, string> = {
   primary:   '#FFFFFF',
-  secondary: '#0EA5E9',  // sky-500
+  secondary: '#0EA5E9',
   ghost:     '#171717',
   danger:    '#7F1D1D',
   accent:    '#FFFFFF',
-  link:      '#0EA5E9',  // sky-500
+  link:      '#0EA5E9',
+  success:   '#FFFFFF',
 }
 
 const SPRING_CONFIG = { mass: 0.5, stiffness: 400, damping: 20 }
@@ -77,6 +81,7 @@ export function Button({
   leftIcon,
   rightIcon,
   fullWidth = false,
+  width,
   className,
 }: ButtonProps) {
   const scale = useSharedValue(1)
@@ -107,8 +112,15 @@ export function Button({
 
   return (
     <Animated.View
-      // style prop required: Reanimated animated transform + dynamic fullWidth layout
-      style={[animatedStyle, fullWidth ? { width: '100%' } : { alignSelf: 'flex-start' as const }]}
+      // style prop required: Reanimated animated transform + dynamic width layout
+      style={[
+        animatedStyle,
+        fullWidth
+          ? { width: '100%' }
+          : width
+            ? { width, alignSelf: 'center' as const }
+            : { alignSelf: 'flex-start' as const },
+      ]}
     >
       <Pressable
         onPress={handlePress}

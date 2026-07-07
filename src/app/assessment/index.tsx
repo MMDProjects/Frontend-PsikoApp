@@ -7,46 +7,28 @@ import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton, SkeletonGroup } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
-import { useAssessmentQuery, useSubmitAssessmentMutation } from '@/domains/assessment'
+import { useAssessmentQuery, useSubmitAssessmentMutation, useAssessmentEngine } from '@/domains/assessment'
 
-import type { AssessmentAnswer } from '@/domains/assessment'
-
-// Assessment auth gerektirmez — (auth) grubunun dışındadır.
 export default function AssessmentScreen() {
   const router = useRouter()
   const { data: assessment, isLoading, isError } = useAssessmentQuery()
   const { mutate: submit, isPending } = useSubmitAssessmentMutation()
-
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [answers, setAnswers] = useState<AssessmentAnswer[]>([])
   const [started, setStarted] = useState(false)
 
-  const question = assessment?.questions[currentIndex]
-  const progress = assessment ? (currentIndex / assessment.questions.length) : 0
-  const isLast = assessment ? currentIndex === assessment.questions.length - 1 : false
-
-  const currentAnswer = answers.find((a) => a.questionId === question?.id)
-
-  const selectOption = (value: number) => {
-    if (!question) return
-    if (question.type === 'multiple_choice') {
-      const existing = currentAnswer?.values ?? []
-      const updated = existing.includes(value)
-        ? existing.filter((v) => v !== value)
-        : [...existing, value]
-      setAnswers((prev) => {
-        const filtered = prev.filter((a) => a.questionId !== question.id)
-        return [...filtered, { questionId: question.id, values: updated }]
-      })
-    } else {
-      setAnswers((prev) => {
-        const filtered = prev.filter((a) => a.questionId !== question.id)
-        return [...filtered, { questionId: question.id, values: [value] }]
-      })
-    }
-  }
-
-  const canProceed = Boolean(currentAnswer && currentAnswer.values.length > 0)
+  const engine = useAssessmentEngine(assessment)
+  const {
+    currentQuestion,
+    currentAnswer,
+    answers,
+    progress,
+    isFirst,
+    isLast,
+    canProceed,
+    selectOption,
+    goNext,
+    goPrev,
+    currentIndex,
+  } = engine
 
   const handleNext = () => {
     if (isLast) {
@@ -60,13 +42,13 @@ export default function AssessmentScreen() {
         }
       )
     } else {
-      setCurrentIndex((i) => i + 1)
+      goNext()
     }
   }
 
   if (!started) {
     return (
-      <View className="flex-1 bg-surface-base px-5 justify-center gap-8">
+      <View className="flex-1 bg-surface-base dark:bg-dark-bg px-5 justify-center gap-8">
         {isLoading ? (
           <SkeletonGroup gap="lg" className="items-center">
             <Skeleton variant="circle" width={64} height={64} />
@@ -82,7 +64,7 @@ export default function AssessmentScreen() {
         ) : (
           <>
             <View className="items-center gap-4">
-              <View className="w-16 h-16 rounded-full bg-sky-50 items-center justify-center">
+              <View className="w-16 h-16 rounded-full bg-sky-50 dark:bg-sky-950 items-center justify-center">
                 <Icon name="Brain" size={32} color="#0EA5E9" />
               </View>
               <View className="items-center gap-2">
@@ -106,9 +88,9 @@ export default function AssessmentScreen() {
                 </View>
               </View>
             </View>
-            <View className="bg-sky-50 border border-sky-100 rounded-xl px-4 py-3 flex-row items-start gap-3">
+            <View className="bg-sky-50 dark:bg-sky-950 border border-sky-100 dark:border-sky-800 rounded-xl px-4 py-3 flex-row items-start gap-3">
               <Icon name="Info" size={16} color="#0369A1" />
-              <Text variant="caption" className="text-sky-700 flex-1">
+              <Text variant="caption" className="text-sky-700 dark:text-sky-400 flex-1">
                 Bu test tanı koymaz. Sonuçlar bilgilendirme amaçlıdır. Ücretsiz, kayıt gerektirmez.
               </Text>
             </View>
@@ -120,18 +102,15 @@ export default function AssessmentScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface-base">
+    <View className="flex-1 bg-surface-base dark:bg-dark-bg">
       {/* Progress bar */}
-      <View className="h-1 bg-neutral-100">
-        <View
-          className="h-full bg-sky-500"
-          style={{ width: `${progress * 100}%` }}
-        />
+      <View className="h-1 bg-neutral-100 dark:bg-dark-control">
+        <View className="h-full bg-sky-500" style={{ width: `${progress * 100}%` }} />
       </View>
 
       <View className="flex-row items-center justify-between px-5 pt-4 pb-2">
-        <Pressable onPress={() => setCurrentIndex((i) => Math.max(0, i - 1))} disabled={currentIndex === 0}>
-          <Icon name="ArrowLeft" size={20} color={currentIndex === 0 ? '#D4D4D4' : '#171717'} />
+        <Pressable onPress={goPrev} disabled={isFirst}>
+          <Icon name="ArrowLeft" size={20} color={isFirst ? '#D4D4D4' : '#171717'} />
         </Pressable>
         <Text variant="caption" color="secondary">
           {currentIndex + 1} / {assessment?.questions.length}
@@ -140,12 +119,12 @@ export default function AssessmentScreen() {
       </View>
 
       <ScrollView contentContainerClassName="px-5 py-4 gap-6" showsVerticalScrollIndicator={false}>
-        {question && (
+        {currentQuestion && (
           <>
-            <Text variant="subheading" className="leading-relaxed">{question.text}</Text>
+            <Text variant="subheading" className="leading-relaxed">{currentQuestion.text}</Text>
 
             <View className="gap-3">
-              {question.options.map((option) => {
+              {currentQuestion.options.map((option) => {
                 const isSelected = currentAnswer?.values.includes(option.value) ?? false
                 return (
                   <Pressable
@@ -153,17 +132,17 @@ export default function AssessmentScreen() {
                     onPress={() => selectOption(option.value)}
                     className={`rounded-xl px-4 py-4 border ${
                       isSelected
-                        ? 'bg-sky-50 border-sky-300'
-                        : 'bg-white border-neutral-200 active:bg-neutral-50'
+                        ? 'bg-sky-50 dark:bg-sky-950 border-sky-300 dark:border-sky-700'
+                        : 'bg-white dark:bg-dark-card border-neutral-200 dark:border-dark-border active:bg-neutral-50 dark:active:bg-dark-elevated'
                     }`}
                   >
                     <View className="flex-row items-center gap-3">
                       <View className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
-                        isSelected ? 'border-sky-500 bg-sky-500' : 'border-neutral-300'
+                        isSelected ? 'border-sky-500 bg-sky-500' : 'border-neutral-300 dark:border-neutral-600'
                       }`}>
                         {isSelected && <View className="w-2.5 h-2.5 rounded-full bg-white" />}
                       </View>
-                      <Text variant="body" className={isSelected ? 'text-sky-700' : ''}>
+                      <Text variant="body" className={isSelected ? 'text-sky-700 dark:text-sky-400' : ''}>
                         {option.text}
                       </Text>
                     </View>

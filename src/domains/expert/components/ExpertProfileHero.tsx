@@ -22,7 +22,7 @@ export function ExpertProfileHero({ expert, className }: ExpertProfileHeroProps)
     .toUpperCase()
 
   return (
-    <View className={cn('bg-white border border-neutral-100 rounded-2xl p-5 gap-4', className)}>
+    <View className={cn('bg-white dark:bg-dark-card border border-neutral-100 dark:border-dark-border rounded-2xl p-5 gap-4', className)}>
       {/* Avatar + isim + ünvan */}
       <View className="flex-row items-center gap-4">
         <Avatar
@@ -62,11 +62,11 @@ export function ExpertProfileHero({ expert, className }: ExpertProfileHeroProps)
       )}
 
       {/* İstatistik şeridi */}
-      <View className="flex-row border-t border-neutral-100 pt-4 gap-0">
+      <View className="flex-row border-t border-neutral-100 dark:border-dark-border pt-4 gap-0">
         <StatPill value={`${expert.experienceYears} yıl`} label="Deneyim" />
-        <View className="w-px bg-neutral-100 mx-3" />
+        <View className="w-px bg-neutral-100 dark:bg-dark-border mx-3" />
         <StatPill value={expert.reviewCount.toString()} label="Değerlendirme" />
-        <View className="w-px bg-neutral-100 mx-3" />
+        <View className="w-px bg-neutral-100 dark:bg-dark-border mx-3" />
         <StatPill value={expert.rating.toFixed(1)} label="Puan" />
       </View>
     </View>

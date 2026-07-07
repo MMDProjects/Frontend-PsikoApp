@@ -113,14 +113,14 @@ export function Avatar({
           />
         ) : (
           <View
-            // Dynamic fallbackColor cannot be a static Tailwind class
-            style={{ backgroundColor: fallbackColor ?? undefined }}
-            className={cn('flex-1 items-center justify-center', !fallbackColor && 'bg-brand-subtle')}
+            // Dynamic fallbackColor cannot be a static Tailwind class — omit style prop entirely when undefined so NativeWind classes take effect
+            style={fallbackColor ? { backgroundColor: fallbackColor } : undefined}
+            className={cn('flex-1 items-center justify-center', !fallbackColor && 'bg-neutral-200 dark:bg-neutral-800')}
           >
             {initials ? (
               <Text
                 style={{ fontSize: fontSizeMap[size], lineHeight: fontSizeMap[size] * 1.2 }}
-                className="text-brand-text font-semibold"
+                className="text-neutral-700 dark:text-neutral-200 font-semibold"
               >
                 {initials.slice(0, 2).toUpperCase()}
               </Text>

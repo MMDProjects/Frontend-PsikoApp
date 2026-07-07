@@ -10,7 +10,12 @@ export function useOfferDetailQuery(offerId: string) {
     queryKey: offerKeys.detail(offerId),
     queryFn: async () => {
       const raw = await get(`/offers/${offerId}`)
-      return OfferSchema.parse(raw)
+      const result = OfferSchema.safeParse(raw)
+      if (!result.success) {
+        console.error('[offer/detail] Zod parse FAILED:', JSON.stringify(result.error.issues))
+        throw result.error
+      }
+      return result.data
     },
     staleTime: OFFER_STALE_TIME,
     enabled: Boolean(offerId),

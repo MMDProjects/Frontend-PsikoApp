@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, useColorScheme, View } from 'react-native'
 import { useMutation } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 
@@ -40,6 +40,7 @@ function useAcceptInviteMutation() {
 
 export default function ClientOnboardingScreen() {
   const router = useRouter()
+  const isDark = useColorScheme() === 'dark'
   const { token: inviteToken } = useLocalSearchParams<{ token?: string }>()
   const { mutate: acceptInvite, isPending, error } = useAcceptInviteMutation()
 
@@ -84,8 +85,8 @@ export default function ClientOnboardingScreen() {
   // No invite token — show error state
   if (!inviteToken) {
     return (
-      <View className="flex-1 items-center justify-center bg-surface-base px-6">
-        <View className="w-20 h-20 rounded-full bg-red-50 border border-red-200 items-center justify-center mb-4">
+      <View className="flex-1 items-center justify-center bg-surface-base dark:bg-dark-bg px-6">
+        <View className="w-20 h-20 rounded-full bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 items-center justify-center mb-4">
           <Icon name="AlertCircle" size={36} color="#DC2626" />
         </View>
         <Text variant="heading" align="center">Geçersiz Davet Bağlantısı</Text>
@@ -104,7 +105,7 @@ export default function ClientOnboardingScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-surface-base"
+      className="flex-1 bg-surface-base dark:bg-dark-bg"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
@@ -113,7 +114,7 @@ export default function ClientOnboardingScreen() {
       >
         {/* Header */}
         <View className="items-center mb-10">
-          <View className="w-16 h-16 rounded-full bg-sky-50 border border-sky-200 items-center justify-center mb-4">
+          <View className="w-16 h-16 rounded-full bg-sky-50 dark:bg-sky-950 border border-sky-200 dark:border-sky-800 items-center justify-center mb-4">
             <Icon name="CheckCircle" size={32} color="#0EA5E9" />
           </View>
           <Text variant="heading" align="center">Daveti Kabul Et</Text>
@@ -147,11 +148,11 @@ export default function ClientOnboardingScreen() {
           {/* KVKK consent */}
           <Pressable
             onPress={() => { setKvkkAccepted((v) => !v); setKvkkError(undefined) }}
-            className="flex-row items-start gap-3 p-4 rounded-xl border border-neutral-200 bg-surface-raised"
+            className="flex-row items-start gap-3 p-4 rounded-xl border border-neutral-200 dark:border-dark-border bg-surface-raised dark:bg-dark-card"
           >
             <View className={[
               'w-5 h-5 rounded border-2 items-center justify-center mt-0.5',
-              kvkkAccepted ? 'bg-sky-500 border-sky-500' : 'border-neutral-300',
+              kvkkAccepted ? 'bg-sky-500 border-sky-500' : 'border-neutral-300 dark:border-neutral-600',
             ].join(' ')}>
               {kvkkAccepted && <Icon name="Check" size={12} color="#FFFFFF" />}
             </View>
@@ -168,7 +169,7 @@ export default function ClientOnboardingScreen() {
           )}
 
           {apiErrorMessage && (
-            <View className="bg-semantic-error-light border border-red-200 rounded-xl px-4 py-3">
+            <View className="bg-semantic-error-light dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
               <Text variant="caption" className="text-semantic-error">
                 {apiErrorMessage}
               </Text>
