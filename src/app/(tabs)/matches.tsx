@@ -9,6 +9,8 @@ import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
+import { HeaderActions } from '@/core/components/molecules/HeaderActions'
+import { SegmentedControl } from '@/core/components/molecules/SegmentedControl'
 import { useAuthStore } from '@/domains/auth'
 import { useMatchesQuery, MATCH_STATUS_CONFIG } from '@/domains/match'
 
@@ -132,6 +134,17 @@ export default function MatchesScreen() {
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
+      <HeaderActions
+        actions={
+          isExpert
+            ? [{ icon: 'Bell', accessibilityLabel: 'Bildirimler', onPress: () => router.push('/notifications' as never) }]
+            : [
+                { icon: 'Bell', accessibilityLabel: 'Bildirimler', onPress: () => router.push('/notifications' as never) },
+                { icon: 'Plus', accessibilityLabel: 'Yeni İlan Oluştur', onPress: () => router.push('/listing/new' as never) },
+              ]
+        }
+      />
+
       <FlatList
         data={(!isLoading && !isError) ? displayed : []}
         keyExtractor={(item) => item.id}
@@ -142,30 +155,15 @@ export default function MatchesScreen() {
         )}
         ListHeaderComponent={
           <View className="px-4 pb-3" style={{ paddingTop: insets.top + 8 }}>
-            <Text variant="heading" className="mb-3">Eşleşmelerim</Text>
-            <View className="flex-row gap-1 bg-neutral-200 dark:bg-neutral-800 rounded-xl p-1">
-              {([
-                { key: 'active' as const, label: 'Aktif',  count: active.length },
-                { key: 'past'   as const, label: 'Geçmiş', count: past.length   },
-              ]).map(({ key, label, count }) => (
-                <Pressable
-                  key={key}
-                  onPress={() => setTab(key)}
-                  className={`flex-1 flex-row items-center justify-center gap-1.5 py-2 rounded-lg ${
-                    tab === key ? 'bg-white dark:bg-neutral-700' : 'active:bg-neutral-300 dark:active:bg-neutral-700'
-                  }`}
-                >
-                  <Text variant="label" className={tab === key ? 'font-semibold text-neutral-900 dark:text-white' : 'font-medium'} color={tab === key ? undefined : 'secondary'}>
-                    {label}
-                  </Text>
-                  {count > 0 && (
-                    <View className="w-5 h-5 rounded-full bg-sky-500 items-center justify-center">
-                      <Text variant="caption" className="text-white text-[10px] font-semibold">{count}</Text>
-                    </View>
-                  )}
-                </Pressable>
-              ))}
-            </View>
+            <Text variant="heading" className="mb-3" style={{ paddingRight: isExpert ? 52 : 100 }}>Eşleşmelerim</Text>
+            <SegmentedControl
+              options={[
+                { key: 'active', label: 'Aktif',  count: active.length },
+                { key: 'past',   label: 'Geçmiş', count: past.length   },
+              ]}
+              value={tab}
+              onChange={setTab}
+            />
           </View>
         }
         ListEmptyComponent={

@@ -12,13 +12,14 @@ export type DividerProps = {
   color?: DividerColor
   spacing?: DividerSpacing
   label?: string
+  className?: string
 }
 
 const colorStyles: Record<DividerColor, string> = {
-  default: 'bg-border',
-  muted: 'bg-border-muted',
-  strong: 'bg-border-strong',
-  brand: 'bg-brand-border',
+  default: 'bg-border dark:bg-neutral-800',
+  muted: 'bg-border-muted dark:bg-dark-border',
+  strong: 'bg-border-strong dark:bg-dark-border2',
+  brand: 'bg-brand-border dark:bg-sky-900',
 }
 
 const spacingStyles: Record<DividerSpacing, string> = {
@@ -40,11 +41,12 @@ export function Divider({
   color = 'default',
   spacing = 'md',
   label,
+  className,
 }: DividerProps) {
   if (orientation === 'vertical') {
     return (
       <View
-        className={cn('w-px self-stretch', colorStyles[color], spacingVerticalStyles[spacing])}
+        className={cn('w-px self-stretch', colorStyles[color], spacingVerticalStyles[spacing], className)}
         accessibilityRole="none"
       />
     )
@@ -52,7 +54,7 @@ export function Divider({
 
   if (label) {
     return (
-      <View className={cn('flex-row items-center gap-3', spacingStyles[spacing])}>
+      <View className={cn('flex-row items-center gap-3', spacingStyles[spacing], className)}>
         <View className={cn('flex-1 h-px', colorStyles[color])} />
         <Text variant="caption" color="tertiary">
           {label}
@@ -64,7 +66,7 @@ export function Divider({
 
   return (
     <View
-      className={cn('w-full h-px', colorStyles[color], spacingStyles[spacing])}
+      className={cn('w-full h-px', colorStyles[color], spacingStyles[spacing], className)}
       accessibilityRole="none"
     />
   )

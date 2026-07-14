@@ -1,0 +1,28 @@
+import { useQuery } from '@tanstack/react-query'
+import { z } from 'zod'
+
+import { get } from '@/lib/api'
+
+import { categoryKeys, CATEGORY_STALE_TIME } from '../category.constants'
+import { CategorySchema } from '../schemas/category.schema'
+
+const CategoryListResponseSchema = z.object({
+  data: z.array(CategorySchema),
+  meta: z.object({ page: z.number(), total: z.number(), perPage: z.number() }),
+})
+
+export function useCategoriesQuery() {
+  return useQuery({
+    queryKey: categoryKeys.lists(),
+    queryFn: async () => {
+      const raw = await get('/categories')
+      const result = CategoryListResponseSchema.safeParse(raw)
+      if (!result.success) {
+        console.error('[categories] Zod parse FAILED:', JSON.stringify(result.error.issues))
+        throw result.error
+      }
+      return result.data.data
+    },
+    staleTime: CATEGORY_STALE_TIME,
+  })
+}

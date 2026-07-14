@@ -1,46 +1,35 @@
-import { Pressable, ScrollView, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useColorScheme } from 'nativewind'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '@/core/components/atoms/Button'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton, SkeletonGroup } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
+import { BackButton } from '@/core/components/molecules/BackButton'
+import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { StatCard } from '@/core/components/molecules/StatCard'
 import { useAuthStore } from '@/domains/auth'
-import { useExpertProfileQuery } from '@/domains/expert'
-import { ExpertProfileHero } from '@/domains/expert/components/ExpertProfileHero'
+import { useExpertProfileQuery, ExpertProfileHero } from '@/domains/expert'
 
 export default function ExpertProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const role = useAuthStore((s) => s.role)
-  const { colorScheme } = useColorScheme()
-  const arrowColor = colorScheme === 'dark' ? '#F5F5F7' : '#171717'
 
   const { data: expert, isLoading, isError } = useExpertProfileQuery(id ?? '')
   const insets = useSafeAreaInsets()
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
-      {/* Floating back button */}
-      <Pressable
-        onPress={() => router.back()}
-        style={{ position: 'absolute', top: insets.top + 8, left: 16, zIndex: 10 }}
-        className="w-10 h-10 rounded-full bg-white dark:bg-dark-card items-center justify-center active:bg-neutral-100 dark:active:bg-dark-elevated"
-      >
-        <Icon name="ArrowLeft" size={20} color={arrowColor} />
-      </Pressable>
+      <BackButton />
 
       <ScrollView
         contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 40, paddingHorizontal: 16, gap: 16 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Sayfa başlığı — scroll içinde */}
-        <View className="pt-2 pb-3 items-center">
-          <Text variant="label" className="font-semibold">Uzman Profili</Text>
-        </View>
+        <ScreenTitle title="Uzman Profili" />
 
         {isLoading && <ExpertProfileSkeleton />}
 

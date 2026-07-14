@@ -1,16 +1,21 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, useColorScheme, View } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '@/core/components/atoms/Button'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton, SkeletonGroup } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
+import { BackButton } from '@/core/components/molecules/BackButton'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
+import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { useAssessmentQuery, useSubmitAssessmentMutation, useAssessmentEngine } from '@/domains/assessment'
 
 export default function AssessmentScreen() {
   const router = useRouter()
+  const insets = useSafeAreaInsets()
+  const isDark = useColorScheme() === 'dark'
   const { data: assessment, isLoading, isError } = useAssessmentQuery()
   const { mutate: submit, isPending } = useSubmitAssessmentMutation()
   const [started, setStarted] = useState(false)
@@ -48,7 +53,11 @@ export default function AssessmentScreen() {
 
   if (!started) {
     return (
-      <View className="flex-1 bg-surface-base dark:bg-dark-bg px-5 justify-center gap-8">
+      <View className="flex-1 bg-surface-base dark:bg-dark-bg">
+        <BackButton />
+        <ScreenTitle title="Değerlendirme Testi" topInset />
+
+        <View className="flex-1 px-5 justify-center gap-8">
         {isLoading ? (
           <SkeletonGroup gap="lg" className="items-center">
             <Skeleton variant="circle" width={64} height={64} />
@@ -97,12 +106,13 @@ export default function AssessmentScreen() {
             <Button label="Testi Başlat" onPress={() => setStarted(true)} />
           </>
         )}
+        </View>
       </View>
     )
   }
 
   return (
-    <View className="flex-1 bg-surface-base dark:bg-dark-bg">
+    <View className="flex-1 bg-surface-base dark:bg-dark-bg" style={{ paddingTop: insets.top }}>
       {/* Progress bar */}
       <View className="h-1 bg-neutral-100 dark:bg-dark-control">
         <View className="h-full bg-sky-500" style={{ width: `${progress * 100}%` }} />
@@ -110,7 +120,7 @@ export default function AssessmentScreen() {
 
       <View className="flex-row items-center justify-between px-5 pt-4 pb-2">
         <Pressable onPress={goPrev} disabled={isFirst}>
-          <Icon name="ArrowLeft" size={20} color={isFirst ? '#D4D4D4' : '#171717'} />
+          <Icon name="ArrowLeft" size={20} color={isFirst ? '#D4D4D4' : isDark ? '#F5F5F7' : '#171717'} />
         </Pressable>
         <Text variant="caption" color="secondary">
           {currentIndex + 1} / {assessment?.questions.length}

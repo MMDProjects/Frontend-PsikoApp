@@ -1,0 +1,178 @@
+import { Pressable, ScrollView, View } from 'react-native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { Divider } from '@/core/components/atoms/Divider'
+import { Icon } from '@/core/components/atoms/Icon'
+import { Skeleton } from '@/core/components/atoms/Skeleton'
+import { Text } from '@/core/components/atoms/Text'
+import { BackButton } from '@/core/components/molecules/BackButton'
+import { EmptyState } from '@/core/components/molecules/EmptyState'
+import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
+import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
+import { useAssessmentListQuery } from '@/domains/assessment'
+import { useCategoryDetailQuery } from '@/domains/category'
+import { useBlogListQuery, BlogCard } from '@/domains/blog'
+
+import type { IconName } from '@/core/components/atoms/Icon'
+
+export default function CategoryDetailScreen() {
+  const { slug } = useLocalSearchParams<{ slug: string }>()
+  const router = useRouter()
+  const insets = useSafeAreaInsets()
+
+  const { data: category, isLoading: categoryLoading, isError: categoryError } = useCategoryDetailQuery(slug ?? '')
+
+  const { data: assessments } = useAssessmentListQuery(category?.assessmentCategory ?? undefined)
+  const { data: blogData, isLoading: blogsLoading } = useBlogListQuery(category?.blogTag)
+  const blogs = blogData?.data ?? []
+
+  const bottomBarHeight = 56 + insets.bottom
+
+  return (
+    <View className="flex-1 bg-surface-base dark:bg-dark-bg">
+      {/* Sabit geri butonu — scroll'dan etkilenmez */}
+      <BackButton />
+
+      {categoryLoading && (
+        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 48 }}>
+          <View className="px-4 gap-4">
+            <View className="flex-row items-center gap-3">
+              <Skeleton variant="circle" width={56} height={56} />
+              <View className="flex-1 gap-2">
+                <Skeleton variant="line" width="50%" height={16} />
+              </View>
+            </View>
+            <Skeleton variant="line" width="80%" height={18} />
+            <Skeleton variant="line" width="55%" height={11} />
+          </View>
+        </ScrollView>
+      )}
+
+      {(categoryError || (!categoryLoading && !category)) && (
+        <EmptyState
+          icon="AlertCircle"
+          title="Kategori bulunamadı"
+          ctaLabel="Geri Dön"
+          onCta={() => router.back()}
+        />
+      )}
+
+      {category && (
+        <>
+          <ScrollView
+            contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: bottomBarHeight + 16 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <ScreenTitle title="Destek Alın" />
+
+            {/* ── Section 1: İkon + kategori adı + özet + istatistikler ── */}
+            <View className="px-4 py-5 gap-4">
+              <View className="flex-row items-center gap-3">
+                <View className="w-14 h-14 rounded-full items-center justify-center bg-sky-50 dark:bg-sky-950">
+                  <Icon name={category.icon as IconName} size={28} color="#0EA5E9" />
+                </View>
+                <View className="flex-1">
+                  <Text variant="subheading" className="font-semibold leading-tight">{category.name}</Text>
+                </View>
+              </View>
+
+              <Text variant="subheading" className="leading-snug">{category.summary}</Text>
+
+              <View className="flex-row flex-wrap items-center gap-3">
+                <View className="flex-row items-center gap-1.5">
+                  <Icon name="Users" size={13} color="#A3A3A3" />
+                  <Text variant="caption" color="tertiary">{category.expertCount} uzman</Text>
+                </View>
+                <View className="flex-row items-center gap-1.5">
+                  <Icon name="CheckCircle2" size={13} color="#A3A3A3" />
+                  <Text variant="caption" color="tertiary">{category.completedMatchCount} tamamlanan eşleşme</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* ── Section 2: Öğretici alan ── */}
+            <Divider spacing="none" className="mx-4" />
+            <View className="px-4 py-5 gap-2">
+              <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
+                {category.name} Hakkında
+              </Text>
+              <Text variant="body" color="secondary" className="leading-relaxed">
+                {category.description}
+              </Text>
+            </View>
+
+            {/* ── Section 3: İlgili Testler ── */}
+            {(assessments?.length ?? 0) > 0 && (
+              <>
+                <Divider spacing="none" className="mx-4" />
+                <View className="pt-5 pb-2 px-4">
+                  <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
+                    İlgili Testler
+                  </Text>
+                </View>
+                {assessments!.map((a, i) => (
+                  <View key={a.id}>
+                    {i > 0 && <Divider spacing="none" className="mx-4" />}
+                    <Pressable
+                      onPress={() => router.push('/assessment/list' as never)}
+                      className="px-4 py-4 flex-row items-center justify-between gap-3 active:opacity-80"
+                    >
+                      <View className="flex-1 gap-0.5">
+                        <Text variant="body" className="font-medium dark:text-[#F5F5F7]">{a.title}</Text>
+                        <Text variant="caption" color="tertiary">
+                          Ücretsiz · {a.questionCount} soru · ~{a.estimatedMinutes} dk
+                        </Text>
+                      </View>
+                      <Icon name="ChevronRight" size={16} color="#A3A3A3" />
+                    </Pressable>
+                  </View>
+                ))}
+              </>
+            )}
+
+            {/* ── Section 4: İlgili Bloglar ── */}
+            <Divider spacing="none" className="mx-4" />
+            <View className="pt-5 pb-2 px-4">
+              <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
+                İlgili Bloglar
+              </Text>
+            </View>
+
+            {blogsLoading ? (
+              <View className="px-4 py-4 gap-3">
+                <Skeleton variant="rect" width="100%" height={190} borderRadius="xl" />
+                <Skeleton variant="line" width="40%" height={12} />
+                <Skeleton variant="line" width="80%" height={14} />
+              </View>
+            ) : blogs.length > 0 ? (
+              blogs.map((blog, i) => (
+                <View key={blog.id}>
+                  {i > 0 && <Divider spacing="none" className="mx-4" />}
+                  <BlogCard
+                    blog={blog}
+                    onPress={() => router.push(`/blog/${blog.slug}` as never)}
+                  />
+                </View>
+              ))
+            ) : (
+              <View className="items-center gap-2 px-4 py-6">
+                <Icon name="FileText" size={28} color="#A3A3A3" />
+                <Text variant="caption" color="secondary" align="center">
+                  Bu konuyla ilgili henüz blog yazısı yok. Yakında eklenecek.
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+
+          <BottomActionBar
+            actions={[{
+              label: 'Destek Al',
+              onPress: () => router.push(`/listing/new?spec=${encodeURIComponent(category.name)}` as never),
+            }]}
+          />
+        </>
+      )}
+    </View>
+  )
+}

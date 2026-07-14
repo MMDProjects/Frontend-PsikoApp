@@ -1,6 +1,6 @@
 export const assessmentKeys = {
   all:       ['assessments'] as const,
-  list:      () => [...assessmentKeys.all, 'list'] as const,
+  list:      (category?: string) => [...assessmentKeys.all, 'list', category ?? 'all'] as const,
   active:    () => [...assessmentKeys.all, 'active'] as const,
   results:   () => [...assessmentKeys.all, 'results'] as const,
   result:    (id: string) => [...assessmentKeys.results(), id] as const,

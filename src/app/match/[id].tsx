@@ -1,28 +1,24 @@
-import { Pressable, ScrollView, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useColorScheme } from 'nativewind'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Chip } from '@/core/components/atoms/Chip'
+import { Divider } from '@/core/components/atoms/Divider'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
+import { BackButton } from '@/core/components/molecules/BackButton'
+import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
 import { RESULT_LEVEL_CONFIG } from '@/domains/assessment'
 import { SESSION_TYPE_LABELS } from '@/domains/listing'
 import { useMatchDetailQuery, MATCH_STATUS_CONFIG } from '@/domains/match'
 import { OFFER_STATUS_CONFIG } from '@/domains/offer'
 
-function Divider() {
-  return <View className="mx-4 h-px bg-neutral-200 dark:bg-neutral-800" />
-}
-
 export default function MatchDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
-  const { colorScheme } = useColorScheme()
-  const arrowColor = colorScheme === 'dark' ? '#F5F5F7' : '#171717'
 
   const { data: match, isLoading, isError } = useMatchDetailQuery(id ?? '')
   const insets = useSafeAreaInsets()
@@ -40,14 +36,7 @@ export default function MatchDetailScreen() {
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
-      {/* Floating back button */}
-      <Pressable
-        onPress={() => router.back()}
-        style={{ position: 'absolute', top: insets.top + 8, left: 16, zIndex: 10 }}
-        className="w-10 h-10 rounded-full bg-white dark:bg-dark-card items-center justify-center active:bg-neutral-100 dark:active:bg-dark-elevated"
-      >
-        <Icon name="ArrowLeft" size={20} color={arrowColor} />
-      </Pressable>
+      <BackButton />
 
       {isLoading && (
         <View style={{ paddingTop: insets.top + 8 }}>
@@ -64,7 +53,7 @@ export default function MatchDetailScreen() {
             <Skeleton variant="line" width="80%" height={18} />
             <Skeleton variant="line" width="50%" height={11} />
           </View>
-          <Divider />
+          <Divider spacing="none" className="mx-4" />
           <View className="px-4 py-5 gap-4">
             <Skeleton variant="line" width="30%" height={11} />
             <Skeleton variant="line" width="75%" height={16} />
@@ -88,9 +77,7 @@ export default function MatchDetailScreen() {
       {!isLoading && !isError && match && (
         <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 48 }} showsVerticalScrollIndicator={false}>
           {/* Sayfa başlığı */}
-          <View className="pt-2 pb-3 items-center">
-            <Text variant="label" className="font-semibold">Eşleşme Detayı</Text>
-          </View>
+          <ScreenTitle title="Eşleşme Detayı" />
 
           {/* ── Section 1: Danışan + İlan başlığı + Meta + İletişim ── */}
           <View className="px-4 py-5 gap-4">
@@ -139,7 +126,7 @@ export default function MatchDetailScreen() {
           {/* ── Section 2: İlan detayı (listing detail Section 2 birebir) ─── */}
           {match.listing && (
             <>
-              <Divider />
+              <Divider spacing="none" className="mx-4" />
               <View className="px-4 py-5 gap-5">
                 {match.listing.description ? (
                   <View className="gap-2">
@@ -201,7 +188,7 @@ export default function MatchDetailScreen() {
             const headerBg = r.level === 'low' ? '#F0FDF4' : r.level === 'moderate' ? '#FFFBEB' : '#FEF2F2'
             return (
               <>
-                <Divider />
+                <Divider spacing="none" className="mx-4" />
                 <View className="px-4 py-5 gap-3">
                   <View className="flex-row items-center gap-1.5">
                     <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
@@ -236,7 +223,7 @@ export default function MatchDetailScreen() {
           })() : null}
 
           {/* ── Section 3: Danışan Hakkında ────────────────────────── */}
-          <Divider />
+          <Divider spacing="none" className="mx-4" />
           <View className="px-4 py-5 gap-3">
             <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
               Danışan Hakkında
@@ -260,7 +247,7 @@ export default function MatchDetailScreen() {
           {/* ── Section 4: Teklif Özeti (conditional) ──────────────────── */}
           {match.offer && (
             <>
-              <Divider />
+              <Divider spacing="none" className="mx-4" />
               <View className="px-4 py-5 gap-4">
                 <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
                   Teklif Özeti

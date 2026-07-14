@@ -2,13 +2,15 @@ import { Pressable, ScrollView, View } from 'react-native'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Controller, useForm } from 'react-hook-form'
-import { useColorScheme } from 'nativewind'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Chip } from '@/core/components/atoms/Chip'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
+import { BackButton } from '@/core/components/molecules/BackButton'
+import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { InputField } from '@/core/components/molecules/InputField'
+import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
 import { useSendOfferMutation, SendOfferSchema } from '@/domains/offer'
 
 import type { SendOfferRequest } from '@/domains/offer'
@@ -16,8 +18,6 @@ import type { SendOfferRequest } from '@/domains/offer'
 export default function NewOfferScreen() {
   const router = useRouter()
   const { listingId } = useLocalSearchParams<{ listingId?: string }>()
-  const { colorScheme } = useColorScheme()
-  const arrowColor = colorScheme === 'dark' ? '#F5F5F7' : '#171717'
 
   const { mutate: sendOffer, isPending, error } = useSendOfferMutation()
 
@@ -70,19 +70,10 @@ export default function NewOfferScreen() {
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
-      {/* Floating back button */}
-      <Pressable
-        onPress={() => router.back()}
-        style={{ position: 'absolute', top: insets.top + 8, left: 16, zIndex: 10 }}
-        className="w-10 h-10 rounded-full bg-white dark:bg-dark-card items-center justify-center active:bg-neutral-100 dark:active:bg-dark-elevated"
-      >
-        <Icon name="ArrowLeft" size={20} color={arrowColor} />
-      </Pressable>
+      <BackButton />
 
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: bottomBarHeight + 16, gap: 20 }} showsVerticalScrollIndicator={false}>
-        <View className="pt-2 pb-3 items-center">
-          <Text variant="label" className="font-semibold">Teklif Gönder</Text>
-        </View>
+        <ScreenTitle title="Teklif Gönder" />
 
         {/* Teklif Başlığı */}
         <Controller
@@ -175,17 +166,14 @@ export default function NewOfferScreen() {
       </ScrollView>
 
       {/* Fixed bottom bar */}
-      <View style={{ position: 'absolute', bottom: insets.bottom, left: 16, right: 16 }}>
-        <Pressable
-          onPress={isPending ? undefined : handleSubmit(onSubmit)}
-          disabled={isPending}
-          className="bg-brand rounded-full h-14 items-center justify-center active:bg-brand-hover"
-        >
-          <Text variant="label" className="text-white font-semibold">
-            {isPending ? 'Gönderiliyor...' : 'Teklif Gönder'}
-          </Text>
-        </Pressable>
-      </View>
+      <BottomActionBar
+        actions={[{
+          label: 'Teklif Gönder',
+          loadingLabel: 'Gönderiliyor...',
+          onPress: handleSubmit(onSubmit),
+          isLoading: isPending,
+        }]}
+      />
     </View>
   )
 }

@@ -1,6 +1,5 @@
 import { Alert, Pressable, ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useColorScheme } from 'nativewind'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Avatar } from '@/core/components/atoms/Avatar'
@@ -8,7 +7,10 @@ import { Chip } from '@/core/components/atoms/Chip'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
+import { BackButton } from '@/core/components/molecules/BackButton'
+import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
+import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
 import { useAuthStore } from '@/domains/auth'
 import {
   useListingDetailQuery,
@@ -23,8 +25,6 @@ export default function ListingDetailScreen() {
   const role = useAuthStore((s) => s.role)
   const { user } = useAuthStore()
   const isClient = role === 'client'
-  const { colorScheme } = useColorScheme()
-  const arrowColor = colorScheme === 'dark' ? '#F5F5F7' : '#171717'
   const insets = useSafeAreaInsets()
 
   const { data: listing, isLoading, isError } = useListingDetailQuery(id ?? '')
@@ -66,14 +66,7 @@ export default function ListingDetailScreen() {
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
-      {/* Floating back button — scroll etkilemez */}
-      <Pressable
-        onPress={() => router.back()}
-        style={{ position: 'absolute', top: insets.top + 8, left: 16, zIndex: 10 }}
-        className="w-10 h-10 rounded-full bg-white dark:bg-dark-card items-center justify-center active:bg-neutral-100 dark:active:bg-dark-elevated"
-      >
-        <Icon name="ArrowLeft" size={20} color={arrowColor} />
-      </Pressable>
+      <BackButton />
 
       {isLoading && (
         <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 48 }}>
@@ -115,9 +108,7 @@ export default function ListingDetailScreen() {
             showsVerticalScrollIndicator={false}
           >
             {/* Sayfa başlığı — scroll içinde */}
-            <View className="pt-2 pb-3 items-center">
-              <Text variant="label" className="font-semibold">İlan Detayı</Text>
-            </View>
+            <ScreenTitle title="İlan Detayı" />
 
             {/* Sections 1, 2, 3 */}
             <ListingDetail
@@ -262,48 +253,32 @@ export default function ListingDetailScreen() {
           </ScrollView>
 
           {/* ── Pill Bottom Bar ──────────────────────── */}
-          <View
-            style={{
-              position: 'absolute',
-              bottom: insets.bottom,
-              left: 16,
-              right: 16,
-            }}
-          >
-            {/* Expert: teklif gönder */}
-            {!isClient && listing.status === 'OPEN' && (
-              hasAlreadySentOffer ? (
+          {listing.status === 'OPEN' && (
+            !isClient && hasAlreadySentOffer ? (
+              <BottomActionBar>
                 <View className="flex-row items-center justify-center gap-2 bg-price-subtle border border-price-muted dark:bg-green-950 dark:border-green-900 rounded-full h-14">
                   <Icon name="CheckCircle2" size={16} color="#15803D" />
                   <Text variant="label" className="text-price-text dark:text-price-border font-semibold">
                     Teklif Gönderildi
                   </Text>
                 </View>
-              ) : (
-                <Pressable
-                  onPress={handleSendOffer}
-                  className="bg-brand rounded-full h-14 items-center justify-center active:bg-brand-hover"
-                >
-                  <Text variant="label" className="text-white font-semibold">
-                    Teklif Gönder
-                  </Text>
-                </Pressable>
-              )
-            )}
-
-            {/* Client: ilanı kapat */}
-            {isClient && listing.status === 'OPEN' && (
-              <Pressable
-                onPress={isClosing ? undefined : handleClose}
-                disabled={isClosing}
-                className="bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:border-dark-border2 rounded-full h-14 items-center justify-center active:bg-neutral-200 dark:active:bg-neutral-700"
-              >
-                <Text variant="label" className="text-neutral-600 dark:text-neutral-400 font-medium">
-                  {isClosing ? 'Kapatılıyor...' : 'İlanı Kapat'}
-                </Text>
-              </Pressable>
-            )}
-          </View>
+              </BottomActionBar>
+            ) : (
+              <BottomActionBar
+                actions={
+                  isClient
+                    ? [{
+                        label: 'İlanı Kapat',
+                        loadingLabel: 'Kapatılıyor...',
+                        onPress: handleClose,
+                        variant: 'ghost',
+                        isLoading: isClosing,
+                      }]
+                    : [{ label: 'Teklif Gönder', onPress: handleSendOffer }]
+                }
+              />
+            )
+          )}
         </>
       )}
     </View>

@@ -7,6 +7,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { Button } from '@/core/components/atoms/Button'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
+import { BackButton } from '@/core/components/molecules/BackButton'
 import { InputField } from '@/core/components/molecules/InputField'
 import { RegisterRequestSchema, useRegisterMutation } from '@/domains/auth'
 
@@ -66,7 +67,6 @@ function RoleCard({ role, selected, onPress }: RoleCardProps) {
 
 export default function RegisterScreen() {
   const router = useRouter()
-  const isDark = useColorScheme() === 'dark'
   const [step, setStep] = useState<1 | 2>(1)
   const [role, setRole] = useState<UserRole | null>(null)
 
@@ -104,12 +104,11 @@ export default function RegisterScreen() {
       >
         {/* Header */}
         <View className="flex-row items-center mb-8">
-          <Pressable
+          <BackButton
+            variant="inline"
             onPress={() => (step === 2 ? setStep(1) : router.back())}
-            className="p-2 -ml-2 rounded-full active:bg-neutral-100 dark:active:bg-dark-control"
-          >
-            <Icon name="ArrowLeft" size={22} color={isDark ? '#F5F5F7' : '#171717'} />
-          </Pressable>
+            className="-ml-1"
+          />
           <Text variant="heading" className="ml-2">
             {step === 1 ? 'Hesap Oluştur' : 'Bilgilerini Gir'}
           </Text>

@@ -9,6 +9,7 @@ import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
+import { HeaderActions } from '@/core/components/molecules/HeaderActions'
 import { useAuthStore } from '@/domains/auth'
 import { useMyListingsQuery, ListingCard, formatClientName } from '@/domains/listing'
 import { useExpertOffersQuery, OFFER_STATUS_CONFIG } from '@/domains/offer'
@@ -50,6 +51,12 @@ function ExpertOffersScreen() {
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
+      <HeaderActions
+        actions={[
+          { icon: 'Bell', accessibilityLabel: 'Bildirimler', onPress: () => router.push('/notifications' as never) },
+        ]}
+      />
+
       <FlatList
         data={(!isLoading && !isError) ? filtered : []}
         keyExtractor={(item) => item.id}
@@ -60,7 +67,7 @@ function ExpertOffersScreen() {
         )}
         ListHeaderComponent={
           <View className="px-4 pb-3" style={{ paddingTop: insets.top + 8 }}>
-            <View className="flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center justify-between mb-3" style={{ paddingRight: 52 }}>
               <Text variant="heading">Tekliflerim</Text>
               <Text variant="caption" color="secondary">{offers.length} teklif</Text>
             </View>
@@ -175,37 +182,12 @@ function ClientListingsScreen() {
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
-      {/* Absolute header ikonları — scroll etkilemez */}
-      <View
-        style={{
-          position: 'absolute',
-          top: insets.top + 8,
-          right: 20,
-          zIndex: 10,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 4,
-        }}
-      >
-        <Pressable
-          onPress={() => router.push('/(tabs)/notifications' as never)}
-          accessibilityRole="button"
-          accessibilityLabel="Bildirimler"
-          className="active:opacity-40"
-          style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
-        >
-          <Icon name="Bell" size={22} color="#0EA5E9" />
-        </Pressable>
-        <Pressable
-          onPress={() => router.push('/listing/new' as never)}
-          accessibilityRole="button"
-          accessibilityLabel="Yeni İlan Oluştur"
-          className="active:opacity-40"
-          style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
-        >
-          <Icon name="Plus" size={24} color="#0EA5E9" />
-        </Pressable>
-      </View>
+      <HeaderActions
+        actions={[
+          { icon: 'Bell', accessibilityLabel: 'Bildirimler', onPress: () => router.push('/notifications' as never) },
+          { icon: 'Plus', accessibilityLabel: 'Yeni İlan Oluştur', onPress: () => router.push('/listing/new' as never) },
+        ]}
+      />
 
       <FlatList
         data={!isLoading ? filtered : []}

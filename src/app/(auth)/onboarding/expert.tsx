@@ -6,6 +6,7 @@ import { Button } from '@/core/components/atoms/Button'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
 import { Chip } from '@/core/components/atoms/Chip'
+import { BackButton } from '@/core/components/molecules/BackButton'
 import { InputField } from '@/core/components/molecules/InputField'
 import { ExpertSpecializations, useCreateExpertProfileMutation } from '@/domains/expert'
 
@@ -24,13 +25,10 @@ type StepHeaderProps = {
 }
 
 function StepHeader({ step, total, title, subtitle, onBack }: StepHeaderProps) {
-  const isDark = useColorScheme() === 'dark'
   return (
     <View className="mb-8">
       <View className="flex-row items-center mb-6">
-        <Pressable onPress={onBack} className="p-2 -ml-2 rounded-full active:bg-neutral-100 dark:active:bg-dark-control">
-          <Icon name="ArrowLeft" size={22} color={isDark ? '#F5F5F7' : '#171717'} />
-        </Pressable>
+        <BackButton variant="inline" onPress={onBack} className="-ml-1" />
         <Text variant="caption" color="secondary" className="ml-2">
           {step}/{total}
         </Text>

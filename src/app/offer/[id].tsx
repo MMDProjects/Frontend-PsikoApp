@@ -1,14 +1,17 @@
-import { Alert, Pressable, ScrollView, View } from 'react-native'
+import { Alert, ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useColorScheme } from 'nativewind'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Chip } from '@/core/components/atoms/Chip'
+import { Divider } from '@/core/components/atoms/Divider'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
+import { BackButton } from '@/core/components/molecules/BackButton'
+import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
+import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
 import { useAuthStore } from '@/domains/auth'
 import { RESULT_LEVEL_CONFIG } from '@/domains/assessment'
 import { SESSION_TYPE_LABELS } from '@/domains/listing'
@@ -20,17 +23,11 @@ import {
   OFFER_STATUS_CONFIG,
 } from '@/domains/offer'
 
-function Divider() {
-  return <View className="mx-4 h-px bg-neutral-200 dark:bg-neutral-800" />
-}
-
 export default function OfferDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const role = useAuthStore((s) => s.role)
   const isClient = role === 'client'
-  const { colorScheme } = useColorScheme()
-  const arrowColor = colorScheme === 'dark' ? '#F5F5F7' : '#171717'
 
   const { data: offer, isLoading, isError } = useOfferDetailQuery(id ?? '')
   const { mutate: acceptOffer, isPending: isAccepting } = useAcceptOfferMutation()
@@ -71,14 +68,7 @@ export default function OfferDetailScreen() {
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
-      {/* Floating back button */}
-      <Pressable
-        onPress={() => router.back()}
-        style={{ position: 'absolute', top: insets.top + 8, left: 16, zIndex: 10 }}
-        className="w-10 h-10 rounded-full bg-white dark:bg-dark-card items-center justify-center active:bg-neutral-100 dark:active:bg-dark-elevated"
-      >
-        <Icon name="ArrowLeft" size={20} color={arrowColor} />
-      </Pressable>
+      <BackButton />
 
       {isLoading && (
         <View style={{ paddingTop: insets.top + 8 }}>
@@ -96,7 +86,7 @@ export default function OfferDetailScreen() {
             <Skeleton variant="line" width="70%" height={16} />
             <Skeleton variant="line" width="35%" height={11} />
           </View>
-          <Divider />
+          <Divider spacing="none" className="mx-4" />
           <View className="px-4 py-5 gap-4">
             <Skeleton variant="line" width="25%" height={11} />
             <Skeleton variant="rect" width={100} height={28} borderRadius="full" />
@@ -122,9 +112,7 @@ export default function OfferDetailScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Sayfa başlığı */}
-          <View className="pt-2 pb-3 items-center">
-            <Text variant="label" className="font-semibold">Teklif Detayı</Text>
-          </View>
+          <ScreenTitle title="Teklif Detayı" />
 
           {/* ── Section 1: Uzman + İlan başlığı + Meta ── */}
           <View className="px-4 py-5 gap-4">
@@ -176,7 +164,7 @@ export default function OfferDetailScreen() {
           </View>
 
           {/* ── Section 2: Teklif Detayları ── */}
-          <Divider />
+          <Divider spacing="none" className="mx-4" />
           <View className="px-4 py-5 gap-5">
             {offer.description ? (
               <View className="gap-2">
@@ -219,7 +207,7 @@ export default function OfferDetailScreen() {
             const headerBg = r.level === 'low' ? '#F0FDF4' : r.level === 'moderate' ? '#FFFBEB' : '#FEF2F2'
             return (
               <>
-                <Divider />
+                <Divider spacing="none" className="mx-4" />
                 <View className="px-4 py-5 gap-3">
                   <View className="flex-row items-center gap-1.5">
                     <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
@@ -257,40 +245,37 @@ export default function OfferDetailScreen() {
 
         {/* ── Fixed Bottom Bar ── */}
         {offer.status === 'PENDING' && (
-          <View style={{ position: 'absolute', bottom: insets.bottom, left: 16, right: 16 }}>
-            {isClient ? (
-              <View className="flex-row gap-3">
-                <Pressable
-                  onPress={isActing ? undefined : handleAccept}
-                  disabled={isActing}
-                  className="flex-1 bg-brand rounded-full h-14 items-center justify-center active:bg-brand-hover"
-                >
-                  <Text variant="label" className="text-white font-semibold">
-                    {isAccepting ? 'Kabul Ediliyor...' : 'Teklifi Kabul Et'}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={isActing ? undefined : handleReject}
-                  disabled={isActing}
-                  className="flex-1 bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:border-dark-border2 rounded-full h-14 items-center justify-center active:bg-neutral-200 dark:active:bg-neutral-700"
-                >
-                  <Text variant="label" className="text-neutral-600 dark:text-neutral-400 font-medium">
-                    {isRejecting ? 'Reddediliyor...' : 'Reddet'}
-                  </Text>
-                </Pressable>
-              </View>
-            ) : (
-              <Pressable
-                onPress={isWithdrawing ? undefined : handleWithdraw}
-                disabled={isWithdrawing}
-                className="bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:border-dark-border2 rounded-full h-14 items-center justify-center active:bg-neutral-200 dark:active:bg-neutral-700"
-              >
-                <Text variant="label" className="text-neutral-600 dark:text-neutral-400 font-medium">
-                  {isWithdrawing ? 'Geri Çekiliyor...' : 'Teklifi Geri Çek'}
-                </Text>
-              </Pressable>
-            )}
-          </View>
+          <BottomActionBar
+            actions={
+              isClient
+                ? [
+                    {
+                      label: 'Teklifi Kabul Et',
+                      loadingLabel: 'Kabul Ediliyor...',
+                      onPress: handleAccept,
+                      isLoading: isAccepting,
+                      isDisabled: isActing,
+                    },
+                    {
+                      label: 'Reddet',
+                      loadingLabel: 'Reddediliyor...',
+                      onPress: handleReject,
+                      variant: 'ghost',
+                      isLoading: isRejecting,
+                      isDisabled: isActing,
+                    },
+                  ]
+                : [
+                    {
+                      label: 'Teklifi Geri Çek',
+                      loadingLabel: 'Geri Çekiliyor...',
+                      onPress: handleWithdraw,
+                      variant: 'ghost',
+                      isLoading: isWithdrawing,
+                    },
+                  ]
+            }
+          />
         )}
         </>
       )}
