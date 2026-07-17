@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Button } from '@/core/components/atoms/Button'
 import { Chip } from '@/core/components/atoms/Chip'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
 import { InputField } from '@/core/components/molecules/InputField'
+import { StepProgress } from '@/core/components/molecules/StepProgress'
+import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
 import { cn } from '@/core/utils/cn'
 import { useMyAssessmentResultsQuery, RESULT_LEVEL_CONFIG } from '@/domains/assessment'
 
@@ -20,15 +22,21 @@ const STEP_LABELS = ['Konu & Açıklama', 'Tercihler', 'Test Sonucu']
 type SessionType = 'online' | 'yüz_yüze' | 'yüz_yüze_online'
 
 type CreateListingFormProps = {
+  /** Kontrollü adım — geri butonu ve dekor animasyonu ekran seviyesinde yönetilir */
+  step: number
+  onStepChange: (step: number) => void
   onSubmit: (data: CreateListingRequest) => void
-  onCancel: () => void
   isLoading?: boolean
   initialSpecialization?: string
 }
 
-export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initialSpecialization }: CreateListingFormProps) {
-  const [step, setStep] = useState(1)
-
+export function CreateListingForm({
+  step,
+  onStepChange,
+  onSubmit,
+  isLoading = false,
+  initialSpecialization,
+}: CreateListingFormProps) {
   const [title, setTitle] = useState('')
   const [titleError, setTitleError] = useState<string | undefined>()
   const [description, setDescription] = useState('')
@@ -46,11 +54,9 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
   const [selectedResultId, setSelectedResultId] = useState<string | undefined>()
 
   const { data: myResults } = useMyAssessmentResultsQuery()
+  const insets = useSafeAreaInsets()
 
-  const goBack = () => {
-    if (step > 1) setStep((s) => (s - 1) as typeof step)
-    else onCancel()
-  }
+  const bottomBarHeight = 56 + insets.bottom
 
   const toggleSpec = (spec: string) => {
     setSelectedSpecs((prev) =>
@@ -87,7 +93,7 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
         setSpecsError(undefined)
       }
       if (hasError) return
-      setStep(2)
+      onStepChange(2)
     } else if (step === 2) {
       const minVal = parseFloat(budgetMin)
       const maxVal = parseFloat(budgetMax)
@@ -108,7 +114,7 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
         setBudgetMaxError(undefined)
       }
       if (hasError) return
-      setStep(3)
+      onStepChange(3)
     } else {
       submitListing()
     }
@@ -119,28 +125,14 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
       className="flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Progress header */}
-      <View className="px-5 pt-4 pb-2">
-        <View className="flex-row items-center mb-4">
-          <Pressable onPress={goBack} className="p-2 -ml-2 rounded-full active:bg-neutral-100">
-            <Icon name="ArrowLeft" size={22} color="#171717" />
-          </Pressable>
-          <View className="flex-1 ml-2">
-            <Text variant="caption" color="secondary">{step}/{TOTAL_STEPS} — {STEP_LABELS[step - 1]}</Text>
-          </View>
-        </View>
-        <View className="flex-row gap-1.5 mb-4">
-          {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-            <View
-              key={i}
-              className={cn('h-1.5 flex-1 rounded-full', i < step ? 'bg-sky-500' : 'bg-neutral-200')}
-            />
-          ))}
-        </View>
+      {/* Aşama barı */}
+      <View className="px-5 pt-2 pb-4">
+        <StepProgress current={step} total={TOTAL_STEPS} label={STEP_LABELS[step - 1]} />
       </View>
 
       <ScrollView
-        contentContainerClassName="px-5 pb-8 gap-5"
+        contentContainerClassName="px-5 gap-5"
+        contentContainerStyle={{ paddingBottom: bottomBarHeight + 16 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -149,13 +141,14 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
         {step === 1 && (
           <View className="gap-5">
             <View className="gap-1">
-              <Text variant="heading">İlanını Oluştur</Text>
-              <Text variant="body" color="secondary">
+              <Text variant="heading" className="text-white">İlanını Oluştur</Text>
+              <Text variant="body" className="text-sky-100">
                 Neye ihtiyaç duyduğunu anlat, uzmanlara ilanını göster.
               </Text>
             </View>
 
             <InputField
+              tone="onBrand"
               label="İlan Başlığı"
               placeholder="Örn: Kaygı ve panik atak için destek arıyorum"
               value={title}
@@ -163,35 +156,27 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
               errorMessage={titleError}
               isRequired
               maxLength={100}
-              hintText={`${title.length}/100`}
+              hint={`${title.length}/100`}
             />
 
-            <View className="gap-1.5">
-              <Text variant="label">
-                Açıklama <Text variant="caption" color="tertiary">(opsiyonel)</Text>
-              </Text>
-              <View className="border border-neutral-200 rounded-xl p-3 bg-neutral-50 min-h-[90px]">
-                <TextInput
-                  value={description}
-                  onChangeText={setDescription}
-                  placeholder="Deneyimini, beklentilerini, mevcut durumunu kısaca anlat..."
-                  multiline
-                  numberOfLines={4}
-                  maxLength={500}
-                  className="text-sm text-neutral-900 leading-relaxed"
-                  textAlignVertical="top"
-                />
-              </View>
-              <Text variant="caption" color="tertiary" align="right">{description.length}/500</Text>
-            </View>
+            <InputField
+              tone="onBrand"
+              label="Açıklama (opsiyonel)"
+              placeholder="Deneyimini, beklentilerini, mevcut durumunu kısaca anlat..."
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              maxLength={500}
+              hint={`${description.length}/500`}
+            />
 
             <View className="gap-2.5">
               <View className="flex-row items-center justify-between">
-                <Text variant="label">
-                  Uzmanlık Alanı <Text variant="caption" className="text-red-500">*</Text>
+                <Text variant="label" className="text-white">
+                  Uzmanlık Alanı <Text variant="caption" className="text-red-100">*</Text>
                 </Text>
                 {selectedSpecs.length > 0 && (
-                  <Text variant="caption" color="secondary">{selectedSpecs.length} seçildi</Text>
+                  <Text variant="caption" className="text-sky-100">{selectedSpecs.length} seçildi</Text>
                 )}
               </View>
               <View className="flex-row flex-wrap gap-2">
@@ -199,14 +184,14 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
                   <Chip
                     key={spec}
                     label={spec}
-                    variant="filter"
+                    variant="onBrand"
                     isSelected={selectedSpecs.includes(spec)}
                     onPress={() => toggleSpec(spec)}
                   />
                 ))}
               </View>
               {specsError && (
-                <Text variant="caption" className="text-red-500">{specsError}</Text>
+                <Text variant="caption" className="text-red-100">{specsError}</Text>
               )}
             </View>
           </View>
@@ -216,62 +201,66 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
         {step === 2 && (
           <View className="gap-5">
             <View className="gap-1">
-              <Text variant="heading">Tercihleriniz</Text>
-              <Text variant="body" color="secondary">
+              <Text variant="heading" className="text-white">Tercihleriniz</Text>
+              <Text variant="body" className="text-sky-100">
                 Görüşme yönteminizi ve bütçe aralığınızı belirleyin.
               </Text>
             </View>
 
             <View className="gap-2.5">
-              <Text variant="label">Seans Tipi</Text>
+              <Text variant="label" className="text-white">Seans Tipi</Text>
               <View className="gap-2">
                 {([
                   { value: 'online',      label: 'Online',      subtitle: 'Video veya ses ile görüşme', icon: 'Video'   },
                   { value: 'yüz_yüze',   label: 'Yüz Yüze',   subtitle: 'Fiziksel ofis görüşmesi',    icon: 'MapPin'  },
                   { value: 'yüz_yüze_online', label: 'Yüz Yüze / Online', subtitle: 'Her iki yöntem de uygun', icon: 'Shuffle' },
-                ] as { value: SessionType; label: string; subtitle: string; icon: string }[]).map(({ value, label, subtitle, icon }) => (
-                  <Pressable
-                    key={value}
-                    onPress={() => setSessionType(value)}
-                    className={cn(
-                      'border rounded-xl p-4 flex-row items-center gap-3',
-                      sessionType === value
-                        ? 'bg-sky-50 border-sky-300'
-                        : 'bg-white border-neutral-200 active:bg-neutral-50'
-                    )}
-                  >
-                    <View
+                ] as { value: SessionType; label: string; subtitle: string; icon: string }[]).map(({ value, label, subtitle, icon }) => {
+                  const isActive = sessionType === value
+                  return (
+                    <Pressable
+                      key={value}
+                      onPress={() => setSessionType(value)}
                       className={cn(
-                        'w-9 h-9 rounded-xl items-center justify-center',
-                        sessionType === value ? 'bg-sky-100' : 'bg-neutral-100'
+                        'border rounded-xl p-4 flex-row items-center gap-3',
+                        isActive
+                          ? 'bg-white border-white'
+                          : 'bg-sky-600 border-sky-600 dark:bg-sky-900 dark:border-sky-900 active:bg-sky-700 dark:active:bg-sky-800'
                       )}
                     >
-                      <Icon name={icon as never} size={18} color={sessionType === value ? '#0EA5E9' : '#A3A3A3'} />
-                    </View>
-                    <View className="flex-1">
-                      <Text variant="label">{label}</Text>
-                      <Text variant="caption" color="secondary">{subtitle}</Text>
-                    </View>
-                    <View
-                      className={cn(
-                        'w-5 h-5 rounded-full border-2 items-center justify-center',
-                        sessionType === value ? 'border-sky-500' : 'border-neutral-300'
-                      )}
-                    >
-                      {sessionType === value && (
-                        <View className="w-2.5 h-2.5 rounded-full bg-sky-500" />
-                      )}
-                    </View>
-                  </Pressable>
-                ))}
+                      <View
+                        className={cn(
+                          'w-9 h-9 rounded-xl items-center justify-center',
+                          isActive ? 'bg-sky-100' : 'bg-sky-700 dark:bg-sky-950'
+                        )}
+                      >
+                        <Icon name={icon as never} size={18} color={isActive ? '#0EA5E9' : '#FFFFFF'} />
+                      </View>
+                      <View className="flex-1">
+                        <Text variant="label" className={isActive ? 'text-neutral-900 dark:text-neutral-900' : 'text-white'}>{label}</Text>
+                        <Text variant="caption" className={isActive ? 'text-neutral-500 dark:text-neutral-500' : 'text-sky-100'}>{subtitle}</Text>
+                      </View>
+                      <View
+                        className={cn(
+                          'w-5 h-5 rounded-full border-2 items-center justify-center',
+                          isActive ? 'border-sky-500' : 'border-sky-300 dark:border-sky-700'
+                        )}
+                      >
+                        {isActive && (
+                          <View className="w-2.5 h-2.5 rounded-full bg-sky-500" />
+                        )}
+                      </View>
+                    </Pressable>
+                  )
+                })}
               </View>
             </View>
 
             <View className="gap-2.5">
-              <Text variant="label">Bütçe Aralığı (₺ / seans)</Text>
+              <Text variant="label" className="text-white">Bütçe Aralığı (₺ / seans)</Text>
               <View className="flex-row gap-3">
                 <View className="flex-1">
                   <InputField
+                    tone="onBrand"
                     label="Minimum"
                     placeholder="500"
                     keyboardType="numeric"
@@ -283,6 +272,7 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
                 </View>
                 <View className="flex-1">
                   <InputField
+                    tone="onBrand"
                     label="Maksimum"
                     placeholder="1000"
                     keyboardType="numeric"
@@ -294,9 +284,9 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
                 </View>
               </View>
               {budgetMin && budgetMax && !budgetMinError && !budgetMaxError && (
-                <View className="flex-row items-center gap-1.5 bg-sky-50 border border-sky-100 rounded-xl px-3 py-2">
-                  <Icon name="Info" size={14} color="#0EA5E9" />
-                  <Text variant="caption" className="text-sky-700">
+                <View className="flex-row items-center gap-1.5 bg-sky-600 dark:bg-sky-900 rounded-xl px-3 py-2">
+                  <Icon name="Info" size={14} color="#FFFFFF" />
+                  <Text variant="caption" className="text-white">
                     ₺{parseFloat(budgetMin).toLocaleString('tr-TR')} – ₺{parseFloat(budgetMax).toLocaleString('tr-TR')} aralığı
                   </Text>
                 </View>
@@ -309,31 +299,31 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
         {step === 3 && (
           <View className="gap-5">
             <View className="gap-1">
-              <Text variant="heading">Test Sonucu Ekle</Text>
-              <Text variant="body" color="secondary">
+              <Text variant="heading" className="text-white">Test Sonucu Ekle</Text>
+              <Text variant="body" className="text-sky-100">
                 Geçmiş test sonuçlarını ilanına ekleyerek uzmanlara daha fazla bilgi verebilirsin.
               </Text>
             </View>
 
-            {/* İlan özeti */}
-            <View className="bg-sky-50 border border-sky-100 rounded-xl px-4 py-4 gap-3">
-              <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
+            {/* İlan özeti — flat panel */}
+            <View className="bg-sky-600 dark:bg-sky-900 rounded-xl px-4 py-4 gap-3">
+              <Text variant="caption" className="text-sky-100 font-semibold uppercase tracking-widest">
                 İlan Özeti
               </Text>
               <View className="gap-1.5">
                 <View className="flex-row gap-2">
-                  <Icon name="FileText" size={14} color="#0EA5E9" />
-                  <Text variant="caption" color="secondary" className="flex-1" numberOfLines={2}>{title.trim()}</Text>
+                  <Icon name="FileText" size={14} color="#FFFFFF" />
+                  <Text variant="caption" className="text-white flex-1" numberOfLines={2}>{title.trim()}</Text>
                 </View>
                 <View className="flex-row gap-2">
-                  <Icon name="Tag" size={14} color="#0EA5E9" />
-                  <Text variant="caption" color="secondary" className="flex-1">
+                  <Icon name="Tag" size={14} color="#FFFFFF" />
+                  <Text variant="caption" className="text-white flex-1">
                     {selectedSpecs.slice(0, 3).join(', ')}{selectedSpecs.length > 3 ? ` +${selectedSpecs.length - 3}` : ''}
                   </Text>
                 </View>
                 <View className="flex-row gap-2">
-                  <Icon name="Wallet" size={14} color="#0EA5E9" />
-                  <Text variant="caption" color="secondary">
+                  <Icon name="Wallet" size={14} color="#FFFFFF" />
+                  <Text variant="caption" className="text-white">
                     ₺{parseFloat(budgetMin).toLocaleString('tr-TR')} – ₺{parseFloat(budgetMax).toLocaleString('tr-TR')}
                   </Text>
                 </View>
@@ -341,12 +331,12 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
             </View>
 
             {!myResults || myResults.length === 0 ? (
-              <View className="bg-white rounded-xl p-4 border border-neutral-100 items-center gap-2">
-                <Icon name="ClipboardList" size={32} color="#A3A3A3" />
-                <Text variant="body" color="secondary" align="center">
+              <View className="bg-sky-600 dark:bg-sky-900 rounded-xl p-4 items-center gap-2">
+                <Icon name="ClipboardList" size={32} color="rgba(255,255,255,0.8)" />
+                <Text variant="body" className="text-white" align="center">
                   Henüz tamamlanmış test sonucun yok.
                 </Text>
-                <Text variant="caption" color="tertiary" align="center">
+                <Text variant="caption" className="text-sky-100" align="center">
                   Testler sayfasından bir test tamamlayabilirsin.
                 </Text>
               </View>
@@ -355,46 +345,50 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
                 {myResults.map((result) => {
                   const cfg = RESULT_LEVEL_CONFIG[result.level]
                   const isSelected = selectedResultId === result.id
-                  const headerBg = result.level === 'low' ? '#F0FDF4' : result.level === 'moderate' ? '#FFFBEB' : '#FEF2F2'
                   return (
                     <Pressable
                       key={result.id}
                       onPress={() => setSelectedResultId(isSelected ? undefined : result.id)}
                       className={cn(
-                        'rounded-xl overflow-hidden border',
-                        isSelected ? 'border-sky-300' : 'border-neutral-200'
+                        'rounded-xl px-4 py-4 gap-2 active:opacity-90',
+                        isSelected ? 'bg-sky-50 dark:bg-sky-100' : 'bg-white dark:bg-white'
                       )}
                     >
-                      <View
-                        className="px-4 py-3 flex-row items-center justify-between"
-                        style={{ backgroundColor: headerBg }}
+                      {/* Başlık + seviye + seçim — güncel test sonuçları satır dili */}
+                      <View className="flex-row items-center gap-2.5">
+                        <Text
+                          variant="label"
+                          className="flex-1 font-semibold text-neutral-900 dark:text-neutral-900"
+                          numberOfLines={1}
+                        >
+                          {result.assessmentTitle}
+                        </Text>
+                        <Text variant="caption" className="font-semibold" style={{ color: cfg.color }}>
+                          {cfg.label}
+                        </Text>
+                        <View
+                          className={cn(
+                            'w-5 h-5 rounded-full border-2 items-center justify-center',
+                            isSelected ? 'border-sky-500 bg-sky-500' : 'border-neutral-300 bg-white'
+                          )}
+                        >
+                          {isSelected && <Icon name="Check" size={11} color="#fff" />}
+                        </View>
+                      </View>
+
+                      {/* Özet */}
+                      <Text
+                        variant="caption"
+                        className="leading-relaxed text-neutral-500 dark:text-neutral-500"
+                        numberOfLines={2}
                       >
-                        <View className="flex-row items-center gap-2">
-                          <Icon name="ClipboardList" size={14} color={cfg.color} />
-                          <Text variant="label" className="font-semibold" style={{ color: cfg.color }}>
-                            {result.assessmentTitle}
-                          </Text>
-                        </View>
-                        <View className="flex-row items-center gap-2">
-                          <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: cfg.color + '20' }}>
-                            <Text variant="caption" className="font-semibold" style={{ color: cfg.color }}>
-                              {cfg.label}
-                            </Text>
-                          </View>
-                          <View
-                            className={cn(
-                              'w-5 h-5 rounded-full border-2 items-center justify-center',
-                              isSelected ? 'border-sky-500 bg-sky-500' : 'border-neutral-300 bg-white'
-                            )}
-                          >
-                            {isSelected && <Icon name="Check" size={11} color="#fff" />}
-                          </View>
-                        </View>
-                      </View>
-                      <View className="px-4 pt-3 pb-3 bg-white gap-1">
-                        <Text variant="caption" color="secondary" numberOfLines={2}>{result.summary}</Text>
-                        <Text variant="caption" color="tertiary">Puan: {result.score}</Text>
-                      </View>
+                        {result.summary}
+                      </Text>
+
+                      {/* Puan */}
+                      <Text variant="caption" className="text-neutral-400 dark:text-neutral-400">
+                        Puan: {result.score}
+                      </Text>
                     </Pressable>
                   )
                 })}
@@ -403,45 +397,28 @@ export function CreateListingForm({ onSubmit, onCancel, isLoading = false, initi
           </View>
         )}
 
-        {/* Aksiyon butonları */}
-        {step < TOTAL_STEPS ? (
-          <Button
-            label="Devam Et"
-            onPress={handleNext}
-            variant="primary"
-            size="lg"
-            fullWidth
-            className="mt-2"
-          />
-        ) : (
-          <View className="gap-3 mt-2">
-            <Button
-              label="İlanı Yayınla"
-              onPress={submitListing}
-              isLoading={isLoading}
-              variant="primary"
-              size="lg"
-              fullWidth
-            />
-            {selectedResultId !== undefined && (
-              <View className="flex-row items-center gap-1.5 justify-center">
-                <Icon name="Paperclip" size={13} color="#0EA5E9" />
-                <Text variant="caption" className="text-sky-600">Test sonucu ilanına eklenecek</Text>
-              </View>
-            )}
-            {selectedResultId === undefined && myResults && myResults.length > 0 && (
-              <Button
-                label="Test sonucu eklemeden yayınla"
-                onPress={submitListing}
-                isLoading={isLoading}
-                variant="ghost"
-                size="md"
-                fullWidth
-              />
-            )}
+        {/* Seçili test sonucu bilgilendirmesi */}
+        {step === TOTAL_STEPS && selectedResultId !== undefined && (
+          <View className="flex-row items-center gap-1.5 justify-center">
+            <Icon name="Paperclip" size={13} color="#FFFFFF" />
+            <Text variant="caption" className="text-white">Test sonucu ilanına eklenecek</Text>
           </View>
         )}
       </ScrollView>
+
+      {/* Alt sabit aksiyon barı — diğer sayfalarla aynı pill dil */}
+      <BottomActionBar
+        actions={
+          step < TOTAL_STEPS
+            ? [{ label: 'Devam Et', onPress: handleNext, variant: 'inverse' }]
+            : selectedResultId === undefined && myResults && myResults.length > 0
+              ? [
+                  { label: 'Testsiz Yayınla', onPress: submitListing, variant: 'inverseGhost', isLoading, loadingLabel: 'Yayınlanıyor...' },
+                  { label: 'İlanı Yayınla', onPress: submitListing, variant: 'inverse', isLoading, loadingLabel: 'Yayınlanıyor...' },
+                ]
+              : [{ label: 'İlanı Yayınla', onPress: submitListing, variant: 'inverse', isLoading, loadingLabel: 'Yayınlanıyor...' }]
+        }
+      />
     </KeyboardAvoidingView>
   )
 }

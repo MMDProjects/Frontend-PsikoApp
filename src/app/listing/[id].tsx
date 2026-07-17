@@ -11,6 +11,7 @@ import { BackButton } from '@/core/components/molecules/BackButton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
+import { getFullName } from '@/core/utils/personName'
 import { useAuthStore } from '@/domains/auth'
 import {
   useListingDetailQuery,
@@ -211,7 +212,7 @@ export default function ListingDetailScreen() {
 
             {/* ── Section 5: Teklif Özeti (expert, gönderilmişse) ── */}
             {myOffer && (() => {
-              const expertName = myOffer.expert?.name ?? user?.fullName ?? 'Uzman'
+              const expertName = myOffer.expert?.name || getFullName(user) || 'Uzman'
               const expertInitials = expertName.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
               const statusCfg = OFFER_STATUS_CONFIG[myOffer.status]
               return (

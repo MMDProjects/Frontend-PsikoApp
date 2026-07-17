@@ -1,11 +1,12 @@
-import { Alert, Pressable, ScrollView, View } from 'react-native'
+import { Alert, Pressable, ScrollView, Share, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { useColorScheme } from 'nativewind'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
+import { useThemeColors } from '@/core/theme'
+import { getFullName, getInitials } from '@/core/utils/personName'
 import { useAuthStore, useLogoutMutation } from '@/domains/auth'
 import { useThemeStore } from '@/store/themeStore'
 
@@ -16,6 +17,8 @@ type MenuItem = {
   label: string
   onPress: () => void
   value?: string
+  /** false ise satır bir sayfaya değil, doğrudan bir aksiyona (Alert, Share, vb.) bağlıdır — ok gösterilmez */
+  hasArrow?: boolean
 }
 
 type MenuSection = {
@@ -23,8 +26,8 @@ type MenuSection = {
   items: MenuItem[]
 }
 
-function SectionCard({ items, isDark }: { items: MenuItem[]; isDark: boolean }) {
-  const iconColor = isDark ? '#A3A3A3' : '#404040'
+function SectionCard({ items }: { items: MenuItem[] }) {
+  const colors = useThemeColors()
   return (
     <View>
       {items.map((item, i) => (
@@ -33,12 +36,14 @@ function SectionCard({ items, isDark }: { items: MenuItem[]; isDark: boolean }) 
           onPress={item.onPress}
           className="px-4 py-4 flex-row items-center gap-3 active:opacity-90"
         >
-          <Icon name={item.icon} size={18} color={iconColor} />
+          <Icon name={item.icon} size={18} color={colors.contentSecondary} />
           <Text variant="body" className="flex-1 dark:text-[#F5F5F7]">{item.label}</Text>
           {item.value ? (
             <Text variant="caption" color="tertiary">{item.value}</Text>
           ) : null}
-          <Icon name="ChevronRight" size={16} color={isDark ? '#525252' : '#A3A3A3'} />
+          {item.hasArrow !== false && (
+            <Icon name="ChevronRight" size={16} color={colors.contentDisabled} />
+          )}
         </Pressable>
       ))}
     </View>
@@ -52,8 +57,7 @@ const THEME_LABELS: Record<string, string> = {
 export default function SettingsScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const { colorScheme } = useColorScheme()
-  const isDark = colorScheme === 'dark'
+  const colors = useThemeColors()
   const { user } = useAuthStore()
   const { mutate: logout, isPending } = useLogoutMutation()
   const isExpert = user?.role === 'expert'
@@ -68,19 +72,64 @@ export default function SettingsScreen() {
     ])
   }
 
-  const initials = (user?.fullName ?? 'K')
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
+  const handleInviteFriend = () => {
+    Share.share({
+      message: 'PsikoAl\'ı senin için önerdim! Ücretsiz psikolojik test çöz, sana uygun bir psikologla eşleş.',
+    }).catch(() => undefined)
+  }
+
+  const handleRateUs = () => {
+    Alert.alert('Bizi Değerlendir', 'Uygulamamızı beğendin mi?', [
+      {
+        text: 'Hayır',
+        onPress: () => Alert.alert('Önerin Bizim İçin Değerli', 'Öneri formu yakında web sitemizde aktif olacak.'),
+      },
+      {
+        text: 'Evet',
+        onPress: () => Alert.alert('Teşekkürler!', 'Değerlendirme sayfası yakında aktif olacak.'),
+      },
+    ])
+  }
+
+  const handleComingSoon = (title: string) => {
+    Alert.alert(title, 'Bu özellik yakında aktif olacak.')
+  }
+
+  const initials = getInitials(user) || 'K'
+
+  const communitySection: MenuSection = {
+    title: 'TOPLULUK',
+    items: [
+      { icon: 'UserPlus', label: 'Arkadaşlarını Davet Et', hasArrow: false, onPress: handleInviteFriend },
+      { icon: 'Heart',    label: 'Bizi Değerlendir',       hasArrow: false, onPress: handleRateUs },
+    ],
+  }
+
+  const appSection: MenuSection = {
+    title: 'UYGULAMA',
+    items: [
+      { icon: 'Sun',        label: 'Görünüm',                 value: THEME_LABELS[preference], hasArrow: false, onPress: handleThemePress },
+      { icon: 'Bell',       label: 'Bildirim Ayarları',       hasArrow: false, onPress: () => handleComingSoon('Bildirim Ayarları') },
+      { icon: 'LifeBuoy',   label: 'Destek, Talep ve Öneri',  hasArrow: false, onPress: () => handleComingSoon('Destek, Talep ve Öneri') },
+    ],
+  }
+
+  const privacySection: MenuSection = {
+    title: 'VERİ VE GİZLİLİK',
+    items: [
+      { icon: 'ShieldCheck', label: 'Veri ve Gizlilik', onPress: () => router.push('/profile/privacy' as never) },
+    ],
+  }
 
   const expertSections: MenuSection[] = [
     {
       title: 'HESAP',
       items: [
-        { icon: 'User',        label: 'Uzman Profilim',       onPress: () => user && router.push(`/expert/${user.id}` as never) },
-        { icon: 'Stethoscope', label: 'Uzmanlık Alanlarım',   onPress: () => user && router.push(`/expert/${user.id}` as never) },
-        { icon: 'Star',        label: 'Danışan Yorumlarım',   onPress: () => {} },
+        { icon: 'User',        label: 'Kişisel Bilgiler',           onPress: () => router.push('/profile/personal' as never) },
+        { icon: 'Stethoscope', label: 'Mesleki Bilgiler',           onPress: () => router.push('/profile/professional' as never) },
+        { icon: 'FileText',    label: 'Belgeler ve Bağlantılar',    onPress: () => router.push('/profile/documents' as never) },
+        { icon: 'Star',        label: 'Danışan Yorumları',          onPress: () => user && router.push(`/expert/${user.id}` as never) },
+        { icon: 'Lock',        label: 'Şifre Yönetimi',             onPress: () => router.push('/profile/password' as never) },
       ],
     },
     {
@@ -89,38 +138,23 @@ export default function SettingsScreen() {
         { icon: 'CreditCard', label: 'Cüzdanım', onPress: () => router.push('/payment/packages' as never) },
       ],
     },
-    {
-      title: 'UYGULAMA',
-      items: [
-        { icon: 'Sun',        label: 'Görünüm',          value: THEME_LABELS[preference], onPress: handleThemePress },
-        { icon: 'Bell',       label: 'Bildirim Ayarları', onPress: () => {} },
-        { icon: 'HelpCircle', label: 'Yardım & Destek',   onPress: () => {} },
-      ],
-    },
+    communitySection,
+    appSection,
+    privacySection,
   ]
 
   const clientSections: MenuSection[] = [
     {
       title: 'HESAP',
       items: [
-        { icon: 'User',  label: 'Profilim',        onPress: () => {} },
-        { icon: 'Brain', label: 'Psikolojik Test', onPress: () => router.push('/assessment/list' as never) },
+        { icon: 'User',  label: 'Kişisel Bilgiler',        onPress: () => router.push('/profile/personal' as never) },
+        { icon: 'Brain', label: 'Testler',         onPress: () => router.push('/assessment/list' as never) },
+        { icon: 'Lock',  label: 'Şifre Yönetimi',  onPress: () => router.push('/profile/password' as never) },
       ],
     },
-    {
-      title: 'FİNANS',
-      items: [
-        { icon: 'CreditCard', label: 'Seans Paketleri', onPress: () => router.push('/payment/packages' as never) },
-      ],
-    },
-    {
-      title: 'UYGULAMA',
-      items: [
-        { icon: 'Sun',        label: 'Görünüm',          value: THEME_LABELS[preference], onPress: handleThemePress },
-        { icon: 'Bell',       label: 'Bildirim Ayarları', onPress: () => {} },
-        { icon: 'HelpCircle', label: 'Yardım & Destek',   onPress: () => {} },
-      ],
-    },
+    communitySection,
+    appSection,
+    privacySection,
   ]
 
   const sections = isExpert ? expertSections : clientSections
@@ -139,14 +173,14 @@ export default function SettingsScreen() {
           <Avatar size="xl" initials={initials} isVerified={isExpert} />
           <View className="flex-1 gap-1">
             <Text variant="subheading" className="font-semibold dark:text-[#F5F5F7]">
-              {user?.fullName ?? 'Kullanıcı'}
+              {getFullName(user) || 'Kullanıcı'}
             </Text>
             <Text variant="caption" color="secondary">{user?.email ?? ''}</Text>
           </View>
         </View>
 
         {/* ── Sections ── */}
-        {sections.map((section, i) => (
+        {sections.map((section) => (
           <View key={section.title}>
             <View className="mx-4 mt-4 h-px bg-neutral-200 dark:bg-neutral-800" />
             <View className="px-4 pt-4 pb-2">
@@ -154,7 +188,7 @@ export default function SettingsScreen() {
                 {section.title}
               </Text>
             </View>
-            <SectionCard items={section.items} isDark={isDark} />
+            <SectionCard items={section.items} />
           </View>
         ))}
 
@@ -165,7 +199,7 @@ export default function SettingsScreen() {
           disabled={isPending}
           className="px-4 py-4 flex-row items-center gap-3 active:opacity-90"
         >
-          <Icon name="LogOut" size={18} color={isDark ? '#F87171' : '#DC2626'} />
+          <Icon name="LogOut" size={18} color={colors.error} />
           <Text variant="body" className="flex-1 text-red-600 dark:text-red-400">
             {isPending ? 'Çıkış Yapılıyor...' : 'Çıkış Yap'}
           </Text>

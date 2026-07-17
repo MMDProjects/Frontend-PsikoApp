@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Chip } from '@/core/components/atoms/Chip'
+import { DecorCircles } from '@/core/components/atoms/DecorCircles'
 import { Divider } from '@/core/components/atoms/Divider'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
@@ -97,16 +98,7 @@ function ExpertHomeScreen() {
               }}
             >
               {/* Dekoratif zemin daireleri — her iki temada beyaz ton */}
-              <View
-                pointerEvents="none"
-                className="absolute bg-white/10 rounded-full"
-                style={{ width: 220, height: 220, top: -70, right: -60 }}
-              />
-              <View
-                pointerEvents="none"
-                className="absolute bg-white/[0.07] rounded-full"
-                style={{ width: 140, height: 140, bottom: -50, left: -40 }}
-              />
+              <DecorCircles />
 
               <View style={{ paddingRight: 64 }}>
                 {/* Mavi zemin üzerinde okunurluk için beyaz pill — gerçek logo gelince kaldırılabilir */}
@@ -119,7 +111,7 @@ function ExpertHomeScreen() {
                   />
                 </View>
                 <Text variant="subheading" className="text-white font-bold mt-3">
-                  Merhaba{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : ''}!
+                  Merhaba{user?.firstName ? `, ${user.firstName}` : ''}!
                 </Text>
                 <Text variant="caption" className="text-sky-100 mt-0.5">
                   Bugün hangi fırsatı değerlendireceksiniz?
@@ -306,16 +298,7 @@ function ClientHomeScreen() {
           }}
         >
           {/* Dekoratif zemin daireleri — her iki temada beyaz ton */}
-          <View
-            pointerEvents="none"
-            className="absolute bg-white/10 rounded-full"
-            style={{ width: 220, height: 220, top: -70, right: -60 }}
-          />
-          <View
-            pointerEvents="none"
-            className="absolute bg-white/[0.07] rounded-full"
-            style={{ width: 140, height: 140, bottom: -50, left: -40 }}
-          />
+          <DecorCircles />
 
           <View style={{ paddingRight: 108 }}>
             {/* Mavi zemin üzerinde okunurluk için beyaz pill — gerçek logo gelince kaldırılabilir */}
@@ -328,7 +311,7 @@ function ClientHomeScreen() {
               />
             </View>
             <Text variant="subheading" className="text-white font-bold mt-3">
-              Merhaba{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : ''}!
+              Merhaba{user?.firstName ? `, ${user.firstName}` : ''}!
             </Text>
             <Text variant="caption" className="text-sky-100 mt-0.5">
               Bugün nasıl hissediyorsunuz?

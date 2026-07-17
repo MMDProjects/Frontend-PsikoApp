@@ -26,11 +26,16 @@ export const ExpertOnboardingSchema = z.object({
   experienceYears: z.number().min(0).max(50),
   bio:             z.string().min(50, 'Biyografi en az 50 karakter olmalı').max(1000),
   avatarUrl:       z.string().url().nullable().optional(),
+  education:       z.string().nullable().optional(),
+  cvUrl:           z.string().nullable().optional(),
+  certificates:    z.array(z.string()).optional(),
+  personalWebsite: z.string().url('Geçerli bir URL giriniz').nullable().optional().or(z.literal('')),
 })
 
 export const ExpertSchema = z.object({
   id:              z.string().uuid(),
-  name:            z.string(),
+  firstName:       z.string(),
+  lastName:        z.string(),
   title:           z.string(),
   specializations: z.array(z.string()),
   experienceYears: z.number(),
@@ -40,6 +45,10 @@ export const ExpertSchema = z.object({
   reviewCount:     z.number().int().min(0),
   isVerified:      z.boolean(),
   status:          z.enum(['pending', 'approved', 'rejected']),
+  education:       z.string().nullable().optional(),
+  cvUrl:           z.string().nullable().optional(),
+  certificates:    z.array(z.string()).optional(),
+  personalWebsite: z.string().url().nullable().optional(),
 })
 
 export type ExpertOnboarding = z.infer<typeof ExpertOnboardingSchema>

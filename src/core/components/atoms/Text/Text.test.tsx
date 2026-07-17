@@ -81,7 +81,7 @@ describe('Text', () => {
     const { getByText } = render(<Text variant="heading">Title</Text>)
     const el = getByText('Title')
     expect(el.props.className).toContain('font-display')
-    expect(el.props.className).toContain('text-3xl')
+    expect(el.props.className).toContain('text-4xl')
   })
 
   it('custom weight overrides variant default weight', () => {

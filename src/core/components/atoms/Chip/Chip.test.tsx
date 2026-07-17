@@ -40,7 +40,7 @@ describe('Chip — filter variant', () => {
 
   it('applies unselected styles when not selected', () => {
     const { getByRole } = render(<Chip label="Yoga" onPress={jest.fn()} isSelected={false} />)
-    expect(getByRole('button').props.className).toContain('bg-surface-raised')
+    expect(getByRole('button').props.className).toContain('bg-neutral-200')
   })
 
   it('applies opacity-40 when disabled', () => {
@@ -84,6 +84,20 @@ describe('Chip — input variant', () => {
   it('applies input styles', () => {
     const { UNSAFE_getByProps } = render(<Chip label="React" variant="input" />)
     const container = UNSAFE_getByProps({ accessibilityRole: 'none' })
-    expect(container.props.className).toContain('bg-brand-subtle')
+    expect(container.props.className).toContain('bg-brand-muted/60')
+  })
+})
+
+describe('Chip — onBrand variant', () => {
+  it('applies flat dark-sky styles when unselected', () => {
+    const { getByRole, getByText } = render(<Chip label="Anksiyete" variant="onBrand" onPress={jest.fn()} />)
+    expect(getByRole('button').props.className).toContain('bg-sky-600')
+    expect(getByText('Anksiyete').props.className).toContain('text-white')
+  })
+
+  it('applies solid white styles when selected', () => {
+    const { getByRole, getByText } = render(<Chip label="Anksiyete" variant="onBrand" isSelected onPress={jest.fn()} />)
+    expect(getByRole('button').props.className).toContain('bg-white')
+    expect(getByText('Anksiyete').props.className).toContain('text-sky-700')
   })
 })

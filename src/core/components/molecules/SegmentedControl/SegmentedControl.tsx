@@ -6,8 +6,6 @@ import { Text } from '@/core/components/atoms/Text'
 export type SegmentedControlOption<T extends string> = {
   key: T
   label: string
-  /** 0'dan büyükse sky rozet içinde gösterilir */
-  count?: number
 }
 
 export type SegmentedControlProps<T extends string> = {
@@ -24,8 +22,10 @@ export function SegmentedControl<T extends string>({
   className,
 }: SegmentedControlProps<T>) {
   return (
+    // p-1 (dış) + py-1 (segment) = filtre chip'lerindeki (size="md") py-2 ile aynı dikey yükseklik
+    // iOS Health pattern: seçili segment = zeminden ayrışan düz beyaz/koyu kart (gölgesiz), metin nötr — mavi vurgu yok
     <View className={cn('flex-row gap-1 bg-neutral-200 dark:bg-neutral-800 rounded-xl p-1', className)}>
-      {options.map(({ key, label, count }) => {
+      {options.map(({ key, label }) => {
         const isActive = value === key
         return (
           <Pressable
@@ -34,24 +34,19 @@ export function SegmentedControl<T extends string>({
             accessibilityRole="button"
             accessibilityState={{ selected: isActive }}
             className={cn(
-              'flex-1 flex-row items-center justify-center gap-1.5 py-2 rounded-lg',
-              isActive
-                ? 'bg-white dark:bg-neutral-700'
-                : 'active:bg-neutral-300 dark:active:bg-neutral-700'
+              'flex-1 items-center justify-center py-1 rounded-lg',
+              isActive && 'bg-white dark:bg-dark-control'
             )}
           >
             <Text
               variant="label"
-              className={isActive ? 'font-semibold text-neutral-900 dark:text-white' : 'font-medium'}
-              color={isActive ? undefined : 'secondary'}
+              className={cn(
+                'font-medium',
+                isActive ? 'text-neutral-900 dark:text-[#F5F5F7]' : 'text-neutral-500 dark:text-neutral-400'
+              )}
             >
               {label}
             </Text>
-            {(count ?? 0) > 0 && (
-              <View className="w-5 h-5 rounded-full bg-sky-500 items-center justify-center">
-                <Text variant="caption" className="text-white text-[10px] font-semibold">{count}</Text>
-              </View>
-            )}
           </Pressable>
         )
       })}

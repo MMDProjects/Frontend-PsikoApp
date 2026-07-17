@@ -158,8 +158,8 @@ export default function MatchesScreen() {
             <Text variant="heading" className="mb-3" style={{ paddingRight: isExpert ? 52 : 100 }}>Eşleşmelerim</Text>
             <SegmentedControl
               options={[
-                { key: 'active', label: 'Aktif',  count: active.length },
-                { key: 'past',   label: 'Geçmiş', count: past.length   },
+                { key: 'active', label: 'Aktif'  },
+                { key: 'past',   label: 'Geçmiş' },
               ]}
               value={tab}
               onChange={setTab}

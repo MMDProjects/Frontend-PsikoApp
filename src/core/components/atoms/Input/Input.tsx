@@ -1,6 +1,7 @@
 import { forwardRef, useState } from 'react'
 import { Pressable, TextInput, View } from 'react-native'
 import * as Haptics from 'expo-haptics'
+import { useColorScheme } from 'nativewind'
 import { Eye, EyeOff, X } from 'lucide-react-native'
 
 import { cn } from '@/core/utils/cn'
@@ -18,6 +19,7 @@ const XIcon = X as ComponentType<IconProps>
 
 export type InputState = 'default' | 'focused' | 'error' | 'success' | 'disabled'
 export type InputSize = 'sm' | 'md' | 'lg'
+export type InputTone = 'default' | 'onBrand'
 
 export type InputProps = {
   value: string
@@ -25,6 +27,8 @@ export type InputProps = {
   placeholder?: string
   state?: InputState
   size?: InputSize
+  /** onBrand: marka (mavi) zemin üzerinde flat solid input */
+  tone?: InputTone
   leftElement?: React.ReactNode
   rightElement?: React.ReactNode
   isSecure?: boolean
@@ -50,6 +54,15 @@ const containerStateStyles: Record<InputState, string> = {
   disabled: 'border border-border bg-surface-sunken opacity-40',
 }
 
+// Mavi marka zemini üzerinde flat solid görünüm (light: beyaz kart, dark: sky-900)
+const onBrandContainerStateStyles: Record<InputState, string> = {
+  default:  'border border-white bg-white dark:border-sky-900 dark:bg-sky-900',
+  focused:  'border-2 border-sky-300 bg-white dark:border-sky-400 dark:bg-sky-900',
+  error:    'border-2 border-red-400 bg-red-50 dark:border-red-700 dark:bg-red-950',
+  success:  'border-2 border-emerald-400 bg-white dark:border-emerald-600 dark:bg-sky-900',
+  disabled: 'border border-white bg-white opacity-40 dark:border-sky-900 dark:bg-sky-900',
+}
+
 const containerSizeStyles: Record<InputSize, string> = {
   sm: 'min-h-9 px-3 rounded-md',
   md: 'min-h-11 px-3.5 rounded-lg',
@@ -64,6 +77,7 @@ const textSizeStyles: Record<InputSize, string> = {
 
 const ICON_SIZE: Record<InputSize, number> = { sm: 16, md: 18, lg: 20 }
 const ICON_COLOR = { default: '#737373', error: '#DC2626', success: '#16A34A' }
+const ON_BRAND_DARK_ICON_COLOR = { default: 'rgba(255,255,255,0.7)', error: '#FCA5A5', success: '#6EE7B7' }
 
 export const Input = forwardRef<TextInput, InputProps>(function Input(
   {
@@ -72,6 +86,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
     placeholder,
     state = 'default',
     size = 'md',
+    tone = 'default',
     leftElement,
     rightElement,
     isSecure = false,
@@ -96,13 +111,17 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
     return isFocused ? 'focused' : 'default'
   })()
 
+  const { colorScheme } = useColorScheme()
+  const isDark = colorScheme === 'dark'
   const isDisabled = state === 'disabled'
+  // onBrand dark: input zemini sky-900 olduğundan ikon/placeholder beyaz tonlara döner
+  const iconColors = tone === 'onBrand' && isDark ? ON_BRAND_DARK_ICON_COLOR : ICON_COLOR
   const iconColor =
     state === 'error'
-      ? ICON_COLOR.error
+      ? iconColors.error
       : state === 'success'
-        ? ICON_COLOR.success
-        : ICON_COLOR.default
+        ? iconColors.success
+        : iconColors.default
   const iconSize = ICON_SIZE[size]
 
   const handleFocus: TextInputProps['onFocus'] = (e) => {
@@ -159,7 +178,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
     <View
       className={cn(
         'flex-row items-center',
-        containerStateStyles[effectiveState],
+        tone === 'onBrand' ? onBrandContainerStateStyles[effectiveState] : containerStateStyles[effectiveState],
         containerSizeStyles[size],
         multiline && 'items-start py-2.5',
         className
@@ -172,7 +191,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#A3A3A3"
+        placeholderTextColor={tone === 'onBrand' && isDark ? 'rgba(255,255,255,0.55)' : '#A3A3A3'}
         editable={!isDisabled}
         secureTextEntry={isSecure && !isSecureVisible}
         multiline={multiline}
@@ -187,7 +206,8 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
         // maxHeight is a Reanimated/multiline behavior constraint — cannot be a static Tailwind class
         style={multiline ? { maxHeight: MULTILINE_MAX_HEIGHT } : undefined}
         className={cn(
-          'flex-1 text-content-primary p-0',
+          'flex-1 p-0',
+          tone === 'onBrand' ? 'text-neutral-900 dark:text-white' : 'text-content-primary',
           textSizeStyles[size],
           multiline && 'align-top'
         )}

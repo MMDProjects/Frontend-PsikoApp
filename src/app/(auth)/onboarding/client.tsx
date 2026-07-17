@@ -1,12 +1,17 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, useColorScheme, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native'
 import { useMutation } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Button } from '@/core/components/atoms/Button'
+import { DecorCircles } from '@/core/components/atoms/DecorCircles'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
+import { BackButton } from '@/core/components/molecules/BackButton'
 import { InputField } from '@/core/components/molecules/InputField'
+import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
+import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
+import { cn } from '@/core/utils/cn'
 import { post } from '@/lib/api'
 import { tokenStorage } from '@/lib/storage'
 import { useAuthStore } from '@/domains/auth'
@@ -40,7 +45,7 @@ function useAcceptInviteMutation() {
 
 export default function ClientOnboardingScreen() {
   const router = useRouter()
-  const isDark = useColorScheme() === 'dark'
+  const insets = useSafeAreaInsets()
   const { token: inviteToken } = useLocalSearchParams<{ token?: string }>()
   const { mutate: acceptInvite, isPending, error } = useAcceptInviteMutation()
 
@@ -81,109 +86,136 @@ export default function ClientOnboardingScreen() {
   }
 
   const apiErrorMessage = error instanceof Error ? error.message : undefined
+  const bottomBarHeight = 56 + insets.bottom
 
   // No invite token — show error state
   if (!inviteToken) {
     return (
-      <View className="flex-1 items-center justify-center bg-surface-base dark:bg-dark-bg px-6">
-        <View className="w-20 h-20 rounded-full bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 items-center justify-center mb-4">
-          <Icon name="AlertCircle" size={36} color="#DC2626" />
+      <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
+        <DecorCircles />
+        <BackButton />
+        <View className="flex-1 items-center justify-center px-6 gap-4">
+          <View className="w-20 h-20 rounded-full bg-white items-center justify-center">
+            <Icon name="AlertCircle" size={36} color="#DC2626" />
+          </View>
+          <Text variant="heading" align="center" className="text-white">Geçersiz Davet Bağlantısı</Text>
+          <Text variant="body" align="center" className="text-sky-100">
+            Bu bağlantı geçersiz veya süresi dolmuş. Psikologunuzdan yeni bir davet bağlantısı isteyin.
+          </Text>
         </View>
-        <Text variant="heading" align="center">Geçersiz Davet Bağlantısı</Text>
-        <Text variant="body" color="secondary" align="center" className="mt-2">
-          Bu bağlantı geçersiz veya süresi dolmuş. Psikologunuzdan yeni bir davet bağlantısı isteyin.
-        </Text>
-        <Button
-          label="Ana Sayfaya Dön"
-          onPress={() => router.replace('/(auth)/login')}
-          variant="secondary"
-          className="mt-6"
+        <BottomActionBar
+          actions={[{ label: 'Girişe Dön', onPress: () => router.replace('/(auth)/login'), variant: 'inverse' }]}
         />
       </View>
     )
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-surface-base dark:bg-dark-bg"
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerClassName="flex-grow px-6 py-12"
-        keyboardShouldPersistTaps="handled"
+    <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
+      <DecorCircles />
+      <BackButton />
+
+      <ScreenTitle title="Daveti Kabul Et" topInset titleClassName="text-white" />
+
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Header */}
-        <View className="items-center mb-10">
-          <View className="w-16 h-16 rounded-full bg-sky-50 dark:bg-sky-950 border border-sky-200 dark:border-sky-800 items-center justify-center mb-4">
-            <Icon name="CheckCircle" size={32} color="#0EA5E9" />
+        <ScrollView
+          contentContainerClassName="px-5 gap-5 pt-2"
+          contentContainerStyle={{ paddingBottom: bottomBarHeight + 16 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header */}
+          <View className="items-center gap-3">
+            <View className="w-16 h-16 rounded-full bg-white items-center justify-center">
+              <Icon name="CheckCircle" size={32} color="#0EA5E9" />
+            </View>
+            <Text variant="heading" align="center" className="text-white">Hoş Geldiniz!</Text>
+            <Text variant="body" align="center" className="text-sky-100">
+              Psikologunuz sizi PsikoAl&apos;a davet etti. Şifrenizi belirleyerek hesabınızı aktive edin.
+            </Text>
           </View>
-          <Text variant="heading" align="center">Daveti Kabul Et</Text>
-          <Text variant="body" color="secondary" align="center" className="mt-2">
-            Psikologunuz sizi PsikoAl'a davet etti. Şifrenizi belirleyerek hesabınızı aktive edin.
-          </Text>
-        </View>
 
-        {/* Form */}
-        <View className="gap-4">
-          <InputField
-            label="Şifre"
-            placeholder="En az 8 karakter"
-            isSecure
-            value={password}
-            onChangeText={(v) => { setPassword(v); setPasswordError(undefined) }}
-            errorMessage={password !== passwordConfirm && passwordConfirm ? 'Şifreler eşleşmiyor' : undefined}
-            isRequired
-          />
+          {/* Form */}
+          <View className="gap-4 mt-2">
+            <InputField
+              tone="onBrand"
+              label="Şifre"
+              placeholder="En az 8 karakter"
+              isSecure
+              value={password}
+              onChangeText={(v) => { setPassword(v); setPasswordError(undefined) }}
+              errorMessage={password !== passwordConfirm && passwordConfirm ? 'Şifreler eşleşmiyor' : undefined}
+              isRequired
+            />
 
-          <InputField
-            label="Şifre Tekrar"
-            placeholder="Şifrenizi tekrar girin"
-            isSecure
-            value={passwordConfirm}
-            onChangeText={(v) => { setPasswordConfirm(v); setPasswordError(undefined) }}
-            errorMessage={passwordError}
-            isRequired
-          />
+            <InputField
+              tone="onBrand"
+              label="Şifre Tekrar"
+              placeholder="Şifrenizi tekrar girin"
+              isSecure
+              value={passwordConfirm}
+              onChangeText={(v) => { setPasswordConfirm(v); setPasswordError(undefined) }}
+              errorMessage={passwordError}
+              isRequired
+            />
 
-          {/* KVKK consent */}
-          <Pressable
-            onPress={() => { setKvkkAccepted((v) => !v); setKvkkError(undefined) }}
-            className="flex-row items-start gap-3 p-4 rounded-xl border border-neutral-200 dark:border-dark-border bg-surface-raised dark:bg-dark-card"
-          >
-            <View className={[
-              'w-5 h-5 rounded border-2 items-center justify-center mt-0.5',
-              kvkkAccepted ? 'bg-sky-500 border-sky-500' : 'border-neutral-300 dark:border-neutral-600',
-            ].join(' ')}>
-              {kvkkAccepted && <Icon name="Check" size={12} color="#FFFFFF" />}
-            </View>
-            <Text variant="caption" color="secondary" className="flex-1">
-              <Text variant="caption" color="brand">KVKK Aydınlatma Metni</Text>
-              {"'ni okudum ve kişisel verilerimin işlenmesini kabul ediyorum."}
-            </Text>
-          </Pressable>
-
-          {kvkkError && (
-            <Text variant="caption" className="text-semantic-error">
-              {kvkkError}
-            </Text>
-          )}
-
-          {apiErrorMessage && (
-            <View className="bg-semantic-error-light dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
-              <Text variant="caption" className="text-semantic-error">
-                {apiErrorMessage}
+            {/* KVKK consent — flat seçim dili */}
+            <Pressable
+              onPress={() => { setKvkkAccepted((v) => !v); setKvkkError(undefined) }}
+              className={cn(
+                'flex-row items-start gap-3 p-4 rounded-xl',
+                kvkkAccepted ? 'bg-white dark:bg-white' : 'bg-sky-600 dark:bg-sky-900 active:bg-sky-700 dark:active:bg-sky-800'
+              )}
+            >
+              <View
+                className={cn(
+                  'w-5 h-5 rounded border-2 items-center justify-center mt-0.5',
+                  kvkkAccepted ? 'bg-sky-500 border-sky-500' : 'border-sky-300 dark:border-sky-700'
+                )}
+              >
+                {kvkkAccepted && <Icon name="Check" size={12} color="#FFFFFF" />}
+              </View>
+              <Text
+                variant="caption"
+                className={cn('flex-1', kvkkAccepted ? 'text-neutral-600 dark:text-neutral-600' : 'text-sky-100')}
+              >
+                <Text
+                  variant="caption"
+                  className={kvkkAccepted ? 'text-sky-600 dark:text-sky-600 font-semibold' : 'text-white font-semibold'}
+                >
+                  KVKK Aydınlatma Metni
+                </Text>
+                {"'ni okudum ve kişisel verilerimin işlenmesini kabul ediyorum."}
               </Text>
-            </View>
-          )}
+            </Pressable>
 
-          <Button
-            label="Hesabımı Aktive Et"
-            onPress={onSubmit}
-            isLoading={isPending}
-            className="mt-2"
-          />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            {kvkkError && (
+              <Text variant="caption" className="text-red-100">{kvkkError}</Text>
+            )}
+
+            {apiErrorMessage && (
+              <View className="bg-red-50 dark:bg-red-950 rounded-xl px-4 py-3">
+                <Text variant="caption" className="text-red-600 dark:text-red-300">
+                  {apiErrorMessage}
+                </Text>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+
+        <BottomActionBar
+          actions={[{
+            label: 'Hesabımı Aktive Et',
+            onPress: onSubmit,
+            variant: 'inverse',
+            isLoading: isPending,
+            loadingLabel: 'Aktive ediliyor...',
+          }]}
+        />
+      </KeyboardAvoidingView>
+    </View>
   )
 }

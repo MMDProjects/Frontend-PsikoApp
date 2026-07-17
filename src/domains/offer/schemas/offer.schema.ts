@@ -18,6 +18,11 @@ export const OfferSchema = z.object({
     title:    z.string(),
     clientId: z.string().uuid(),
     city:     z.string().optional(),
+    client: z.object({
+      id:        z.string().uuid(),
+      fullName:  z.string(),
+      avatarUrl: z.string().url().nullable().optional(),
+    }).optional(),
     assessmentResult: z.object({
       id:              z.string(),
       score:           z.number(),

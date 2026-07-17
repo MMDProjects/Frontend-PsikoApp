@@ -7,7 +7,7 @@ import { Text } from '@/core/components/atoms/Text'
 
 import type { ReactNode } from 'react'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'link' | 'success'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'link' | 'success' | 'inverse'
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
 
 export type ButtonProps = {
@@ -32,6 +32,8 @@ const variantStyles: Record<ButtonVariant, string> = {
   accent:    'bg-accent border border-accent-border active:bg-accent-hover',
   link:      'px-0',
   success:   'bg-green-600 border border-green-200 active:bg-green-700 dark:bg-green-600 dark:border-green-200 dark:active:bg-green-700',
+  // Mavi marka zemini üzerinde solid beyaz CTA
+  inverse:   'bg-white border border-white active:bg-sky-50',
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -49,6 +51,7 @@ const labelVariantStyles: Record<ButtonVariant, string> = {
   accent:    'text-content-inverse',
   link:      'text-content-link underline',
   success:   'text-white',
+  inverse:   'text-sky-700 dark:text-sky-700',
 }
 
 const labelSizeStyles: Record<ButtonSize, 'xs' | 'sm' | 'base' | 'base'> = {
@@ -67,6 +70,7 @@ const indicatorColor: Record<ButtonVariant, string> = {
   accent:    '#FFFFFF',
   link:      '#0EA5E9',
   success:   '#FFFFFF',
+  inverse:   '#0369A1',
 }
 
 const SPRING_CONFIG = { mass: 0.5, stiffness: 400, damping: 20 }

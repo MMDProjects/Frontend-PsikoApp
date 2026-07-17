@@ -3,13 +3,20 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Avatar } from '@/core/components/atoms/Avatar'
+import { Badge } from '@/core/components/atoms/Badge'
+import { Divider } from '@/core/components/atoms/Divider'
 import { Icon } from '@/core/components/atoms/Icon'
-import { Skeleton, SkeletonGroup } from '@/core/components/atoms/Skeleton'
+import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
-import { useClientProfileQuery } from '@/domains/client'
+import { useClientProfileQuery, MATCH_STATUS_CONFIG } from '@/domains/client'
+
+const REGISTRATION_TYPE_LABELS: Record<string, string> = {
+  invited: 'Platforma davet edildi',
+  self:    'Kendi kaydoldu',
+}
 
 export default function ClientDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -18,22 +25,36 @@ export default function ClientDetailScreen() {
   const { data: client, isLoading, isError } = useClientProfileQuery(id ?? '')
   const insets = useSafeAreaInsets()
 
+  const initials = client
+    ? client.fullName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+    : ''
+
+  const statusCfg = client ? MATCH_STATUS_CONFIG[client.matchStatus] : null
+
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
       <BackButton />
 
       {isLoading && (
-        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 20, gap: 16 }}>
-          <View className="bg-white dark:bg-dark-card border border-neutral-100 dark:border-dark-border rounded-2xl p-5 flex-row items-center gap-4">
-            <Skeleton variant="circle" height={56} width={56} />
-            <SkeletonGroup className="flex-1" gap="sm">
-              <Skeleton variant="line" width="50%" height={16} />
-              <Skeleton variant="line" width="65%" height={14} />
-              <Skeleton variant="line" width="40%" height={14} />
-            </SkeletonGroup>
+        <View style={{ paddingTop: insets.top + 8 }}>
+          <View className="pt-2 pb-3 items-center">
+            <Skeleton variant="line" width="30%" height={14} />
           </View>
-          <Skeleton variant="rect" height={80} borderRadius="xl" />
-        </ScrollView>
+          <View className="px-4 py-5 gap-4">
+            <View className="flex-row items-center gap-4">
+              <Skeleton variant="circle" width={56} height={56} />
+              <View className="flex-1 gap-2">
+                <Skeleton variant="line" width="50%" height={18} />
+                <Skeleton variant="line" width="65%" height={14} />
+              </View>
+            </View>
+          </View>
+          <Divider spacing="none" className="mx-4" />
+          <View className="px-4 py-5 gap-3">
+            <Skeleton variant="line" width="25%" height={11} />
+            <Skeleton variant="rect" width={100} height={28} borderRadius="full" />
+          </View>
+        </View>
       )}
 
       {isError && (
@@ -48,37 +69,79 @@ export default function ClientDetailScreen() {
 
       {client && (
         <ScrollView
-          contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 40, gap: 16 }}
+          contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 48 }}
           showsVerticalScrollIndicator={false}
         >
           <ScreenTitle title="Danışan Profili" />
-          <View className="bg-white dark:bg-dark-card border border-neutral-100 dark:border-dark-border rounded-2xl p-5 gap-4">
-            <View className="flex-row items-center gap-4">
-              <Avatar
-                size="lg"
-                initials={client.fullName.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
-              />
-              <View className="flex-1 gap-1">
-                <Text variant="subheading">{client.fullName}</Text>
-                {client.email && (
-                  <Text variant="caption" color="secondary">{client.email}</Text>
-                )}
-                {client.phone && (
-                  <Text variant="caption" color="secondary">{client.phone}</Text>
-                )}
+
+          {/* ── Section 1: Kimlik ── */}
+          <View className="px-4 py-5 gap-4">
+            <View className="flex-row items-center gap-3">
+              <Avatar size="lg" initials={initials} />
+              <View className="flex-1">
+                <Text variant="subheading" className="leading-tight">{client.fullName}</Text>
               </View>
+            </View>
+
+            <View className="flex-row flex-wrap items-center gap-3">
+              {client.email ? (
+                <View className="flex-row items-center gap-1.5 shrink">
+                  <Icon name="Mail" size={13} color="#A3A3A3" />
+                  <Text variant="caption" color="tertiary" numberOfLines={1} className="shrink">{client.email}</Text>
+                </View>
+              ) : null}
+              {client.phone ? (
+                <View className="flex-row items-center gap-1.5 shrink-0">
+                  <Icon name="Phone" size={13} color="#A3A3A3" />
+                  <Text variant="caption" color="tertiary">{client.phone}</Text>
+                </View>
+              ) : null}
             </View>
           </View>
 
-          {client.notes && (
-            <View className="bg-white dark:bg-dark-card border border-neutral-100 dark:border-dark-border rounded-2xl p-5 gap-2">
-              <View className="flex-row items-center gap-2">
-                <Icon name="FileText" size={16} color="#737373" />
-                <Text variant="label" className="font-semibold">Notlar</Text>
-              </View>
-              <Text variant="body" color="secondary">{client.notes}</Text>
+          {/* ── Section 2: Eşleşme Durumu ── */}
+          <Divider spacing="none" className="mx-4" />
+          <View className="px-4 py-5 gap-3">
+            <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
+              Eşleşme Durumu
+            </Text>
+            <View className="flex-row items-center gap-2">
+              {statusCfg && <Badge label={statusCfg.label} variant={statusCfg.variant} />}
+              {client.matchCode ? (
+                <Text variant="caption" color="tertiary">Kod: {client.matchCode}</Text>
+              ) : null}
             </View>
-          )}
+            <Text variant="caption" color="secondary">
+              {REGISTRATION_TYPE_LABELS[client.registrationType] ?? client.registrationType}
+            </Text>
+          </View>
+
+          {/* ── Section 3: Notlar (varsa) ── */}
+          {client.notes ? (
+            <>
+              <Divider spacing="none" className="mx-4" />
+              <View className="px-4 py-5 gap-2">
+                <View className="flex-row items-center gap-1.5">
+                  <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
+                    Notlar
+                  </Text>
+                  <Icon name="FileText" size={12} color="#A3A3A3" />
+                </View>
+                <Text variant="body" color="secondary" className="leading-relaxed">{client.notes}</Text>
+              </View>
+            </>
+          ) : null}
+
+          {/* ── Section 4: Kayıt Bilgisi ── */}
+          <Divider spacing="none" className="mx-4" />
+          <View className="px-4 py-5 gap-1">
+            <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
+              Kayıt Bilgisi
+            </Text>
+            <Text variant="caption" color="secondary">
+              {new Date(client.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} tarihinde kayıt oldu.
+            </Text>
+          </View>
         </ScrollView>
       )}
     </View>

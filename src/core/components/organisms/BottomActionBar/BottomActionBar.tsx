@@ -6,7 +6,7 @@ import { Text } from '@/core/components/atoms/Text'
 
 import type { ReactNode } from 'react'
 
-export type BottomBarActionVariant = 'primary' | 'ghost' | 'danger'
+export type BottomBarActionVariant = 'primary' | 'ghost' | 'danger' | 'inverse' | 'inverseGhost'
 
 export type BottomBarAction = {
   label: string
@@ -37,6 +37,15 @@ const variantStyles: Record<BottomBarActionVariant, { button: string; text: stri
   danger: {
     button: 'bg-red-50 border border-red-200 dark:bg-red-950 dark:border-red-900 active:bg-red-100 dark:active:bg-red-900',
     text:   'text-red-600 dark:text-red-400 font-medium',
+  },
+  // Mavi marka zemini üzerinde: solid beyaz CTA + koyu sky ikincil aksiyon (flat)
+  inverse: {
+    button: 'bg-white active:bg-sky-50',
+    text:   'text-sky-700 dark:text-sky-700 font-semibold',
+  },
+  inverseGhost: {
+    button: 'bg-sky-600 dark:bg-sky-900 active:bg-sky-700 dark:active:bg-sky-800',
+    text:   'text-white font-medium',
   },
 }
 

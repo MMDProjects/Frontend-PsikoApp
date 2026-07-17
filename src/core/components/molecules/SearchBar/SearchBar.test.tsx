@@ -58,6 +58,6 @@ describe('SearchBar', () => {
 
   it('uses default placeholder when none provided', () => {
     const { getByPlaceholderText } = render(<SearchBar value="" onChangeText={jest.fn()} />)
-    expect(getByPlaceholderText('Search…')).toBeTruthy()
+    expect(getByPlaceholderText('Ara...')).toBeTruthy()
   })
 })

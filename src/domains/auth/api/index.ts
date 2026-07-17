@@ -1,3 +1,6 @@
 export { useLoginMutation } from './useLoginMutation'
 export { useLogoutMutation } from './useLogoutMutation'
 export { useRegisterMutation } from './useRegisterMutation'
+export { useUpdateProfileMutation } from './useUpdateProfileMutation'
+export { useChangePasswordMutation } from './useChangePasswordMutation'
+export { useForgotPasswordMutation } from './useForgotPasswordMutation'

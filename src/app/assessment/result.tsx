@@ -3,10 +3,11 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Button } from '@/core/components/atoms/Button'
-import { Icon } from '@/core/components/atoms/Icon'
-import { Text } from '@/core/components/atoms/Text'
+import { DecorCircles } from '@/core/components/atoms/DecorCircles'
+import { BackButton } from '@/core/components/molecules/BackButton'
+import { EmptyState } from '@/core/components/molecules/EmptyState'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
+import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
 import { assessmentKeys, AssessmentResultCard } from '@/domains/assessment'
 
 import type { AssessmentResult } from '@/domains/assessment'
@@ -19,30 +20,45 @@ export default function AssessmentResultScreen() {
 
   const result = queryClient.getQueryData<AssessmentResult>(assessmentKeys.result(resultId ?? ''))
 
+  const bottomBarHeight = 56 + insets.bottom
+
   if (!result) {
     return (
-      <View className="flex-1 items-center justify-center bg-surface-base dark:bg-dark-bg px-5 gap-4">
-        <Icon name="AlertCircle" size={48} color="#737373" />
-        <Text variant="heading" className="text-center">Sonuç bulunamadı</Text>
-        <Button label="Teste Dön" onPress={() => router.replace('/assessment')} variant="ghost" />
+      <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
+        <DecorCircles />
+        <BackButton />
+        <EmptyState
+          icon="AlertCircle"
+          title="Sonuç bulunamadı"
+          ctaLabel="Teste Dön"
+          onCta={() => router.replace('/assessment')}
+        />
       </View>
     )
   }
 
   return (
-    <ScrollView
-      className="flex-1 bg-surface-base dark:bg-dark-bg"
-      contentContainerClassName="px-5 pb-12"
-      contentContainerStyle={{ paddingTop: insets.top + 8 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <ScreenTitle title="Değerlendirme Tamamlandı" className="mb-3" />
+    <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
+      <DecorCircles />
 
-      <AssessmentResultCard
-        result={result}
-        onFindExpert={() => router.push('/(tabs)/explore')}
-        onRetake={() => router.replace('/assessment')}
+      <BackButton />
+
+      <ScreenTitle title="Değerlendirme Tamamlandı" topInset titleClassName="text-white" />
+
+      <ScrollView
+        contentContainerClassName="px-5 gap-5"
+        contentContainerStyle={{ paddingBottom: bottomBarHeight + 16 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <AssessmentResultCard result={result} />
+      </ScrollView>
+
+      <BottomActionBar
+        actions={[
+          { label: 'Testi Tekrar Yap', onPress: () => router.replace('/assessment'), variant: 'inverseGhost' },
+          { label: 'Destek Al', onPress: () => router.push('/listing/new'), variant: 'inverse' },
+        ]}
       />
-    </ScrollView>
+    </View>
   )
 }

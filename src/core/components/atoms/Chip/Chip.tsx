@@ -10,7 +10,7 @@ import type { SvgProps } from 'react-native-svg'
 type IconProps = Pick<SvgProps, 'stroke'> & { size?: number }
 const XIcon = X as ComponentType<IconProps>
 
-export type ChipVariant = 'filter' | 'input' | 'tag' | 'session' | 'price'
+export type ChipVariant = 'filter' | 'input' | 'tag' | 'session' | 'price' | 'onBrand'
 export type ChipSize = 'sm' | 'md'
 
 export type ChipProps = {
@@ -30,6 +30,8 @@ const variantStyles: Record<ChipVariant, { base: string; selectedSm: string; sel
   tag:     { base: 'bg-neutral-200 dark:bg-neutral-800', selectedSm: 'bg-tag-muted/60 dark:bg-tag/20',                                                           selectedMd: 'bg-tag-muted/60 dark:bg-tag/20'                                                          },
   session: { base: 'bg-neutral-200 dark:bg-neutral-800', selectedSm: 'bg-session-muted/60 dark:bg-session/20',                                                   selectedMd: 'bg-session-muted/60 dark:bg-session/20'                                                  },
   price:   { base: 'bg-neutral-200 dark:bg-neutral-800', selectedSm: 'bg-price-muted/60 border border-price-muted dark:bg-price/20 dark:border-price/30',        selectedMd: 'bg-price-muted/60 border border-price-muted dark:bg-price/20 dark:border-price/30'       },
+  // Mavi marka zemini üzerinde flat: seçili = solid beyaz, seçili değil = koyu sky tonu
+  onBrand: { base: 'bg-sky-600 dark:bg-sky-900',           selectedSm: 'bg-white dark:bg-white',                                                                  selectedMd: 'bg-white dark:bg-white'                                                                  },
 }
 
 const selectedTextMap: Record<ChipVariant, string> = {
@@ -38,6 +40,7 @@ const selectedTextMap: Record<ChipVariant, string> = {
   tag:     'text-tag-text dark:text-tag-border',
   session: 'text-session-text dark:text-session-border',
   price:   'text-price-text dark:text-price-border',
+  onBrand: 'text-sky-700 dark:text-sky-700',
 }
 
 const sizeStyles: Record<ChipSize, { container: string; textVariant: 'caption' | 'label'; xSize: number }> = {
@@ -72,7 +75,9 @@ export function Chip({
 
   const textClass = isSelected
     ? `${selectedTextMap[variant]} font-medium`
-    : 'text-neutral-700 dark:text-neutral-400 font-medium'
+    : variant === 'onBrand'
+      ? 'text-white font-medium'
+      : 'text-neutral-700 dark:text-neutral-400 font-medium'
   const xStroke = '#0369A1' // sky-700 (filter X butonu için)
 
   const content = (

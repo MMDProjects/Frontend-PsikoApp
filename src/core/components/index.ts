@@ -8,6 +8,7 @@ export { Avatar, AvatarGroup } from './atoms/Avatar'
 export { Icon } from './atoms/Icon'
 export { Divider } from './atoms/Divider'
 export { Skeleton, SkeletonGroup } from './atoms/Skeleton'
+export { Switch } from './atoms/Switch'
 
 export type { TextProps, TextVariant, TextWeight, TextColor, TextAlign } from './atoms/Text'
 export type { ButtonProps, ButtonVariant, ButtonSize } from './atoms/Button'
@@ -28,6 +29,7 @@ export type {
   SkeletonVariant,
   SkeletonBorderRadius,
 } from './atoms/Skeleton'
+export type { SwitchProps } from './atoms/Switch'
 
 // molecules
 export { IconButton } from './molecules/IconButton'

@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 
+import { DecorCircles } from '@/core/components/atoms/DecorCircles'
 import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
@@ -11,6 +13,9 @@ import type { CreateListingRequest } from '@/domains/listing'
 export default function NewListingScreen() {
   const router = useRouter()
   const { spec } = useLocalSearchParams<{ spec?: string }>()
+
+  // Form adımı — DecorCircles her adımda animasyonla yer değiştirir
+  const [step, setStep] = useState(1)
 
   const { mutate: createListing, isPending, error } = useCreateListingMutation()
 
@@ -25,21 +30,26 @@ export default function NewListingScreen() {
   const apiError = error instanceof Error ? error.message : undefined
 
   return (
-    <View className="flex-1 bg-surface-base dark:bg-dark-bg">
-      <BackButton />
+    <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
+      {/* Dekoratif zemin daireleri — hero dili, adım geçişlerinde süzülerek hareket eder */}
+      <DecorCircles phase={step} />
 
-      {/* Sayfa başlığı — sabit, form'un üstünde */}
-      <ScreenTitle title="İlan Oluştur" topInset />
+      {/* Tek geri butonu — form içi geri de buradan yönetilir (adım > 1 ise adım geri) */}
+      <BackButton onPress={() => (step > 1 ? setStep(step - 1) : router.back())} />
+
+      {/* Sayfa başlığı — mavi zeminde beyaz */}
+      <ScreenTitle title="İlan Oluştur" topInset titleClassName="text-white" />
 
       {apiError && (
-        <View className="mx-4 mb-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
-          <Text variant="caption" color="error">{apiError}</Text>
+        <View className="mx-4 mb-2 bg-red-50 dark:bg-red-950 rounded-xl px-4 py-3">
+          <Text variant="caption" className="text-red-600 dark:text-red-300">{apiError}</Text>
         </View>
       )}
 
       <CreateListingForm
+        step={step}
+        onStepChange={setStep}
         onSubmit={handleSubmit}
-        onCancel={() => router.back()}
         isLoading={isPending}
         initialSpecialization={spec ?? undefined}
       />

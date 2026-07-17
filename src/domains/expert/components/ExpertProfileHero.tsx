@@ -5,6 +5,7 @@ import { Text } from '@/core/components/atoms/Text'
 import { Chip } from '@/core/components/atoms/Chip'
 import { RatingRow } from '@/core/components/molecules/RatingRow'
 import { cn } from '@/core/utils/cn'
+import { getFullName, getInitials } from '@/core/utils/personName'
 
 import type { Expert } from '../types/expert.types'
 
@@ -14,12 +15,7 @@ export type ExpertProfileHeroProps = {
 }
 
 export function ExpertProfileHero({ expert, className }: ExpertProfileHeroProps) {
-  const initials = expert.name
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
+  const initials = getInitials(expert)
 
   return (
     <View className={cn('bg-white dark:bg-dark-card border border-neutral-100 dark:border-dark-border rounded-2xl p-5 gap-4', className)}>
@@ -33,7 +29,7 @@ export function ExpertProfileHero({ expert, className }: ExpertProfileHeroProps)
         />
 
         <View className="flex-1 gap-1">
-          <Text variant="subheading">{expert.name}</Text>
+          <Text variant="subheading">{getFullName(expert)}</Text>
           <Text variant="body" color="secondary">{expert.title}</Text>
 
           <View className="flex-row items-center gap-2 mt-1">
