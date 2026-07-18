@@ -32,7 +32,6 @@ const variantStyles: Record<ButtonVariant, string> = {
   accent:    'bg-accent border border-accent-border active:bg-accent-hover',
   link:      'px-0',
   success:   'bg-green-600 border border-green-200 active:bg-green-700 dark:bg-green-600 dark:border-green-200 dark:active:bg-green-700',
-  // Mavi marka zemini üzerinde solid beyaz CTA
   inverse:   'bg-white border border-white active:bg-sky-50',
 }
 
@@ -61,7 +60,6 @@ const labelSizeStyles: Record<ButtonSize, 'xs' | 'sm' | 'base' | 'base'> = {
   lg: 'base',
 }
 
-// ActivityIndicator requires a string color value, CSS variables are not supported
 const indicatorColor: Record<ButtonVariant, string> = {
   primary:   '#FFFFFF',
   secondary: '#0EA5E9',
@@ -90,7 +88,6 @@ export function Button({
 }: ButtonProps) {
   const scale = useSharedValue(1)
 
-  // Animated style for press scale — style prop required for Reanimated transform
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }))
@@ -116,7 +113,6 @@ export function Button({
 
   return (
     <Animated.View
-      // style prop required: Reanimated animated transform + dynamic width layout
       style={[
         animatedStyle,
         fullWidth

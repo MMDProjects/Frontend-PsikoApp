@@ -2,6 +2,7 @@ import { ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Badge } from '@/core/components/atoms/Badge'
 import { Divider } from '@/core/components/atoms/Divider'
@@ -11,6 +12,8 @@ import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
+import { formatDate } from '@/core/utils/formatDate'
+import { useRefresh } from '@/core/hooks'
 import { useClientProfileQuery, MATCH_STATUS_CONFIG } from '@/domains/client'
 
 const REGISTRATION_TYPE_LABELS: Record<string, string> = {
@@ -22,12 +25,12 @@ export default function ClientDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
 
-  const { data: client, isLoading, isError } = useClientProfileQuery(id ?? '')
+  const clientQuery = useClientProfileQuery(id ?? '')
+  const { data: client, isLoading, isError } = clientQuery
+  const { isRefreshing, onRefresh } = useRefresh(clientQuery)
   const insets = useSafeAreaInsets()
 
-  const initials = client
-    ? client.fullName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-    : ''
+  const initials = client?.initials ?? ''
 
   const statusCfg = client ? MATCH_STATUS_CONFIG[client.matchStatus] : null
 
@@ -71,10 +74,10 @@ export default function ClientDetailScreen() {
         <ScrollView
           contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 48 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
         >
           <ScreenTitle title="Danışan Profili" />
 
-          {/* ── Section 1: Kimlik ── */}
           <View className="px-4 py-5 gap-4">
             <View className="flex-row items-center gap-3">
               <Avatar size="lg" initials={initials} />
@@ -99,7 +102,6 @@ export default function ClientDetailScreen() {
             </View>
           </View>
 
-          {/* ── Section 2: Eşleşme Durumu ── */}
           <Divider spacing="none" className="mx-4" />
           <View className="px-4 py-5 gap-3">
             <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
@@ -116,7 +118,6 @@ export default function ClientDetailScreen() {
             </Text>
           </View>
 
-          {/* ── Section 3: Notlar (varsa) ── */}
           {client.notes ? (
             <>
               <Divider spacing="none" className="mx-4" />
@@ -132,14 +133,13 @@ export default function ClientDetailScreen() {
             </>
           ) : null}
 
-          {/* ── Section 4: Kayıt Bilgisi ── */}
           <Divider spacing="none" className="mx-4" />
           <View className="px-4 py-5 gap-1">
             <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
               Kayıt Bilgisi
             </Text>
             <Text variant="caption" color="secondary">
-              {new Date(client.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} tarihinde kayıt oldu.
+              {formatDate(client.createdAt, 'long')} tarihinde kayıt oldu.
             </Text>
           </View>
         </ScrollView>

@@ -4,6 +4,7 @@ import { Avatar } from '@/core/components/atoms/Avatar'
 import { Text } from '@/core/components/atoms/Text'
 import { Chip } from '@/core/components/atoms/Chip'
 import { RatingRow } from '@/core/components/molecules/RatingRow'
+import { StatPill } from '@/core/components/molecules/StatPill'
 import { cn } from '@/core/utils/cn'
 import { getFullName, getInitials } from '@/core/utils/personName'
 
@@ -15,11 +16,10 @@ export type ExpertProfileHeroProps = {
 }
 
 export function ExpertProfileHero({ expert, className }: ExpertProfileHeroProps) {
-  const initials = getInitials(expert)
+  const initials = expert.initials ?? getInitials(expert)
 
   return (
     <View className={cn('bg-white dark:bg-dark-card border border-neutral-100 dark:border-dark-border rounded-2xl p-5 gap-4', className)}>
-      {/* Avatar + isim + ünvan */}
       <View className="flex-row items-center gap-4">
         <Avatar
           size="xl"
@@ -42,7 +42,6 @@ export function ExpertProfileHero({ expert, className }: ExpertProfileHeroProps)
         </View>
       </View>
 
-      {/* Uzmanlık chip'leri */}
       {expert.specializations.length > 0 && (
         <View className="flex-row flex-wrap gap-2">
           {expert.specializations.slice(0, 5).map((spec) => (
@@ -57,7 +56,6 @@ export function ExpertProfileHero({ expert, className }: ExpertProfileHeroProps)
         </View>
       )}
 
-      {/* İstatistik şeridi */}
       <View className="flex-row border-t border-neutral-100 dark:border-dark-border pt-4 gap-0">
         <StatPill value={`${expert.experienceYears} yıl`} label="Deneyim" />
         <View className="w-px bg-neutral-100 dark:bg-dark-border mx-3" />
@@ -65,17 +63,6 @@ export function ExpertProfileHero({ expert, className }: ExpertProfileHeroProps)
         <View className="w-px bg-neutral-100 dark:bg-dark-border mx-3" />
         <StatPill value={expert.rating.toFixed(1)} label="Puan" />
       </View>
-    </View>
-  )
-}
-
-type StatPillProps = { value: string; label: string }
-
-function StatPill({ value, label }: StatPillProps) {
-  return (
-    <View className="flex-1 items-center gap-0.5">
-      <Text variant="subheading" className="text-sky-600">{value}</Text>
-      <Text variant="caption" color="tertiary">{label}</Text>
     </View>
   )
 }

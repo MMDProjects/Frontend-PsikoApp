@@ -15,7 +15,7 @@ export function useRejectOfferMutation() {
     },
     onSuccess: (_offer, offerId) => {
       queryClient.invalidateQueries({ queryKey: offerKeys.detail(offerId) })
-      queryClient.invalidateQueries({ queryKey: offerKeys.forListing })
+      queryClient.invalidateQueries({ queryKey: offerKeys.listings() })
     },
   })
 }

@@ -5,8 +5,6 @@ import { Text } from '@/core/components/atoms/Text'
 
 import type { ReactNode } from 'react'
 
-// PsikoAl variant spec: sky | sage | warning | error | neutral
-// + success/info semantic aliases kept for programmatic use
 export type BadgeVariant = 'sky' | 'sage' | 'warning' | 'error' | 'neutral' | 'success' | 'info'
 export type BadgeSize = 'sm' | 'md'
 

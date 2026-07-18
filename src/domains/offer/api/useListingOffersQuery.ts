@@ -18,7 +18,6 @@ export function useListingOffersQuery(listingId: string) {
       const raw = await get(`/listings/${listingId}/offers`)
       const result = ListingOffersResponseSchema.safeParse(raw)
       if (!result.success) {
-        console.error('[listing/offers] Zod parse FAILED:', JSON.stringify(result.error.issues))
         throw result.error
       }
       return result.data

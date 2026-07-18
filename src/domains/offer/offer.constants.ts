@@ -4,10 +4,11 @@ import type { OfferStatus } from './types/offer.types'
 export const offerKeys = {
   all:     ['offers'] as const,
   lists:   () => [...offerKeys.all, 'list'] as const,
-  my:      () => [...offerKeys.all, 'my'] as const,
+  my:      (status?: string) => [...offerKeys.all, 'my', status ?? 'all'] as const,
   details: () => [...offerKeys.all, 'detail'] as const,
   detail:  (id: string) => [...offerKeys.details(), id] as const,
-  forListing: (listingId: string) => [...offerKeys.all, 'listing', listingId] as const,
+  listings:   () => [...offerKeys.all, 'listing'] as const,
+  forListing: (listingId: string) => [...offerKeys.listings(), listingId] as const,
 } as const
 
 export const OFFER_STALE_TIME = 60 * 1000

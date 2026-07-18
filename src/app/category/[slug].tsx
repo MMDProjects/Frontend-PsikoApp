@@ -2,6 +2,7 @@ import { Pressable, ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Divider } from '@/core/components/atoms/Divider'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
@@ -10,6 +11,7 @@ import { BackButton } from '@/core/components/molecules/BackButton'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
+import { useRefresh } from '@/core/hooks'
 import { useAssessmentListQuery } from '@/domains/assessment'
 import { useCategoryDetailQuery } from '@/domains/category'
 import { useBlogListQuery, BlogCard } from '@/domains/blog'
@@ -21,17 +23,21 @@ export default function CategoryDetailScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
 
-  const { data: category, isLoading: categoryLoading, isError: categoryError } = useCategoryDetailQuery(slug ?? '')
+  const categoryQuery = useCategoryDetailQuery(slug ?? '')
+  const { data: category, isLoading: categoryLoading, isError: categoryError } = categoryQuery
 
-  const { data: assessments } = useAssessmentListQuery(category?.assessmentCategory ?? undefined)
-  const { data: blogData, isLoading: blogsLoading } = useBlogListQuery(category?.blogTag)
-  const blogs = blogData?.data ?? []
+  const assessmentsQuery = useAssessmentListQuery(category?.assessmentCategory ?? undefined)
+  const assessments = assessmentsQuery.data
+  const blogsQuery = useBlogListQuery({ category: category?.blogTag })
+  const { isLoading: blogsLoading } = blogsQuery
+  const blogs = blogsQuery.data?.data ?? []
+
+  const { isRefreshing, onRefresh } = useRefresh(categoryQuery, assessmentsQuery, blogsQuery)
 
   const bottomBarHeight = 56 + insets.bottom
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
-      {/* Sabit geri butonu — scroll'dan etkilenmez */}
       <BackButton />
 
       {categoryLoading && (
@@ -63,10 +69,10 @@ export default function CategoryDetailScreen() {
           <ScrollView
             contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: bottomBarHeight + 16 }}
             showsVerticalScrollIndicator={false}
+            refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
           >
             <ScreenTitle title="Destek Alın" />
 
-            {/* ── Section 1: İkon + kategori adı + özet + istatistikler ── */}
             <View className="px-4 py-5 gap-4">
               <View className="flex-row items-center gap-3">
                 <View className="w-14 h-14 rounded-full items-center justify-center bg-sky-50 dark:bg-sky-950">
@@ -91,7 +97,6 @@ export default function CategoryDetailScreen() {
               </View>
             </View>
 
-            {/* ── Section 2: Öğretici alan ── */}
             <Divider spacing="none" className="mx-4" />
             <View className="px-4 py-5 gap-2">
               <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
@@ -102,8 +107,7 @@ export default function CategoryDetailScreen() {
               </Text>
             </View>
 
-            {/* ── Section 3: İlgili Testler ── */}
-            {(assessments?.length ?? 0) > 0 && (
+            {assessments && assessments.length > 0 && (
               <>
                 <Divider spacing="none" className="mx-4" />
                 <View className="pt-5 pb-2 px-4">
@@ -111,7 +115,7 @@ export default function CategoryDetailScreen() {
                     İlgili Testler
                   </Text>
                 </View>
-                {assessments!.map((a, i) => (
+                {assessments.map((a, i) => (
                   <View key={a.id}>
                     {i > 0 && <Divider spacing="none" className="mx-4" />}
                     <Pressable
@@ -131,7 +135,6 @@ export default function CategoryDetailScreen() {
               </>
             )}
 
-            {/* ── Section 4: İlgili Bloglar ── */}
             <Divider spacing="none" className="mx-4" />
             <View className="pt-5 pb-2 px-4">
               <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">

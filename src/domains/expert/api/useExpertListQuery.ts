@@ -24,8 +24,6 @@ export function useExpertListQuery(filters: ExpertListFilters = {}) {
       const raw = await get('/experts', { params: filters })
       const result = ExpertListResponseSchema.safeParse(raw)
       if (!result.success) {
-        console.error('[experts] Zod parse FAILED:', JSON.stringify(result.error.issues))
-        console.error('[experts] raw response:', JSON.stringify(raw).slice(0, 500))
         throw result.error
       }
       return result.data

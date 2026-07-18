@@ -1,10 +1,5 @@
 import { useColorScheme } from 'nativewind'
 
-// Kaynak: global.css — :root (light) ve [data-theme="dark"] blokları, birebir aynı değerler.
-// react-native-css-interop 0.1.x var() çözemediği için className kabul etmeyen prop'larda
-// (Icon color, ActivityIndicator, placeholderTextColor, trackColor vb.) bu token'lar kullanılır.
-// global.css'te bir renk değişirse burası da güncellenmelidir — başka yerde hex yazılmaz.
-
 const light = {
   brand:        '#0EA5E9',
   brandHover:   '#0284C7',
@@ -60,7 +55,7 @@ const light = {
   sessionMuted:  '#FDE68A',
   sessionBorder: '#FCD34D',
   sessionText:   '#B45309',
-} as const
+}
 
 const dark: typeof light = {
   brand:        '#38BDF8',
@@ -117,13 +112,12 @@ const dark: typeof light = {
   sessionMuted:  '#4C1D95',
   sessionBorder: '#7C3AED',
   sessionText:   '#DDD6FE',
-} as const
+}
 
 export const themeColors = { light, dark } as const
 
 export type ThemeColors = typeof light
 
-/** Aktif temaya (nativewind) göre global.css token renklerini döndürür. */
 export function useThemeColors(): ThemeColors {
   const { colorScheme } = useColorScheme()
   return colorScheme === 'dark' ? themeColors.dark : themeColors.light

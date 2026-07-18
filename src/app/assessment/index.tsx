@@ -65,10 +65,8 @@ export default function AssessmentScreen() {
 
   return (
     <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
-      {/* Dekoratif daireler — her soruda süzülerek yer değiştirir */}
       <DecorCircles phase={started ? currentIndex + 1 : 0} />
 
-      {/* Tek geri butonu: sorudayken önceki soruya, ilk sorudaysa girişe döner */}
       <BackButton onPress={handleBack} />
 
       <ScreenTitle title="Değerlendirme Testi" topInset titleClassName="text-white" />
@@ -91,7 +89,6 @@ export default function AssessmentScreen() {
         />
       ) : !started ? (
         <>
-          {/* ── Giriş ── */}
           <ScrollView
             contentContainerClassName="flex-grow justify-center px-5 gap-6"
             contentContainerStyle={{ paddingBottom: bottomBarHeight + 16 }}
@@ -137,7 +134,6 @@ export default function AssessmentScreen() {
         </>
       ) : (
         <>
-          {/* ── Sorular ── */}
           <View className="px-5 pt-2 pb-4">
             <StepProgress
               current={currentIndex + 1}

@@ -2,6 +2,7 @@ import { ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Chip } from '@/core/components/atoms/Chip'
 import { Divider } from '@/core/components/atoms/Divider'
@@ -11,7 +12,9 @@ import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
-import { RESULT_LEVEL_CONFIG } from '@/domains/assessment'
+import { useRefresh } from '@/core/hooks'
+import { formatDate } from '@/core/utils/formatDate'
+import { AssessmentResultSummary } from '@/domains/assessment'
 import { SESSION_TYPE_LABELS } from '@/domains/listing'
 import { useMatchDetailQuery, MATCH_STATUS_CONFIG } from '@/domains/match'
 import { OFFER_STATUS_CONFIG } from '@/domains/offer'
@@ -20,19 +23,15 @@ export default function MatchDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
 
-  const { data: match, isLoading, isError } = useMatchDetailQuery(id ?? '')
+  const matchQuery = useMatchDetailQuery(id ?? '')
+  const { data: match, isLoading, isError } = matchQuery
+  const { isRefreshing, onRefresh } = useRefresh(matchQuery)
   const insets = useSafeAreaInsets()
 
   const statusCfg      = match ? MATCH_STATUS_CONFIG[match.status] : null
-  const clientInitials = match
-    ? match.client.fullName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-    : ''
-  const expertInitials = match?.expert
-    ? match.expert.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
-    : ''
-  const matchDate = match
-    ? new Date(match.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
-    : ''
+  const clientInitials = match?.client.initials ?? ''
+  const expertInitials = match?.expert?.initials ?? ''
+  const matchDate = match ? formatDate(match.createdAt, 'long') : ''
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
@@ -75,11 +74,13 @@ export default function MatchDetailScreen() {
       )}
 
       {!isLoading && !isError && match && (
-        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 48 }} showsVerticalScrollIndicator={false}>
-          {/* Sayfa başlığı */}
+        <ScrollView
+          contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 48 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
+        >
           <ScreenTitle title="Eşleşme Detayı" />
 
-          {/* ── Section 1: Danışan + İlan başlığı + Meta + İletişim ── */}
           <View className="px-4 py-5 gap-4">
             <View className="flex-row items-center gap-3">
               <Avatar size="lg" initials={clientInitials} />
@@ -94,7 +95,6 @@ export default function MatchDetailScreen() {
               <Text variant="subheading" className="leading-snug">{match.listing.title}</Text>
             ) : null}
 
-            {/* Meta: status + konum + email + telefon — yan yana, satır sonu flex-wrap */}
             <View className="flex-row flex-wrap items-center gap-3">
               {statusCfg && (
                 <View className="flex-row items-center gap-1.5 shrink-0">
@@ -123,7 +123,6 @@ export default function MatchDetailScreen() {
             </View>
           </View>
 
-          {/* ── Section 2: İlan detayı (listing detail Section 2 birebir) ─── */}
           {match.listing && (
             <>
               <Divider spacing="none" className="mx-4" />
@@ -171,7 +170,7 @@ export default function MatchDetailScreen() {
                   </Text>
                   <View className="flex-row">
                     <Chip
-                      label={`₺${match.listing.budgetMin.toLocaleString('tr-TR')} – ₺${match.listing.budgetMax.toLocaleString('tr-TR')}`}
+                      label={match.listing.budgetLabel ?? ''}
                       variant="tag"
                       isSelected
                     />
@@ -181,48 +180,13 @@ export default function MatchDetailScreen() {
             </>
           )}
 
-          {/* ── Section 2b: Test Sonucu (varsa) ─────────────────────── */}
-          {match.listing?.assessmentResult ? (() => {
-            const r = match.listing!.assessmentResult!
-            const cfg = RESULT_LEVEL_CONFIG[r.level]
-            const headerBg = r.level === 'low' ? '#F0FDF4' : r.level === 'moderate' ? '#FFFBEB' : '#FEF2F2'
-            return (
-              <>
-                <Divider spacing="none" className="mx-4" />
-                <View className="px-4 py-5 gap-3">
-                  <View className="flex-row items-center gap-1.5">
-                    <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
-                      Test Sonucu
-                    </Text>
-                    <Icon name="Paperclip" size={12} color="#A3A3A3" />
-                  </View>
-                  <View className="rounded-xl overflow-hidden border border-neutral-200">
-                    <View className="px-4 py-3 flex-row items-center justify-between" style={{ backgroundColor: headerBg }}>
-                      <View className="flex-row items-center gap-2">
-                        <Icon name="ClipboardList" size={14} color={cfg.color} />
-                        <Text variant="label" className="font-semibold" style={{ color: cfg.color }}>
-                          {r.assessmentTitle}
-                        </Text>
-                      </View>
-                      <View className="flex-row items-center gap-2">
-                        <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: cfg.color + '20' }}>
-                          <Text variant="caption" className="font-semibold" style={{ color: cfg.color }}>
-                            {cfg.label}
-                          </Text>
-                        </View>
-                        <Text variant="caption" color="tertiary">Puan: {r.score}</Text>
-                      </View>
-                    </View>
-                    <View className="px-4 pt-3 pb-3 bg-white">
-                      <Text variant="caption" color="secondary" className="leading-relaxed">{r.summary}</Text>
-                    </View>
-                  </View>
-                </View>
-              </>
-            )
-          })() : null}
+          {match.listing?.assessmentResult ? (
+            <>
+              <Divider spacing="none" className="mx-4" />
+              <AssessmentResultSummary result={match.listing.assessmentResult} />
+            </>
+          ) : null}
 
-          {/* ── Section 3: Danışan Hakkında ────────────────────────── */}
           <Divider spacing="none" className="mx-4" />
           <View className="px-4 py-5 gap-3">
             <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
@@ -235,7 +199,7 @@ export default function MatchDetailScreen() {
             <View className="gap-1">
               {match.client.createdAt ? (
                 <Text variant="caption" color="secondary">
-                  {new Date(match.client.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} tarihinde kayıt oldu.
+                  {formatDate(match.client.createdAt, 'long')} tarihinde kayıt oldu.
                 </Text>
               ) : null}
               <Text variant="caption" color="secondary">
@@ -244,7 +208,6 @@ export default function MatchDetailScreen() {
             </View>
           </View>
 
-          {/* ── Section 4: Teklif Özeti (conditional) ──────────────────── */}
           {match.offer && (
             <>
               <Divider spacing="none" className="mx-4" />
@@ -253,7 +216,6 @@ export default function MatchDetailScreen() {
                   Teklif Özeti
                 </Text>
 
-                {/* Avatar + isim yan yana */}
                 <View className="flex-row items-center gap-3">
                   <Avatar size="sm" initials={expertInitials} />
                   <Text variant="label" className="font-semibold">{match.expert?.name ?? 'Uzman'}</Text>
@@ -263,7 +225,6 @@ export default function MatchDetailScreen() {
                   <Text variant="label" className="font-medium leading-snug">{match.offer.title}</Text>
                 ) : null}
 
-                {/* Açıklama + status — sola yaslanmış, avatar hizası yok */}
                 <View className="gap-2">
                   {match.offer.description ? (
                     <Text variant="caption" color="secondary">{match.offer.description}</Text>
@@ -280,7 +241,6 @@ export default function MatchDetailScreen() {
                   </View>
                 </View>
 
-                {/* Fiyat */}
                 <View className="flex-row">
                   <Chip
                     label={`₺${match.offer.price.toLocaleString('tr-TR')}`}

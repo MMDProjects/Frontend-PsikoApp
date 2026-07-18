@@ -44,7 +44,6 @@ describe('Input', () => {
     expect(input.props.secureTextEntry).toBe(true)
 
     fireEvent.press(getByLabelText('Show password'))
-    // After toggle secureTextEntry should be false
     expect(getByDisplayValue('secret').props.secureTextEntry).toBe(false)
   })
 
@@ -124,7 +123,6 @@ describe('Input', () => {
         placeholder="with icon"
       />
     )
-    // placeholder is accessible
     expect(getByLabelText).toBeDefined()
   })
 })

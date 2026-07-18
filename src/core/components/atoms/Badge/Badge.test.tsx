@@ -10,7 +10,7 @@ describe('Badge', () => {
   })
 
   it('renders all variants without crashing', () => {
-    const variants = ['brand', 'accent', 'success', 'warning', 'error', 'neutral'] as const
+    const variants = ['sky', 'sage', 'success', 'warning', 'error', 'neutral', 'info'] as const
     variants.forEach((variant) => {
       const { unmount } = render(<Badge label={variant} variant={variant} />)
       unmount()
@@ -27,7 +27,6 @@ describe('Badge', () => {
   it('renders dot indicator when dot is true', () => {
     const { UNSAFE_getAllByType } = render(<Badge label="Online" variant="success" dot />)
     const { View } = require('react-native')
-    // container + dot View must both be present
     expect(UNSAFE_getAllByType(View).length).toBeGreaterThanOrEqual(2)
   })
 

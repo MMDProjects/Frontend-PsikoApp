@@ -45,6 +45,8 @@ export const ExpertSchema = z.object({
   reviewCount:     z.number().int().min(0),
   isVerified:      z.boolean(),
   status:          z.enum(['pending', 'approved', 'rejected']),
+  initials:        z.string().optional(),
+  acceptsOffers:   z.boolean(),
   education:       z.string().nullable().optional(),
   cvUrl:           z.string().nullable().optional(),
   certificates:    z.array(z.string()).optional(),

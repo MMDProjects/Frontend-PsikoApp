@@ -12,18 +12,12 @@ import Animated, {
 import type { ReactNode } from 'react'
 
 export type HeroPagerProps = {
-  /** Sayfa sayfa kayan içerikler — son sayfaya gelince otomatik ilerleme durur */
   pages: ReactNode[]
-  /** Otomatik ilerleme aralığı (ms). Varsayılan 5000. */
   autoAdvanceMs?: number
 }
 
 const SLIDE_TIMING = { duration: 320, easing: Easing.out(Easing.cubic) }
 
-/**
- * Native ScrollView yerine saf Reanimated transform ile çalışan pager.
- * (Fabric'te programatik scrollTo komutları güvenilir işlenmediği için.)
- */
 export function HeroPager({ pages, autoAdvanceMs = 5000 }: HeroPagerProps) {
   const { width: W } = useWindowDimensions()
   const [page, setPage] = useState(0)
@@ -31,7 +25,6 @@ export function HeroPager({ pages, autoAdvanceMs = 5000 }: HeroPagerProps) {
   const offset = useSharedValue(0) // translateX (0, -W, -2W, ...)
   const dragStart = useSharedValue(0)
 
-  // Otomatik ilerleme — son sayfada durur, kullanıcı geri kaydırırsa devam eder
   useEffect(() => {
     if (page >= pages.length - 1) return
     const timer = setTimeout(() => {
@@ -43,7 +36,6 @@ export function HeroPager({ pages, autoAdvanceMs = 5000 }: HeroPagerProps) {
   }, [page, pages.length, autoAdvanceMs, W, offset])
 
   const pan = Gesture.Pan()
-    // Dikey scroll ile çakışmasın: yatayda 15px sonra aktifleş, dikeyde 12px'te bırak
     .activeOffsetX([-15, 15])
     .failOffsetY([-12, 12])
     .onStart(() => {
@@ -52,7 +44,6 @@ export function HeroPager({ pages, autoAdvanceMs = 5000 }: HeroPagerProps) {
     .onUpdate((e) => {
       const min = -(pages.length - 1) * W
       let next = dragStart.value + e.translationX
-      // Kenarlarda lastik direnci
       if (next > 0) next = next / 3
       else if (next < min) next = min + (next - min) / 3
       offset.value = next
@@ -85,7 +76,6 @@ export function HeroPager({ pages, autoAdvanceMs = 5000 }: HeroPagerProps) {
         </View>
       </GestureDetector>
 
-      {/* Sayfa noktaları */}
       <View className="flex-row justify-center gap-1.5 mt-3">
         {pages.map((_, i) => (
           <View

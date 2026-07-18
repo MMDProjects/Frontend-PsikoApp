@@ -12,25 +12,19 @@ export default function AuthLayout() {
   const clearOnboardIntent = useOnboardingStore((s) => s.clearOnboardIntent)
   const segments = useSegments()
 
-  // segments örn: ['(auth)', 'login'] | ['(auth)', 'onboarding', 'expert']
   const current = segments[1]
 
-  // Onboarding'e varınca tek kullanımlık intent tüketilir
   useEffect(() => {
     if (current === 'onboarding' && onboardIntent) clearOnboardIntent()
   }, [current, onboardIntent, clearOnboardIntent])
 
-  // Kayıt sonrası kullanıcı authenticated olur ama rol onboarding'ini tamamlaması gerekir —
-  // onboarding rotaları authenticated kullanıcıya açık kalır.
   if (isAuthenticated && current !== 'onboarding') {
-    // Dev "Onboard" butonları: giriş auth'u tamamlanmadan tabs'a kaçmayı önler
     if (onboardIntent) {
       return <Redirect href={onboardIntent as never} />
     }
-    return <Redirect href="/(tabs)/" />
+    return <Redirect href="/(tabs)" />
   }
 
-  // İlk açılış: karşılama turu görülmediyse önce welcome gösterilir.
   if (!isAuthenticated && hasHydrated && !hasSeenWelcome && current !== 'welcome') {
     return <Redirect href="/(auth)/welcome" />
   }

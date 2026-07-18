@@ -11,16 +11,13 @@ import Animated, {
 import { Text } from '@/core/components/atoms/Text'
 
 export type StepProgressProps = {
-  /** 1 tabanlı geçerli adım */
   current: number
   total: number
-  /** Adımın adı (örn. "Konu & Açıklama") */
   label?: string
 }
 
 const FILL_TIMING = { duration: 420, easing: Easing.out(Easing.cubic) }
 
-/** Mavi marka zemini üzerinde animasyonlu aşama barı — flat, beyaz dolgu */
 export function StepProgress({ current, total, label }: StepProgressProps) {
   const reducedMotion = useReducedMotion()
   const [trackWidth, setTrackWidth] = useState(0)

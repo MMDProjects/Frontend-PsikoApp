@@ -6,76 +6,19 @@ import { Controller, useForm } from 'react-hook-form'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { DecorCircles } from '@/core/components/atoms/DecorCircles'
-import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
 import { InputField } from '@/core/components/molecules/InputField'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { StepProgress } from '@/core/components/molecules/StepProgress'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
-import { cn } from '@/core/utils/cn'
-import { RegisterRequestSchema, useRegisterMutation } from '@/domains/auth'
+import { RegisterRequestSchema, useRegisterMutation, RoleCard } from '@/domains/auth'
 
 import type { RegisterRequest } from '@/domains/auth'
 import type { UserRole } from '@/domains/auth'
 
 const TOTAL_STEPS = 2
 const STEP_LABELS = ['Rol Seçimi', 'Bilgilerin']
-
-// ─── Role selection card — mavi zemin üzerinde flat seçim dili ────────────────
-
-type RoleCardProps = {
-  role: UserRole
-  selected: boolean
-  onPress: () => void
-}
-
-function RoleCard({ role, selected, onPress }: RoleCardProps) {
-  const isExpert = role === 'expert'
-  return (
-    <Pressable
-      onPress={onPress}
-      className={cn(
-        'flex-1 rounded-xl p-5 items-center gap-3',
-        selected
-          ? 'bg-white dark:bg-white'
-          : 'bg-sky-600 dark:bg-sky-900 active:bg-sky-700 dark:active:bg-sky-800'
-      )}
-    >
-      <View
-        className={cn(
-          'w-14 h-14 rounded-full items-center justify-center',
-          selected ? 'bg-sky-100' : 'bg-sky-700 dark:bg-sky-950'
-        )}
-      >
-        <Icon
-          name={isExpert ? 'Stethoscope' : 'User'}
-          size={28}
-          color={selected ? '#0EA5E9' : '#FFFFFF'}
-        />
-      </View>
-      <View className="items-center gap-1">
-        <Text
-          variant="label"
-          className={selected ? 'text-sky-700 dark:text-sky-700 font-bold' : 'text-white font-semibold'}
-        >
-          {isExpert ? 'Psikolog' : 'Danışan'}
-        </Text>
-        <Text
-          variant="caption"
-          align="center"
-          className={selected ? 'text-neutral-500 dark:text-neutral-500' : 'text-sky-100'}
-        >
-          {isExpert
-            ? 'Danışanlarınızı platforma davet edin'
-            : 'Psikolog bulun ve terapi alın'}
-        </Text>
-      </View>
-    </Pressable>
-  )
-}
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function RegisterScreen() {
   const router = useRouter()
@@ -109,10 +52,8 @@ export default function RegisterScreen() {
 
   return (
     <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
-      {/* Dekoratif daireler — adım geçişinde süzülür */}
       <DecorCircles phase={step} />
 
-      {/* Tek geri butonu: adım 2'deyse adım 1'e, değilse sayfadan geri */}
       <BackButton onPress={() => (step === 2 ? setStep(1) : router.back())} />
 
       <ScreenTitle title="Hesap Oluştur" topInset titleClassName="text-white" />
@@ -121,7 +62,6 @@ export default function RegisterScreen() {
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Aşama barı */}
         <View className="px-5 pt-2 pb-4">
           <StepProgress current={step} total={TOTAL_STEPS} label={STEP_LABELS[step - 1]} />
         </View>
@@ -239,7 +179,6 @@ export default function RegisterScreen() {
             </View>
           )}
 
-          {/* Footer */}
           <View className="flex-row items-center justify-center mt-3 gap-1">
             <Text variant="body" className="text-sky-100">Zaten hesabın var mı?</Text>
             <Pressable onPress={() => router.push('/(auth)/login')}>

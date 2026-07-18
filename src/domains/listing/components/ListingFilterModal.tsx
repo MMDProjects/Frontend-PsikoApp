@@ -29,7 +29,6 @@ export type ListingFilterResult = {
 
 export type ListingFilterModalProps = {
   visible: boolean
-  /** Modal açıldığında seçili gelecek mevcut filtreler */
   current: ListingListFilters
   currentPriceLabels: string[]
   onApply: (result: ListingFilterResult) => void
@@ -41,7 +40,6 @@ function toggleArr<T extends string>(arr: T[], val: T): T[] {
   return arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]
 }
 
-/** Seçili fiyat etiketlerinden budgetMin/budgetMax hesaplar */
 function priceLabelsToBudget(labels: string[]): Pick<ListingListFilters, 'budgetMin' | 'budgetMax'> {
   const ranges = PRICE_FILTER_OPTIONS.filter((o) => labels.includes(o.label))
   if (ranges.length === 0) return { budgetMin: undefined, budgetMax: undefined }
@@ -65,14 +63,13 @@ export function ListingFilterModal({
   const [session, setSession] = useState<string[]>([])
   const [price, setPrice] = useState<string[]>([])
 
-  // Modal her açıldığında mevcut seçimleri yükle
   useEffect(() => {
     if (visible) {
       setSpec(current.specialization ?? [])
       setSession(current.sessionType ?? [])
       setPrice(currentPriceLabels)
     }
-  }, [visible])
+  }, [visible, current.specialization, current.sessionType, currentPriceLabels])
 
   const handleApply = () => {
     onApply({

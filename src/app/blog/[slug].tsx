@@ -2,11 +2,14 @@ import { Image, ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
+import { formatDate } from '@/core/utils/formatDate'
+import { useRefresh } from '@/core/hooks'
 import { useBlogDetailQuery, BlogLikeButton } from '@/domains/blog'
 
 export default function BlogDetailScreen() {
@@ -14,18 +17,19 @@ export default function BlogDetailScreen() {
   const router   = useRouter()
   const insets   = useSafeAreaInsets()
 
-  const { data: blog, isLoading, isError } = useBlogDetailQuery(slug ?? '')
+  const blogQuery = useBlogDetailQuery(slug ?? '')
+  const { data: blog, isLoading, isError } = blogQuery
+  const { isRefreshing, onRefresh } = useRefresh(blogQuery)
 
   return (
     <View className="flex-1 bg-white dark:bg-dark-bg">
-      {/* Sabit geri butonu — scroll'dan etkilenmez */}
       <BackButton />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
       >
-        {/* Hero Image */}
         <View>
           {isLoading ? (
             <Skeleton variant="rect" width="100%" height={220} />
@@ -61,7 +65,6 @@ export default function BlogDetailScreen() {
           </View>
         ) : (
           <View className="px-5 pt-5 gap-4">
-            {/* Author & Meta */}
             <View className="flex-row items-center justify-between">
               <View>
                 <Text variant="caption" className="text-sky-500 font-semibold">{blog.author.name}</Text>
@@ -73,12 +76,10 @@ export default function BlogDetailScreen() {
               </View>
             </View>
 
-            {/* Title */}
             <Text variant="heading" className="font-bold leading-tight text-neutral-900 dark:text-[#F5F5F7]">
               {blog.title}
             </Text>
 
-            {/* Kategori tag'ları — düz sky-500 metin */}
             <View className="flex-row flex-wrap gap-x-2 gap-y-1">
               {blog.categories.map((cat) => (
                 <Text key={cat} variant="caption" className="text-sky-500 font-semibold">
@@ -87,10 +88,8 @@ export default function BlogDetailScreen() {
               ))}
             </View>
 
-            {/* Divider */}
             <View className="h-px bg-neutral-100 dark:bg-dark-border" />
 
-            {/* Full content — paragraphs split by \n\n */}
             <View className="gap-4">
               {(blog.content ?? '').split('\n\n').map((paragraph, i) => (
                 <Text
@@ -103,18 +102,12 @@ export default function BlogDetailScreen() {
               ))}
             </View>
 
-            {/* Divider */}
             <View className="h-px bg-neutral-100 dark:bg-dark-border" />
 
-            {/* Like row */}
             <View className="flex-row items-center gap-3">
-              <BlogLikeButton slug={blog.slug} initialCount={blog.likeCount} />
+              <BlogLikeButton slug={blog.slug} liked={blog.liked} likeCount={blog.likeCount} />
               <Text variant="caption" className="text-neutral-400 dark:text-neutral-500">
-                {new Date(blog.publishedAt).toLocaleDateString('tr-TR', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
+                {formatDate(blog.publishedAt, 'long')}
               </Text>
             </View>
           </View>

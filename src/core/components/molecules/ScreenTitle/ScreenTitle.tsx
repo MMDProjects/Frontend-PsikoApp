@@ -7,15 +7,10 @@ import { Text } from '@/core/components/atoms/Text'
 import type { ReactNode } from 'react'
 
 export type ScreenTitleProps = {
-  /** Ortalanmış küçük sayfa başlığı — iç sayfa standardı */
   title: string
-  /** true ise safe-area üst boşluğunu kendisi ekler (scroll DIŞINDA sabit kullanım).
-   *  false/verilmezse scroll container'ın paddingTop'una güvenir. */
   topInset?: boolean
-  /** Başlığın altında gösterilecek opsiyonel satır (örn. güvenlik etiketi) */
   children?: ReactNode
   className?: string
-  /** Başlık rengini geçersiz kılmak için (örn. mavi zeminde 'text-white') */
   titleClassName?: string
 }
 

@@ -3,6 +3,7 @@ import { Pressable, ScrollView, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Chip } from '@/core/components/atoms/Chip'
 import { Divider } from '@/core/components/atoms/Divider'
 import { Icon } from '@/core/components/atoms/Icon'
@@ -14,6 +15,7 @@ import { InputField } from '@/core/components/molecules/InputField'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
 import { themeColors, useThemeColors } from '@/core/theme'
+import { useRefresh } from '@/core/hooks'
 import { useAuthStore } from '@/domains/auth'
 import { ExpertSpecializations, useExpertProfileQuery, useExpertProfileMutation } from '@/domains/expert'
 
@@ -23,7 +25,9 @@ export default function ProfessionalInfoScreen() {
   const insets = useSafeAreaInsets()
   const bottomBarHeight = 56 + insets.bottom
 
-  const { data: expert, isLoading, isError } = useExpertProfileQuery(user?.id ?? '')
+  const expertQuery = useExpertProfileQuery(user?.id ?? '')
+  const { data: expert, isLoading, isError } = expertQuery
+  const { isRefreshing, onRefresh } = useRefresh(expertQuery)
   const { mutate: updateProfile, isPending } = useExpertProfileMutation()
   const colors = useThemeColors()
 
@@ -118,10 +122,10 @@ export default function ProfessionalInfoScreen() {
           <ScrollView
             contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: bottomBarHeight + 16 }}
             showsVerticalScrollIndicator={false}
+            refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
           >
             <ScreenTitle title="Mesleki Bilgiler" />
 
-            {/* ── Section 1: Ünvan ── */}
             <View className="px-4 py-5 gap-4">
               <InputField
                 label="Ünvan"
@@ -133,7 +137,6 @@ export default function ProfessionalInfoScreen() {
               />
             </View>
 
-            {/* ── Section 2: Uzmanlık Alanları ── */}
             <Divider spacing="none" className="mx-4" />
             <View className="px-4 py-5 gap-3">
               <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
@@ -156,7 +159,6 @@ export default function ProfessionalInfoScreen() {
               )}
             </View>
 
-            {/* ── Section 3: Deneyim Süresi ── */}
             <Divider spacing="none" className="mx-4" />
             <View className="px-4 py-5 gap-3">
               <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
@@ -183,13 +185,11 @@ export default function ProfessionalInfoScreen() {
                   accessibilityLabel="Deneyim yılını artır"
                   className="w-10 h-10 rounded-full bg-sky-500 items-center justify-center active:bg-sky-600"
                 >
-                  {/* Sky-500 zeminde her iki temada da beyaz kalmalı */}
                   <Icon name="Plus" size={20} color={themeColors.light.contentInverse} />
                 </Pressable>
               </View>
             </View>
 
-            {/* ── Section 4: Eğitim & Biyografi ── */}
             <Divider spacing="none" className="mx-4" />
             <View className="px-4 py-5 gap-4">
               <InputField

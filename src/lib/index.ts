@@ -1,4 +1,4 @@
-export { storage, zustandStorage, tokenStorage, storageGet, storageSet, storageRemove } from './storage'
+export { zustandStorage, tokenStorage, storageGet, storageSet, storageRemove } from './storage'
 export { env } from './env'
 export { ApiError, NetworkError, registerUnauthenticatedHandler, get, post, put, patch, del, axiosInstance } from './api'
 export { queryClient } from './queryClient'

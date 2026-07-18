@@ -10,16 +10,19 @@ export const MatchSchema = z.object({
   expertId:        z.string().uuid(),
   status:          MatchStatusSchema,
   createdAt:       z.string().datetime(),
+  createdAtRelative: z.string().optional(),
   client: z.object({
     id:       z.string().uuid(),
     fullName: z.string(),
+    initials: z.string().optional(),
     email:    z.string().optional(),
     phone:    z.string().nullable().optional(),
   }).optional(),
   expert: z.object({
-    id:    z.string().uuid(),
-    name:  z.string(),
-    title: z.string(),
+    id:       z.string().uuid(),
+    name:     z.string(),
+    title:    z.string(),
+    initials: z.string().optional(),
   }).optional(),
   listing: z.object({
     id:                   z.string().uuid(),
@@ -28,6 +31,7 @@ export const MatchSchema = z.object({
     specialization:       z.array(z.string()).default([]),
     budgetMin:            z.number(),
     budgetMax:            z.number(),
+    budgetLabel:          z.string().optional(),
     preferredSessionType: z.string(),
     status:               z.string(),
     city:                 z.string().optional(),
@@ -48,7 +52,6 @@ const EmbeddedAssessmentResultSchema = z.object({
   assessmentTitle: z.string(),
 }).optional()
 
-// Tam gömülü veri — GET /matches/:id endpoint'i için
 const EmbeddedListingSchema = z.object({
   id:                   z.string().uuid(),
   title:                z.string(),
@@ -56,6 +59,7 @@ const EmbeddedListingSchema = z.object({
   specialization:       z.array(z.string()).default([]),
   budgetMin:            z.number(),
   budgetMax:            z.number(),
+  budgetLabel:          z.string().optional(),
   preferredSessionType: z.string(),
   status:               z.string(),
   city:                 z.string().optional(),
@@ -75,6 +79,7 @@ export const MatchDetailSchema = MatchSchema.extend({
   client: z.object({
     id:        z.string().uuid(),
     fullName:  z.string(),
+    initials:  z.string().optional(),
     email:     z.string().optional(),
     phone:     z.string().nullable().optional(),
     createdAt: z.string().datetime().optional(),

@@ -32,7 +32,6 @@ export function PackagePicker({ packages, selectedId, onSelect, className }: Pac
             accessibilityRole="radio"
             accessibilityState={{ selected: isSelected }}
           >
-            {/* Başlık + fiyat */}
             <View className="flex-row items-start justify-between">
               <View className="gap-1 flex-1 mr-3">
                 <View className="flex-row items-center gap-2 flex-wrap">
@@ -52,14 +51,13 @@ export function PackagePicker({ packages, selectedId, onSelect, className }: Pac
                 </Text>
                 <View className="flex-row items-center gap-1.5">
                   <Text variant="caption" color="secondary" className="line-through">
-                    ₺{(pkg.unitPrice * pkg.sessionCount).toLocaleString('tr-TR')}
+                    ₺{pkg.originalPrice.toLocaleString('tr-TR')}
                   </Text>
                   <Badge label={`%${pkg.discountPct}`} variant="sage" size="sm" />
                 </View>
               </View>
             </View>
 
-            {/* Seans başı fiyat */}
             <View className="flex-row items-center gap-1.5">
               <Icon
                 name="CheckCircle2"

@@ -12,7 +12,6 @@ export function useOfferDetailQuery(offerId: string) {
       const raw = await get(`/offers/${offerId}`)
       const result = OfferSchema.safeParse(raw)
       if (!result.success) {
-        console.error('[offer/detail] Zod parse FAILED:', JSON.stringify(result.error.issues))
         throw result.error
       }
       return result.data

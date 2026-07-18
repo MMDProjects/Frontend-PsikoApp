@@ -3,18 +3,22 @@ import { ScrollView, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
+import { useRefresh } from '@/core/hooks'
 import { usePackagesQuery, PackagePicker } from '@/domains/payment'
 
 export default function PackagesScreen() {
   const router = useRouter()
 
-  const { data: packages, isLoading, isError } = usePackagesQuery()
+  const packagesQuery = usePackagesQuery()
+  const { data: packages, isLoading, isError } = packagesQuery
+  const { isRefreshing, onRefresh } = useRefresh(packagesQuery)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const insets = useSafeAreaInsets()
 
@@ -43,7 +47,11 @@ export default function PackagesScreen() {
 
       {packages && (
         <>
-          <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 128 }} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 128 }}
+            showsVerticalScrollIndicator={false}
+            refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
+          >
             <ScreenTitle title="Seans Paketleri" />
             <Text variant="body" color="secondary" className="mb-4">
               Toplu paket alımında tasarruf edin. Paketler satın alımdan itibaren 6 ay geçerlidir.
@@ -55,7 +63,6 @@ export default function PackagesScreen() {
             />
           </ScrollView>
 
-          {/* Sticky bottom */}
           <BottomActionBar
             actions={[{
               label: selectedPkg ? `₺${selectedPkg.price.toLocaleString('tr-TR')} — Devam Et` : 'Paket Seçin',

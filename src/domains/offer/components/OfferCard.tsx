@@ -33,13 +33,10 @@ export function OfferCard({ offer, viewerRole, onAction, onViewExpert, className
   const { mutate: reject, isPending: isRejecting } = useRejectOfferMutation()
   const { mutate: withdraw, isPending: isWithdrawing } = useWithdrawOfferMutation()
 
-  const expertInitials = offer.expert?.name
-    ? offer.expert.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-    : '?'
+  const expertInitials = offer.expert?.initials ?? '?'
 
   return (
     <View className={cn('bg-white dark:bg-dark-card rounded-xl px-4 py-4 gap-3', className)}>
-      {/* Uzman bilgisi + fiyat + badge */}
       <View className="flex-row items-center justify-between gap-3">
         <View className="flex-row items-center gap-3 flex-1">
           <Avatar
@@ -74,7 +71,6 @@ export function OfferCard({ offer, viewerRole, onAction, onViewExpert, className
         </View>
       </View>
 
-      {/* Seans tipi + açıklama */}
       <View className="gap-1.5">
         <View className="flex-row items-center gap-1.5">
           <Icon name="Video" size={13} color="#737373" />
@@ -87,7 +83,6 @@ export function OfferCard({ offer, viewerRole, onAction, onViewExpert, className
         ) : null}
       </View>
 
-      {/* Uzmanı İncele linki (client için) */}
       {isClient && onViewExpert && (
         <Pressable
           onPress={onViewExpert}
@@ -98,7 +93,6 @@ export function OfferCard({ offer, viewerRole, onAction, onViewExpert, className
         </Pressable>
       )}
 
-      {/* Danışan aksiyonları (PENDING + client) */}
       {isPending && isClient && (
         <View className="flex-row gap-3">
           <View className="flex-1">
@@ -133,7 +127,6 @@ export function OfferCard({ offer, viewerRole, onAction, onViewExpert, className
         </View>
       )}
 
-      {/* Uzman aksiyonu: geri çek (PENDING + expert) */}
       {isPending && !isClient && (
         <Button
           label="Teklifi Geri Çek"
@@ -145,7 +138,6 @@ export function OfferCard({ offer, viewerRole, onAction, onViewExpert, className
         />
       )}
 
-      {/* Detay linki */}
       <Pressable
         onPress={() => router.push(`/offer/${offer.id}`)}
         className="flex-row items-center justify-end gap-1 active:opacity-70"

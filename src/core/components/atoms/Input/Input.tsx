@@ -10,8 +10,6 @@ import type { ComponentType } from 'react'
 import type { TextInputProps } from 'react-native'
 import type { SvgProps } from 'react-native-svg'
 
-// lucide-react-native exports RefAttributes<SVGSVGElement> which clashes with RN SVG props.
-// We cast to the actual runtime shape: SvgProps + size.
 type IconProps = Pick<SvgProps, 'stroke'> & { size?: number }
 const EyeIcon = Eye as ComponentType<IconProps>
 const EyeOffIcon = EyeOff as ComponentType<IconProps>
@@ -27,7 +25,6 @@ export type InputProps = {
   placeholder?: string
   state?: InputState
   size?: InputSize
-  /** onBrand: marka (mavi) zemin üzerinde flat solid input */
   tone?: InputTone
   leftElement?: React.ReactNode
   rightElement?: React.ReactNode
@@ -54,7 +51,6 @@ const containerStateStyles: Record<InputState, string> = {
   disabled: 'border border-border bg-surface-sunken opacity-40',
 }
 
-// Mavi marka zemini üzerinde flat solid görünüm (light: beyaz kart, dark: sky-900)
 const onBrandContainerStateStyles: Record<InputState, string> = {
   default:  'border border-white bg-white dark:border-sky-900 dark:bg-sky-900',
   focused:  'border-2 border-sky-300 bg-white dark:border-sky-400 dark:bg-sky-900',
@@ -114,7 +110,6 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
   const { colorScheme } = useColorScheme()
   const isDark = colorScheme === 'dark'
   const isDisabled = state === 'disabled'
-  // onBrand dark: input zemini sky-900 olduğundan ikon/placeholder beyaz tonlara döner
   const iconColors = tone === 'onBrand' && isDark ? ON_BRAND_DARK_ICON_COLOR : ICON_COLOR
   const iconColor =
     state === 'error'
@@ -203,7 +198,6 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
         onSubmitEditing={onSubmitEditing}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        // maxHeight is a Reanimated/multiline behavior constraint — cannot be a static Tailwind class
         style={multiline ? { maxHeight: MULTILINE_MAX_HEIGHT } : undefined}
         className={cn(
           'flex-1 p-0',

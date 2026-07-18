@@ -12,7 +12,6 @@ export function useListingDetailQuery(id: string) {
       const raw = await get(`/listings/${id}`)
       const result = ListingSchema.safeParse(raw)
       if (!result.success) {
-        console.error('[listing/detail] Zod parse FAILED:', JSON.stringify(result.error.issues))
         throw result.error
       }
       return result.data

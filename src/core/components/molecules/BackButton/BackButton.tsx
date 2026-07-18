@@ -9,11 +9,7 @@ import { Icon } from '@/core/components/atoms/Icon'
 export type BackButtonVariant = 'floating' | 'overlay' | 'inline'
 
 export type BackButtonProps = {
-  /** floating: sayfa üstünde absolute beyaz daire (varsayılan)
-   *  overlay:  görsel üstünde absolute yarı saydam siyah daire
-   *  inline:   header satırı içinde normal akışta beyaz daire */
   variant?: BackButtonVariant
-  /** Verilmezse router.back() çağrılır */
   onPress?: () => void
   className?: string
 }

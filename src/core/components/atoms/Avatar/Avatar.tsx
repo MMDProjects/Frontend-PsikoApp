@@ -87,12 +87,10 @@ export function Avatar({
   const verifiedPx = verifiedSizeMap[size]
 
   return (
-    // Outer wrapper has no overflow:hidden so the verified badge can bleed outside bounds
     <View
       className={cn('relative self-start', className)}
       style={{ width: px, height: px }}
     >
-      {/* Inner circle — overflow:hidden clips image/fallback to circular shape */}
       <View
         style={{
           width: px,
@@ -113,7 +111,6 @@ export function Avatar({
           />
         ) : (
           <View
-            // Dynamic fallbackColor cannot be a static Tailwind class — omit style prop entirely when undefined so NativeWind classes take effect
             style={fallbackColor ? { backgroundColor: fallbackColor } : undefined}
             className={cn('flex-1 items-center justify-center', !fallbackColor && 'bg-neutral-200 dark:bg-neutral-800')}
           >
@@ -131,7 +128,6 @@ export function Avatar({
         )}
       </View>
 
-      {/* Verified badge — outside overflow:hidden so it bleeds past the circle edge */}
       {isVerified && (
         <View
           className="absolute bg-sky-500 items-center justify-center rounded-full border-2 border-white"
@@ -146,7 +142,6 @@ export function Avatar({
         </View>
       )}
 
-      {/* Generic badge slot — only rendered when isVerified is not set */}
       {badge && !isVerified && (
         <View className="absolute bottom-0 right-0">{badge}</View>
       )}
@@ -165,7 +160,6 @@ export function AvatarGroup({ avatars, max = 5, size = 'md', className }: Avatar
       {avatars.slice(0, visibleCount).map((avatar, i) => (
         <View
           key={i}
-          // Negative margin for overlap + white border ring to separate avatars
           style={{ marginLeft: i === 0 ? 0 : -overlap, zIndex: visibleCount - i }}
         >
           <Avatar {...avatar} size={size} borderWidth={2} borderColor="#FFFFFF" />

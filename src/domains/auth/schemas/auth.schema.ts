@@ -32,7 +32,6 @@ export const AuthUserSchema = z.object({
   createdAt: z.string().datetime(),
   phone: z.string().nullable().optional(),
   city: z.string().nullable().optional(),
-  // Eşleşme sağlandığında ilgili bilginin uzmanla paylaşılıp paylaşılmayacağı — yalnızca client için anlamlıdır
   shareEmail: z.boolean().optional(),
   sharePhone: z.boolean().optional(),
   shareLocation: z.boolean().optional(),

@@ -87,7 +87,6 @@ export default function NewOfferScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Teklif Başlığı */}
           <Controller
             control={control}
             name="title"
@@ -104,7 +103,6 @@ export default function NewOfferScreen() {
             )}
           />
 
-          {/* Fiyat */}
           <Controller
             control={control}
             name="price"
@@ -123,7 +121,6 @@ export default function NewOfferScreen() {
             )}
           />
 
-          {/* Seans tipi */}
           <View className="gap-2">
             <Text variant="label" className="font-semibold text-white">
               Seans Tipi <Text variant="caption" className="text-red-100">*</Text>
@@ -155,7 +152,6 @@ export default function NewOfferScreen() {
             )}
           </View>
 
-          {/* Açıklama */}
           <Controller
             control={control}
             name="description"

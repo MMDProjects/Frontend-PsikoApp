@@ -18,7 +18,6 @@ export function useExpertProfileMutation() {
       return ExpertSchema.parse(raw)
     },
     onSuccess: (updated) => {
-      // Invalidate profile cache so the screen re-fetches fresh data
       if (userId) {
         queryClient.setQueryData(expertKeys.profile(userId), updated)
       }

@@ -11,3 +11,7 @@ export type ListingListFilters = {
   budgetMax?: number
   sessionType?: string[]
 }
+
+export type ListingListParams = ListingListFilters & {
+  sort?: string
+}

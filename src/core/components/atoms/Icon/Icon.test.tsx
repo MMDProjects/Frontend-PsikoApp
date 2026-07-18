@@ -20,7 +20,6 @@ describe('Icon', () => {
 
   it('forwards size prop', () => {
     const { UNSAFE_getByType } = render(<Icon name="User" size={32} />)
-    // Icon renders a Lucide SVG component — it should not throw
     expect(UNSAFE_getByType).toBeDefined()
   })
 
@@ -29,7 +28,6 @@ describe('Icon', () => {
       <Icon name="Heart" size={24} color="#FF0000" strokeWidth={2} />
     )
     const { View } = require('react-native')
-    // queryAllByType returns [] (not throw) when nothing matches — icon renders SVG, not View
     expect(UNSAFE_queryAllByType(View).length).toBeGreaterThanOrEqual(0)
   })
 })

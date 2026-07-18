@@ -25,10 +25,9 @@ export function ListingSortModal({ visible, current, onApply, onClear, onClose }
   const isDark = useColorScheme() === 'dark'
   const [selected, setSelected] = useState<ListingSortValue | undefined>(undefined)
 
-  // Modal her açıldığında mevcut seçimi yükle
   useEffect(() => {
     if (visible) setSelected(current)
-  }, [visible])
+  }, [visible, current])
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>

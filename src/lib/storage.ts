@@ -2,14 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import type { StateStorage } from 'zustand/middleware'
 
-// AsyncStorage is synchronous-compatible via Zustand's async persist
 export const zustandStorage: StateStorage = {
   getItem:    (key) => AsyncStorage.getItem(key),
   setItem:    (key, value) => AsyncStorage.setItem(key, value),
   removeItem: (key) => AsyncStorage.removeItem(key),
 }
 
-// ─── Token helpers ───────────────────────────────────────────────────────────
 const TOKEN_KEY         = 'auth.accessToken'
 const REFRESH_TOKEN_KEY = 'auth.refreshToken'
 
@@ -21,7 +19,6 @@ export const tokenStorage = {
   clearTokens:     () => AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY]),
 }
 
-// ─── Generic typed helpers ──────────────────────────────────────────────────
 export async function storageGet<T>(key: string): Promise<T | null> {
   const raw = await AsyncStorage.getItem(key)
   if (raw == null) return null

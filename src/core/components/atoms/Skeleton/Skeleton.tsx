@@ -87,7 +87,6 @@ export function Skeleton({
     return () => cancelAnimation(progress)
   }, [reducedMotion, progress])
 
-  // Animated background color — style prop required for Reanimated interpolation
   const animatedStyle = useAnimatedStyle(() => ({
     backgroundColor: reducedMotion
       ? SHIMMER_STATIC
@@ -98,8 +97,6 @@ export function Skeleton({
     <Animated.View
       accessibilityRole="none"
       accessibilityLabel="Loading"
-      // style is intentional: Reanimated interpolateColor and dynamic dimensions
-      // cannot be expressed as static Tailwind classes
       style={[
         animatedStyle,
         {

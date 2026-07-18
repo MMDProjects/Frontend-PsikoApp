@@ -60,20 +60,17 @@ function StarItem({ type, size, interactive, onPress, accessibilityLabel }: Star
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
 
   const handlePress = () => {
-    // bounce spring: grow then return
     scale.value = withSpring(1.3, SPRING, () => {
       scale.value = withSpring(1, SPRING)
     })
     onPress?.()
   }
 
-  // Dynamic pixel dimensions cannot be expressed as static Tailwind classes
   const star = (
     <View style={{ width: size, height: size }}>
       {type === 'half' ? (
         <>
           <StarIcon size={size} stroke={STROKE_COLOR} fill={EMPTY_COLOR} />
-          {/* Left-half clip reveals the filled star beneath */}
           <View
             style={{
               position: 'absolute',

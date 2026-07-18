@@ -22,8 +22,6 @@ export function SegmentedControl<T extends string>({
   className,
 }: SegmentedControlProps<T>) {
   return (
-    // p-1 (dış) + py-1 (segment) = filtre chip'lerindeki (size="md") py-2 ile aynı dikey yükseklik
-    // iOS Health pattern: seçili segment = zeminden ayrışan düz beyaz/koyu kart (gölgesiz), metin nötr — mavi vurgu yok
     <View className={cn('flex-row gap-1 bg-neutral-200 dark:bg-neutral-800 rounded-xl p-1', className)}>
       {options.map(({ key, label }) => {
         const isActive = value === key

@@ -5,7 +5,6 @@ export const clientKeys = {
   profile:  (id: string) => [...clientKeys.profiles(), id] as const,
 } as const
 
-// Match durumu → Badge variant + label eşlemesi
 export const MATCH_STATUS_CONFIG = {
   FREE:     { variant: 'neutral',  label: 'Serbest'          } as const,
   PENDING:  { variant: 'warning',  label: 'Onay Bekliyor'    } as const,

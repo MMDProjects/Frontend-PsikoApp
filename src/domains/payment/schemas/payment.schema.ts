@@ -5,6 +5,7 @@ export const PackageSchema = z.object({
   name:         z.string(),
   sessionCount: z.number().int().min(3).max(20),
   price:        z.number().positive(),
+  originalPrice: z.number().positive(),
   unitPrice:    z.number().positive(),
   discountPct:  z.number().min(0).max(100),
   validDays:    z.number().int().positive(),

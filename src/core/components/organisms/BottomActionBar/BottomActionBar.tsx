@@ -13,15 +13,12 @@ export type BottomBarAction = {
   onPress: () => void
   variant?: BottomBarActionVariant
   isLoading?: boolean
-  /** isLoading true iken gösterilecek metin (örn. "Kaydediliyor...") */
   loadingLabel?: string
   isDisabled?: boolean
 }
 
 export type BottomActionBarProps = {
-  /** 1-2 aksiyon. 2 aksiyon yan yana eşit genişlikte dizilir. */
   actions?: BottomBarAction[]
-  /** actions yerine özel içerik (örn. durum pill'i) */
   children?: ReactNode
 }
 
@@ -38,7 +35,6 @@ const variantStyles: Record<BottomBarActionVariant, { button: string; text: stri
     button: 'bg-red-50 border border-red-200 dark:bg-red-950 dark:border-red-900 active:bg-red-100 dark:active:bg-red-900',
     text:   'text-red-600 dark:text-red-400 font-medium',
   },
-  // Mavi marka zemini üzerinde: solid beyaz CTA + koyu sky ikincil aksiyon (flat)
   inverse: {
     button: 'bg-white active:bg-sky-50',
     text:   'text-sky-700 dark:text-sky-700 font-semibold',

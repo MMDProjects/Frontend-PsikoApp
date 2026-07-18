@@ -1,26 +1,30 @@
 import { useQuery } from '@tanstack/react-query'
+import { z } from 'zod'
 
 import { get } from '@/lib/api'
 
 import { matchKeys } from '../match.constants'
 import { MatchSchema } from '../schemas/match.schema'
 
-import type { Match } from '../types/match.types'
+const MatchesResponseSchema = z.object({
+  data: z.array(MatchSchema),
+  meta: z.object({
+    page: z.number(),
+    total: z.number(),
+    perPage: z.number(),
+    activeCount: z.number().int().min(0),
+    pastCount: z.number().int().min(0),
+  }),
+})
 
-export function useMatchesQuery() {
+export function useMatchesQuery(status?: string[]) {
   return useQuery({
-    queryKey: matchKeys.all,
+    queryKey: matchKeys.list(status),
     queryFn: async () => {
-      const raw = await get('/matches')
-      const items: unknown[] = raw?.data ?? []
-      const parsed = items
-        .map((item) => {
-          const result = MatchSchema.safeParse(item)
-          if (!result.success) console.error('[useMatchesQuery] parse error', result.error)
-          return result.success ? result.data : null
-        })
-        .filter((m): m is Match => m !== null)
-      return parsed
+      const raw = await get('/matches', { params: status ? { status } : undefined })
+      const result = MatchesResponseSchema.safeParse(raw)
+      if (!result.success) throw result.error
+      return result.data
     },
     staleTime: 30 * 1000,
   })

@@ -4,6 +4,7 @@ import { post } from '@/lib/api'
 
 import { offerKeys } from '../offer.constants'
 import { listingKeys } from '@/domains/listing'
+import { matchKeys } from '@/domains/match'
 
 export function useAcceptOfferMutation() {
   const queryClient = useQueryClient()
@@ -14,9 +15,9 @@ export function useAcceptOfferMutation() {
     },
     onSuccess: (_data, offerId) => {
       queryClient.invalidateQueries({ queryKey: offerKeys.detail(offerId) })
-      queryClient.invalidateQueries({ queryKey: offerKeys.forListing })
+      queryClient.invalidateQueries({ queryKey: offerKeys.listings() })
       queryClient.invalidateQueries({ queryKey: listingKeys.all })
-      queryClient.invalidateQueries({ queryKey: ['matches'] })
+      queryClient.invalidateQueries({ queryKey: matchKeys.all })
     },
   })
 }

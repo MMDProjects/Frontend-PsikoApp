@@ -1,1 +1,1 @@
-export { AppProviders, useTheme } from './AppProviders'
+export { AppProviders } from './AppProviders'

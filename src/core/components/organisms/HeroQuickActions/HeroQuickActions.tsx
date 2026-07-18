@@ -9,13 +9,11 @@ import type { IconName } from '@/core/components/atoms/Icon'
 export type HeroQuickAction = {
   icon: IconName
   label: string
-  /** 0'dan büyükse tile köşesinde rozet içinde gösterilir */
   badge?: number
   onPress?: () => void
 }
 
 export type HeroQuickActionsProps = {
-  /** Hero (sky) zemin üzerinde eşit genişlikte kısayol tile'ları — flat pastel */
   actions: HeroQuickAction[]
 }
 
@@ -34,7 +32,6 @@ export function HeroQuickActions({ actions }: HeroQuickActionsProps) {
           accessibilityLabel={action.label}
           className="flex-1 bg-sky-100 dark:bg-sky-900 rounded-2xl items-center gap-2 py-3 px-1 active:opacity-80"
         >
-          {/* İkon çapası + rozet */}
           <View>
             <View className="w-11 h-11 rounded-full bg-white dark:bg-sky-950 items-center justify-center">
               <Icon name={action.icon} size={20} color={iconColor} />

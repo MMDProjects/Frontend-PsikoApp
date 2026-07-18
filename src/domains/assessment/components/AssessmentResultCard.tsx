@@ -24,7 +24,6 @@ export function AssessmentResultCard({
 
   return (
     <View className={cn('gap-5', className)}>
-      {/* Skor göstergesi */}
       <View className="items-center gap-3">
         <View className="w-20 h-20 rounded-full bg-white items-center justify-center">
           <Text variant="heading" className="text-sky-700 text-3xl font-bold">
@@ -37,7 +36,6 @@ export function AssessmentResultCard({
         />
       </View>
 
-      {/* Özet */}
       <View className="bg-white dark:bg-dark-card rounded-xl p-5 gap-2">
         <View className="flex-row items-center gap-2 mb-1">
           <Icon name="ClipboardList" size={16} color={iconColor} />
@@ -46,7 +44,6 @@ export function AssessmentResultCard({
         <Text variant="body" color="secondary">{result.summary}</Text>
       </View>
 
-      {/* Öneriler */}
       {result.suggestions.length > 0 && (
         <View className="bg-white dark:bg-dark-card rounded-xl p-5 gap-3">
           <View className="flex-row items-center gap-2 mb-1">
@@ -64,7 +61,6 @@ export function AssessmentResultCard({
         </View>
       )}
 
-      {/* Uzman bul bilgi notu — mavi marka zemini üzerinde flat callout */}
       <View className="bg-sky-600 dark:bg-sky-900 rounded-xl px-4 py-3 flex-row items-start gap-3">
         <Icon name="Heart" size={16} color="#FFFFFF" />
         <Text variant="caption" className="text-white flex-1">

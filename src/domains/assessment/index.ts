@@ -22,3 +22,5 @@ export type {
 export { useAssessmentEngine } from './hooks/useAssessmentEngine'
 export { AssessmentResultCard } from './components/AssessmentResultCard'
 export type { AssessmentResultCardProps } from './components/AssessmentResultCard'
+export { AssessmentResultSummary } from './components/AssessmentResultSummary'
+export type { AssessmentResultSummaryProps } from './components/AssessmentResultSummary'

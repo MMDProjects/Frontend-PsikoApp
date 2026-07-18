@@ -17,8 +17,6 @@ import { tokenStorage } from '@/lib/storage'
 import { useAuthStore } from '@/domains/auth'
 import { LoginResponseSchema } from '@/domains/auth'
 
-// ─── Accept invite mutation ───────────────────────────────────────────────────
-
 type AcceptInviteData = {
   inviteToken: string
   password: string
@@ -40,8 +38,6 @@ function useAcceptInviteMutation() {
     },
   })
 }
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function ClientOnboardingScreen() {
   const router = useRouter()
@@ -81,14 +77,13 @@ export default function ClientOnboardingScreen() {
 
     acceptInvite(
       { inviteToken, password, kvkkConsent: true },
-      { onSuccess: () => router.replace('/(tabs)/') }
+      { onSuccess: () => router.replace('/(tabs)') }
     )
   }
 
   const apiErrorMessage = error instanceof Error ? error.message : undefined
   const bottomBarHeight = 56 + insets.bottom
 
-  // No invite token — show error state
   if (!inviteToken) {
     return (
       <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
@@ -127,7 +122,6 @@ export default function ClientOnboardingScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Header */}
           <View className="items-center gap-3">
             <View className="w-16 h-16 rounded-full bg-white items-center justify-center">
               <Icon name="CheckCircle" size={32} color="#0EA5E9" />
@@ -138,7 +132,6 @@ export default function ClientOnboardingScreen() {
             </Text>
           </View>
 
-          {/* Form */}
           <View className="gap-4 mt-2">
             <InputField
               tone="onBrand"
@@ -162,7 +155,6 @@ export default function ClientOnboardingScreen() {
               isRequired
             />
 
-            {/* KVKK consent — flat seçim dili */}
             <Pressable
               onPress={() => { setKvkkAccepted((v) => !v); setKvkkError(undefined) }}
               className={cn(

@@ -18,7 +18,6 @@ export function useCategoriesQuery() {
       const raw = await get('/categories')
       const result = CategoryListResponseSchema.safeParse(raw)
       if (!result.success) {
-        console.error('[categories] Zod parse FAILED:', JSON.stringify(result.error.issues))
         throw result.error
       }
       return result.data.data

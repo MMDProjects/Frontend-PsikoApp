@@ -20,7 +20,6 @@ export function useSuggestionsQuery(audience: Exclude<SuggestionAudience, 'all'>
       const raw = await get('/suggestions', { params: { audience } })
       const result = SuggestionListResponseSchema.safeParse(raw)
       if (!result.success) {
-        console.error('[suggestions] Zod parse FAILED:', JSON.stringify(result.error.issues))
         throw result.error
       }
       return result.data.data

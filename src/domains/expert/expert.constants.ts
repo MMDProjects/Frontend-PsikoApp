@@ -1,4 +1,3 @@
-// Query key factory — tüm expert query'leri bu factory'den key alır
 export const expertKeys = {
   all:     ['experts'] as const,
   lists:   () => [...expertKeys.all, 'list'] as const,

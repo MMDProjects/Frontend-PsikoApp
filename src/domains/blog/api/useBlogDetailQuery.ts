@@ -12,7 +12,6 @@ export function useBlogDetailQuery(slug: string) {
       const raw = await get(`/blogs/${slug}`)
       const result = BlogSchema.safeParse(raw)
       if (!result.success) {
-        console.error('[blog-detail] Zod parse FAILED:', JSON.stringify(result.error.issues))
         throw result.error
       }
       return result.data

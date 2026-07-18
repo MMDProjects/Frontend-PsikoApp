@@ -3,6 +3,7 @@ import type { MatchStatus } from './types/match.types'
 
 export const matchKeys = {
   all:    ['matches'] as const,
+  list:   (status?: string[]) => [...matchKeys.all, 'list', status ?? []] as const,
   active: () => [...matchKeys.all, 'active'] as const,
   detail: (id: string) => [...matchKeys.all, 'detail', id] as const,
 } as const

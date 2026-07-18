@@ -39,7 +39,6 @@ export default function CheckoutScreen() {
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
       <BackButton />
 
-      {/* Başlık + güvenlik etiketi — WebView üstünde sabit */}
       <ScreenTitle title="Güvenli Ödeme" topInset className="border-b border-neutral-100 dark:border-dark-border">
         <View className="flex-row items-center gap-1">
           <Icon name="Lock" size={10} color={colorScheme === 'dark' ? '#A3A3A3' : '#737373'} />

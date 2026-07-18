@@ -5,8 +5,6 @@ import { tokenStorage } from './storage'
 
 import type { AxiosError, AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 
-// ─── Error types ─────────────────────────────────────────────────────────────
-
 export type ValidationError = { field: string; message: string }
 
 export class ApiError extends Error {
@@ -28,25 +26,17 @@ export class NetworkError extends Error {
   }
 }
 
-// ─── Navigation callback ──────────────────────────────────────────────────────
-// Set by the root layout so the lib layer can trigger navigation without
-// importing expo-router directly (avoids circular deps).
 let _onUnauthenticated: (() => void) | null = null
 
 export function registerUnauthenticatedHandler(handler: () => void): void {
   _onUnauthenticated = handler
 }
 
-// ─── Axios instance ───────────────────────────────────────────────────────────
-
 const instance: AxiosInstance = axios.create({
   baseURL: env.EXPO_PUBLIC_API_URL,
   timeout: 15_000,
   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
 })
-
-// ─── Request interceptor: attach Bearer token ────────────────────────────────
-// tokenStorage.getAccessToken() is async (AsyncStorage), so the interceptor must be async
 
 instance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const token = await tokenStorage.getAccessToken()
@@ -56,31 +46,28 @@ instance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => 
   return config
 })
 
-// ─── Token refresh state ──────────────────────────────────────────────────────
-
 let isRefreshing = false
 let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = []
 
 function processQueue(error: unknown, token: string | null): void {
-  failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(token!)))
+  failedQueue.forEach((p) => {
+    if (token != null && !error) p.resolve(token)
+    else p.reject(error ?? new Error('Token refresh failed'))
+  })
   failedQueue = []
 }
-
-// ─── Response interceptor ────────────────────────────────────────────────────
 
 instance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<{ code?: string; message?: string; errors?: unknown[] }>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
-    // Network error (no response at all)
     if (!error.response) {
       return Promise.reject(new NetworkError())
     }
 
     const { status, data } = error.response
 
-    // 401 — attempt one token refresh then retry
     if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -122,7 +109,6 @@ instance.interceptors.response.use(
       }
     }
 
-    // 422 — normalize validation errors
     if (status === 422) {
       const rawErrors = (data?.errors ?? []) as Array<{ field?: string; message?: string }>
       const validationErrors: ValidationError[] = rawErrors.map((e) => ({
@@ -139,7 +125,6 @@ instance.interceptors.response.use(
       )
     }
 
-    // All other errors
     return Promise.reject(
       new ApiError(
         data?.code    ?? 'UNKNOWN_ERROR',
@@ -150,17 +135,13 @@ instance.interceptors.response.use(
   },
 )
 
-// ⚠️ MOCK — delete this block + psikoAL/mock-db/ folder when connecting real API
+// ⚠️ MOCK — gerçek API'ye geçerken bu bloğu ve psikoAL/mock-db/ klasörünü sil (bkz. docs/PRODUCTION_CHECKLIST.md)
 if (process.env.EXPO_PUBLIC_APP_ENV === 'mock') {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const MockAdapter = require('axios-mock-adapter')
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { setupMocks } = require('../../../mock-db/handlers')
   setupMocks(new MockAdapter(instance, { delayResponse: 600 }))
 }
 // END MOCK
-
-// ─── Typed request wrappers ───────────────────────────────────────────────────
 
 export async function get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
   const res = await instance.get<T>(url, config)

@@ -7,31 +7,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Divider } from '@/core/components/atoms/Divider'
 import { Icon } from '@/core/components/atoms/Icon'
-import { Switch } from '@/core/components/atoms/Switch'
 import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
 import { InputField } from '@/core/components/molecules/InputField'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
+import { ToggleRow } from '@/core/components/molecules/ToggleRow'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
 import { themeColors } from '@/core/theme'
 import { getFullName, getInitials } from '@/core/utils/personName'
 import { useAuthStore, useUpdateProfileMutation, UpdateProfileSchema } from '@/domains/auth'
 
 import type { UpdateProfileRequest } from '@/domains/auth'
-
-type ShareRowProps = { label: string; description: string; value: boolean; onValueChange: (v: boolean) => void }
-
-function ShareRow({ label, description, value, onValueChange }: ShareRowProps) {
-  return (
-    <View className="flex-row items-center justify-between gap-4">
-      <View className="flex-1 gap-0.5">
-        <Text variant="label" className="font-medium">{label}</Text>
-        <Text variant="caption" color="tertiary">{description}</Text>
-      </View>
-      <Switch value={value} onValueChange={onValueChange} />
-    </View>
-  )
-}
 
 export default function PersonalInfoScreen() {
   const router = useRouter()
@@ -77,13 +63,11 @@ export default function PersonalInfoScreen() {
         >
           <ScreenTitle title="Kişisel Bilgiler" />
 
-          {/* ── Section 1: Kimlik ── */}
           <View className="px-4 py-5 gap-4">
             <View className="flex-row items-center gap-4">
               <Pressable onPress={handleChangePhoto} className="relative active:opacity-80">
                 <Avatar size="xl" src={user?.avatarUrl ?? undefined} initials={initials} isVerified={user?.isVerified} />
                 <View className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-sky-500 items-center justify-center border-2 border-surface-base dark:border-dark-bg">
-                  {/* Sky-500 rozet zemininde her iki temada da beyaz kalmalı */}
                   <Icon name="Pencil" size={13} color={themeColors.light.contentInverse} />
                 </View>
               </Pressable>
@@ -132,7 +116,6 @@ export default function PersonalInfoScreen() {
             </View>
           </View>
 
-          {/* ── Section 2: İletişim ── */}
           <Divider spacing="none" className="mx-4" />
           <View className="px-4 py-5 gap-4">
             <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
@@ -169,7 +152,6 @@ export default function PersonalInfoScreen() {
             />
           </View>
 
-          {/* ── Section 3: İletişim Paylaşımı (yalnızca danışan) ── */}
           {isClient && (
             <>
               <Divider spacing="none" className="mx-4" />
@@ -187,21 +169,21 @@ export default function PersonalInfoScreen() {
                   control={control}
                   name="shareEmail"
                   render={({ field: { onChange, value } }) => (
-                    <ShareRow label="E-posta" description="Uzman e-posta adresinizi görebilir" value={value ?? true} onValueChange={onChange} />
+                    <ToggleRow label="E-posta" description="Uzman e-posta adresinizi görebilir" value={value ?? true} onValueChange={onChange} />
                   )}
                 />
                 <Controller
                   control={control}
                   name="sharePhone"
                   render={({ field: { onChange, value } }) => (
-                    <ShareRow label="Telefon" description="Uzman telefon numaranızı görebilir" value={value ?? true} onValueChange={onChange} />
+                    <ToggleRow label="Telefon" description="Uzman telefon numaranızı görebilir" value={value ?? true} onValueChange={onChange} />
                   )}
                 />
                 <Controller
                   control={control}
                   name="shareLocation"
                   render={({ field: { onChange, value } }) => (
-                    <ShareRow label="Konum" description="Uzman konum tercihinizi görebilir" value={value ?? true} onValueChange={onChange} />
+                    <ToggleRow label="Konum" description="Uzman konum tercihinizi görebilir" value={value ?? true} onValueChange={onChange} />
                   )}
                 />
               </View>

@@ -8,3 +8,6 @@ export type { MatchStatus, Match, MatchDetail, ReleaseMatchBody } from './types/
 
 export { MatchCodeBanner } from './components/MatchCodeBanner'
 export type { MatchCodeBannerProps } from './components/MatchCodeBanner'
+
+export { MatchRow } from './components/MatchRow'
+export type { MatchRowProps } from './components/MatchRow'

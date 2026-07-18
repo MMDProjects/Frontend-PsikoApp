@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router'
 import { Controller, useForm } from 'react-hook-form'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Chip } from '@/core/components/atoms/Chip'
 import { Divider } from '@/core/components/atoms/Divider'
 import { Icon } from '@/core/components/atoms/Icon'
@@ -14,6 +15,7 @@ import { InputField } from '@/core/components/molecules/InputField'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
 import { useThemeColors } from '@/core/theme'
+import { useRefresh } from '@/core/hooks'
 import { useAuthStore } from '@/domains/auth'
 import { useExpertProfileQuery, useExpertProfileMutation } from '@/domains/expert'
 
@@ -25,7 +27,9 @@ export default function DocumentsScreen() {
   const insets = useSafeAreaInsets()
   const bottomBarHeight = 56 + insets.bottom
 
-  const { data: expert, isLoading, isError } = useExpertProfileQuery(user?.id ?? '')
+  const expertQuery = useExpertProfileQuery(user?.id ?? '')
+  const { data: expert, isLoading, isError } = expertQuery
+  const { isRefreshing, onRefresh } = useRefresh(expertQuery)
   const { mutate: updateProfile, isPending } = useExpertProfileMutation()
   const colors = useThemeColors()
 
@@ -75,10 +79,10 @@ export default function DocumentsScreen() {
           <ScrollView
             contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: bottomBarHeight + 16 }}
             showsVerticalScrollIndicator={false}
+            refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
           >
             <ScreenTitle title="Belgeler ve Bağlantılar" />
 
-            {/* ── Section 1: CV ── */}
             <View className="px-4 py-5 gap-3">
               <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
                 Özgeçmiş (CV)
@@ -96,7 +100,6 @@ export default function DocumentsScreen() {
               </Pressable>
             </View>
 
-            {/* ── Section 2: Sertifikalar ── */}
             <Divider spacing="none" className="mx-4" />
             <View className="px-4 py-5 gap-3">
               <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
@@ -119,7 +122,6 @@ export default function DocumentsScreen() {
               </Pressable>
             </View>
 
-            {/* ── Section 3: Kişisel Site ── */}
             <Divider spacing="none" className="mx-4" />
             <View className="px-4 py-5 gap-3">
               <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">

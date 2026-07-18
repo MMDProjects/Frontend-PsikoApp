@@ -14,7 +14,6 @@ export default function NewListingScreen() {
   const router = useRouter()
   const { spec } = useLocalSearchParams<{ spec?: string }>()
 
-  // Form adımı — DecorCircles her adımda animasyonla yer değiştirir
   const [step, setStep] = useState(1)
 
   const { mutate: createListing, isPending, error } = useCreateListingMutation()
@@ -31,13 +30,10 @@ export default function NewListingScreen() {
 
   return (
     <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
-      {/* Dekoratif zemin daireleri — hero dili, adım geçişlerinde süzülerek hareket eder */}
       <DecorCircles phase={step} />
 
-      {/* Tek geri butonu — form içi geri de buradan yönetilir (adım > 1 ise adım geri) */}
       <BackButton onPress={() => (step > 1 ? setStep(step - 1) : router.back())} />
 
-      {/* Sayfa başlığı — mavi zeminde beyaz */}
       <ScreenTitle title="İlan Oluştur" topInset titleClassName="text-white" />
 
       {apiError && (

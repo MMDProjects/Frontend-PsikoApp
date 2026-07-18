@@ -30,7 +30,6 @@ const variantStyles: Record<ChipVariant, { base: string; selectedSm: string; sel
   tag:     { base: 'bg-neutral-200 dark:bg-neutral-800', selectedSm: 'bg-tag-muted/60 dark:bg-tag/20',                                                           selectedMd: 'bg-tag-muted/60 dark:bg-tag/20'                                                          },
   session: { base: 'bg-neutral-200 dark:bg-neutral-800', selectedSm: 'bg-session-muted/60 dark:bg-session/20',                                                   selectedMd: 'bg-session-muted/60 dark:bg-session/20'                                                  },
   price:   { base: 'bg-neutral-200 dark:bg-neutral-800', selectedSm: 'bg-price-muted/60 border border-price-muted dark:bg-price/20 dark:border-price/30',        selectedMd: 'bg-price-muted/60 border border-price-muted dark:bg-price/20 dark:border-price/30'       },
-  // Mavi marka zemini üzerinde flat: seçili = solid beyaz, seçili değil = koyu sky tonu
   onBrand: { base: 'bg-sky-600 dark:bg-sky-900',           selectedSm: 'bg-white dark:bg-white',                                                                  selectedMd: 'bg-white dark:bg-white'                                                                  },
 }
 

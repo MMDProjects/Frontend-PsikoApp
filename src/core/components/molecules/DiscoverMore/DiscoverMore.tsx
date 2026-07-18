@@ -10,26 +10,16 @@ export type DiscoverMoreVariant = 'row' | 'tile'
 
 export type DiscoverMoreProps = {
   onPress: () => void
-  /** Varsayılan: "Daha Fazlasını Keşfet" */
   label?: string
-  /** Başlığın altındaki açıklama satırı (kardeş ögelerin meta satırıyla aynı stil) */
   hint?: string
-  /** tile varyantında görsel alanının üstündeki kategori etiketi (kardeş kartlardaki #kategori gibi) */
   tag?: string
-  /** row varyantında başa eklenen ikon (kardeş satırların ikonlarıyla aynı düzen) */
   icon?: IconName
-  /** row: liste satırı anatomisinde · tile: carousel kartı anatomisinde */
   variant?: DiscoverMoreVariant
-  /** tile varyantında görsel alanı boyutu (carousel'deki kartlarla eşleşmesi için) */
   tileWidth?: number
   tileHeight?: number
   className?: string
 }
 
-/**
- * Listenin/akışın son ögesi gibi görünen keşif bağlantısı.
- * Kardeş ögelerle birebir aynı anatomi ve nötr renkler — ayrı bir buton gibi durmaz.
- */
 export function DiscoverMore({
   onPress,
   label = 'Daha Fazlasını Keşfet',
@@ -51,13 +41,11 @@ export function DiscoverMore({
         style={{ width: tileWidth }}
         className={cn('active:opacity-70 gap-2', className)}
       >
-        {/* Görsel alanı — kardeş kartların görseliyle aynı boyutta nötr yüzey */}
         <View
           className="rounded-xl bg-neutral-200/70 dark:bg-white/5"
           style={{ height: tileHeight }}
         />
 
-        {/* Metin bloğu — kardeş kartların kategori/başlık/meta anatomisi */}
         <View className="gap-1">
           <Text variant="caption" className="text-sky-500 font-semibold" numberOfLines={1}>
             {tag}

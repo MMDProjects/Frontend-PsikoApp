@@ -8,7 +8,6 @@ type SuggestionSlideProps = {
   suggestion: Suggestion
 }
 
-/** Hero pager içindeki tek öneri slaytı — flat pastel panel, ikonsuz, metin odaklı */
 export function SuggestionSlide({ suggestion }: SuggestionSlideProps) {
   return (
     <View className="flex-1 bg-sky-100 dark:bg-sky-900 rounded-2xl px-4 py-3 justify-center gap-1">

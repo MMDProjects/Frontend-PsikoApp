@@ -5,6 +5,7 @@ export const MatchStatusSchema = z.enum(['FREE', 'PENDING', 'MATCHED', 'RELEASED
 export const ClientSchema = z.object({
   id:               z.string().uuid(),
   fullName:         z.string(),
+  initials:         z.string().optional(),
   email:            z.string().email(),
   phone:            z.string().nullable(),
   matchCode:        z.string().nullable(),

@@ -10,15 +10,11 @@ import Animated, {
 import { cn } from '@/core/utils/cn'
 
 export type DecorCirclesProps = {
-  /** Değiştiğinde daireler animasyonla yeni pozisyona kayar (örn. wizard adımı) */
   phase?: number
 }
 
-// Geniş mesafeli ama hızlı geçiş
 const MOVE_TIMING = { duration: 700, easing: Easing.out(Easing.cubic) }
 
-// Base konumlar statik layout'ta kalır; hareket transform-only (Fabric-safe).
-// Phase 0 = anasayfa hero'sundaki mevcut görünüm (big + mid birebir).
 const OFFSETS = [
   { big: { x: 0, y: 0 },     mid: { x: 0, y: 0 },     tiny: { x: 0, y: 0 } },
   { big: { x: -120, y: 90 }, mid: { x: 150, y: -60 }, tiny: { x: -180, y: -120 } },
@@ -26,7 +22,6 @@ const OFFSETS = [
   { big: { x: -210, y: 60 }, mid: { x: 90, y: -150 }, tiny: { x: -240, y: 60 } },
 ] as const
 
-// Mavi marka zemini üzerinde beyaz tonlar — her iki temada aynı
 const circleColors = {
   big:  'bg-white/10',
   mid:  'bg-white/[0.07]',

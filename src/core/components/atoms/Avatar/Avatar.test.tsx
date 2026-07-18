@@ -24,7 +24,6 @@ describe('Avatar', () => {
   it('renders fallback person icon when no src and no initials', () => {
     const { UNSAFE_getAllByType } = render(<Avatar size="md" />)
     const { View } = require('react-native')
-    // Should render fallback container
     expect(UNSAFE_getAllByType(View).length).toBeGreaterThan(0)
   })
 
@@ -76,13 +75,11 @@ describe('AvatarGroup', () => {
 
   it('shows +N overflow when avatars exceed max', () => {
     const { getByText } = render(<AvatarGroup avatars={avatars} max={5} />)
-    // 7 total, max=5: show 4 + "+3"
     expect(getByText('+3')).toBeTruthy()
   })
 
   it('shows correct overflow count', () => {
     const { getByText } = render(<AvatarGroup avatars={avatars} max={3} />)
-    // 7 total, max=3: show 2 + "+5"
     expect(getByText('+5')).toBeTruthy()
   })
 

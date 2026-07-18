@@ -30,6 +30,3 @@ export type { ListingFilterModalProps, ListingFilterResult } from './components/
 export { ListingSortModal, LISTING_SORT_OPTIONS } from './components/ListingSortModal'
 export type { ListingSortModalProps, ListingSortValue } from './components/ListingSortModal'
 
-export { useListingStatus } from './hooks/useListingStatus'
-
-export { formatClientName } from './utils/formatClientName'

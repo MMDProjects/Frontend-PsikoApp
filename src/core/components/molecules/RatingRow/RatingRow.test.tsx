@@ -64,7 +64,6 @@ describe('RatingRow', () => {
   })
 
   it('does not render empty stars when showEmpty is false', () => {
-    // rating=2 → 2 full, 3 empty; with showEmpty=false only 2 stars render
     const { getAllByRole } = render(
       <RatingRow rating={2} interactive showEmpty={false} onRatingChange={jest.fn()} />
     )
@@ -77,7 +76,6 @@ describe('RatingRow', () => {
       <RatingRow rating={3} onRatingChange={onRatingChange} />
     )
     const { Pressable } = require('react-native')
-    // Non-interactive renders no Pressable elements
     expect(UNSAFE_queryAllByType(Pressable)).toHaveLength(0)
   })
 })

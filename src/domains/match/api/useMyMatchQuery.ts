@@ -13,7 +13,6 @@ export function useMyMatchQuery() {
       if (raw === null || raw === undefined) return null
       const result = MatchSchema.safeParse(raw)
       if (!result.success) {
-        console.error('[match/active] Zod parse FAILED:', JSON.stringify(result.error.issues))
         throw result.error
       }
       return result.data

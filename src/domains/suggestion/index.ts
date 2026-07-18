@@ -1,4 +1,4 @@
-export { useSuggestionsQuery } from './api/useSuggestionsQuery'
+export { useSuggestionsQuery } from './api'
 export { SuggestionSlide } from './components/SuggestionSlide'
 export { suggestionKeys, SUGGESTION_STALE_TIME } from './suggestion.constants'
 

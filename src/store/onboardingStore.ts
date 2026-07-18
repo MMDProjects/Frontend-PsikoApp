@@ -4,11 +4,8 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { zustandStorage } from '@/lib/storage'
 
 type OnboardingState = {
-  /** Karşılama turu (welcome slaytları) daha önce görüldü mü */
   hasSeenWelcome: boolean
-  /** Persist rehidrasyonu tamamlandı mı — tamamlanmadan yönlendirme yapılmaz */
   hasHydrated: boolean
-  /** Giriş sonrası tabs yerine gidilecek onboarding rotası (tek kullanımlık, persist edilmez) */
   onboardIntent: string | null
   setSeenWelcome: () => void
   resetWelcome: () => void

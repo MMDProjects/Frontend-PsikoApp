@@ -26,7 +26,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     setColorScheme(preference)
-  }, [preference])
+  }, [preference, setColorScheme])
 
   const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_400Regular,

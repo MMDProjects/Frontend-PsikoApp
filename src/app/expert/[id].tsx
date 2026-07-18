@@ -2,6 +2,7 @@ import { ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Chip } from '@/core/components/atoms/Chip'
 import { Divider } from '@/core/components/atoms/Divider'
@@ -12,8 +13,11 @@ import { BackButton } from '@/core/components/molecules/BackButton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
 import { RatingRow } from '@/core/components/molecules/RatingRow'
+import { StatPill } from '@/core/components/molecules/StatPill'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
+import { useRefresh } from '@/core/hooks'
 import { getFullName, getInitials } from '@/core/utils/personName'
+import { formatDate } from '@/core/utils/formatDate'
 import { SESSION_TYPE_LABELS } from '@/domains/listing'
 import { useAuthStore } from '@/domains/auth'
 import { useExpertProfileQuery, useExpertReviewsQuery } from '@/domains/expert'
@@ -23,14 +27,17 @@ export default function ExpertProfileScreen() {
   const router = useRouter()
   const role = useAuthStore((s) => s.role)
 
-  const { data: expert, isLoading, isError } = useExpertProfileQuery(id ?? '')
-  const { data: reviews } = useExpertReviewsQuery(id ?? '')
+  const expertQuery = useExpertProfileQuery(id ?? '')
+  const { data: expert, isLoading, isError } = expertQuery
+  const reviewsQuery = useExpertReviewsQuery(id ?? '')
+  const reviews = reviewsQuery.data
+  const { isRefreshing, onRefresh } = useRefresh(expertQuery, reviewsQuery)
   const insets = useSafeAreaInsets()
   const bottomBarHeight = 56 + insets.bottom
 
-  const initials = getInitials(expert)
+  const initials = expert?.initials ?? getInitials(expert)
 
-  const canOffer = role === 'client' && expert?.status === 'approved'
+  const canOffer = role === 'client' && (expert?.acceptsOffers ?? false)
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
@@ -75,10 +82,10 @@ export default function ExpertProfileScreen() {
           <ScrollView
             contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: canOffer ? bottomBarHeight + 16 : 48 }}
             showsVerticalScrollIndicator={false}
+            refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
           >
             <ScreenTitle title="Uzman Profili" />
 
-            {/* ── Section 1: Kimlik ── */}
             <View className="px-4 py-5 gap-4">
               <View className="flex-row items-center gap-4">
                 <Avatar
@@ -104,7 +111,6 @@ export default function ExpertProfileScreen() {
               )}
             </View>
 
-            {/* ── Section 2: Uzmanlık Alanları ── */}
             {expert.specializations.length > 0 && (
               <>
                 <Divider spacing="none" className="mx-4" />
@@ -121,7 +127,6 @@ export default function ExpertProfileScreen() {
               </>
             )}
 
-            {/* ── Section 3: Deneyim / İstatistikler ── */}
             <Divider spacing="none" className="mx-4" />
             <View className="px-4 py-5">
               <View className="flex-row items-center">
@@ -133,7 +138,6 @@ export default function ExpertProfileScreen() {
               </View>
             </View>
 
-            {/* ── Section 4: Biyografi ── */}
             {expert.bio ? (
               <>
                 <Divider spacing="none" className="mx-4" />
@@ -148,7 +152,6 @@ export default function ExpertProfileScreen() {
               </>
             ) : null}
 
-            {/* ── Section 4b: Eğitim ── */}
             {expert.education ? (
               <>
                 <Divider spacing="none" className="mx-4" />
@@ -163,7 +166,6 @@ export default function ExpertProfileScreen() {
               </>
             ) : null}
 
-            {/* ── Section 4c: Belgeler ve Bağlantılar ── */}
             {(expert.cvUrl || (expert.certificates && expert.certificates.length > 0) || expert.personalWebsite) && (
               <>
                 <Divider spacing="none" className="mx-4" />
@@ -192,7 +194,6 @@ export default function ExpertProfileScreen() {
               </>
             )}
 
-            {/* ── Section 5: Değerlendirmeler (anonim) ── */}
             {reviews && reviews.length > 0 && (
               <>
                 <Divider spacing="none" className="mx-4" />
@@ -212,7 +213,7 @@ export default function ExpertProfileScreen() {
                               <Text variant="caption" color="tertiary">Danışan</Text>
                             </View>
                             <Text variant="caption" color="tertiary">
-                              {new Date(review.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                              {formatDate(review.createdAt, 'long')}
                             </Text>
                           </View>
                           <RatingRow rating={review.rating} size="sm" showEmpty={false} />
@@ -245,17 +246,6 @@ export default function ExpertProfileScreen() {
           )}
         </>
       )}
-    </View>
-  )
-}
-
-type StatPillProps = { value: string; label: string }
-
-function StatPill({ value, label }: StatPillProps) {
-  return (
-    <View className="flex-1 items-center gap-0.5">
-      <Text variant="subheading" className="text-sky-600">{value}</Text>
-      <Text variant="caption" color="tertiary">{label}</Text>
     </View>
   )
 }

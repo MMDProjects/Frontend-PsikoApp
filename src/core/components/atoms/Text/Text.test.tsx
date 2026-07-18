@@ -91,7 +91,6 @@ describe('Text', () => {
       </Text>
     )
     const el = getByText('Bold body')
-    // custom weight class should be present
     expect(el.props.className).toContain('font-bold')
   })
 })

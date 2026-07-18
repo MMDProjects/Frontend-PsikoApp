@@ -21,7 +21,6 @@ export default function TabsLayout() {
     }
   }, [isAuthenticated, router])
 
-  // ── iOS: Liquid Glass NativeTabs (SF Symbols) ────────────────
   if (Platform.OS === 'ios') {
     return (
       <NativeTabs>
@@ -48,7 +47,6 @@ export default function TabsLayout() {
     )
   }
 
-  // ── Android: Flat bottom nav (Lucide icons, dark mode aware) ─
   const tabBg        = isDark ? '#1C1C1E' : '#FFFFFF'
   const tabBorder    = isDark ? '#38383A' : '#F0F0F0'
   const tabActive    = isDark ? '#38BDF8' : '#0EA5E9'   // sky-400 dark / sky-500 light

@@ -14,6 +14,7 @@ export const BlogSchema = z.object({
   coverImage:  z.string().url(),
   categories:  z.array(z.string()),
   likeCount:   z.number().int().min(0),
+  liked:       z.boolean().default(false),
   readingTime: z.number().int().positive(),
   publishedAt: z.string().datetime(),
   author:      BlogAuthorSchema,

@@ -12,7 +12,6 @@ import { useOnboardingStore } from '@/store/onboardingStore'
 
 import type { IconName } from '@/core/components/atoms/Icon'
 
-// TODO: gerçek marka logosu gelince değiştirilecek
 const LOGO_PLACEHOLDER = require('../../../assets/images/brand/logo-placeholder.png')
 
 type WelcomeSlide = {
@@ -59,10 +58,8 @@ export default function WelcomeScreen() {
 
   return (
     <View className="flex-1 bg-sky-500 dark:bg-sky-950" style={{ overflow: 'hidden' }}>
-      {/* Dekoratif daireler — her slaytta süzülerek yer değiştirir */}
       <DecorCircles phase={slide} />
 
-      {/* Atla — sağ üst */}
       <Pressable
         onPress={() => finish('/(auth)/login')}
         hitSlop={8}
@@ -74,7 +71,6 @@ export default function WelcomeScreen() {
         <Text variant="caption" className="text-white font-semibold">Atla</Text>
       </Pressable>
 
-      {/* Logo — üst orta */}
       <View className="items-center" style={{ paddingTop: insets.top + 12 }}>
         <View className="bg-white rounded-xl px-3 py-1.5">
           <Image
@@ -86,13 +82,11 @@ export default function WelcomeScreen() {
         </View>
       </View>
 
-      {/* Slayt içeriği */}
       <View className="flex-1 justify-center px-8 gap-6" style={{ paddingBottom: bottomBarHeight }}>
         <View className="items-center gap-6">
           <View className="w-24 h-24 rounded-full bg-white items-center justify-center">
             <Icon name={current.icon} size={44} color="#0EA5E9" />
           </View>
-          {/* Sabit yükseklikli metin bloğu — slaytlar arası ikon/nokta konumları oynamaz */}
           <View className="items-center gap-3">
             <Text
               variant="heading"
@@ -113,7 +107,6 @@ export default function WelcomeScreen() {
           </View>
         </View>
 
-        {/* Slayt noktaları */}
         <View className="flex-row justify-center gap-2 mt-2">
           {SLIDES.map((_, i) => (
             <View

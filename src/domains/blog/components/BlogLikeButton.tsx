@@ -8,11 +8,12 @@ import { useBlogLike } from '../hooks/useBlogLike'
 
 type BlogLikeButtonProps = {
   slug: string
-  initialCount: number
+  liked: boolean
+  likeCount: number
 }
 
-export function BlogLikeButton({ slug, initialCount }: BlogLikeButtonProps) {
-  const { liked, likeCount, toggleLike } = useBlogLike({ slug, initialCount })
+export function BlogLikeButton({ slug, liked: initialLiked, likeCount: initialCount }: BlogLikeButtonProps) {
+  const { liked, likeCount, toggleLike } = useBlogLike({ slug, liked: initialLiked, likeCount: initialCount })
 
   return (
     <Pressable

@@ -2,11 +2,12 @@ import { Pressable, ScrollView, useColorScheme, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Divider } from '@/core/components/atoms/Divider'
 import { Icon } from '@/core/components/atoms/Icon'
-import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
+import { ListRowSkeleton } from '@/core/components/molecules/ListRowSkeleton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { SectionHeader } from '@/core/components/molecules/SectionHeader'
 import {
@@ -15,29 +16,20 @@ import {
   RESULT_LEVEL_CONFIG,
 } from '@/domains/assessment'
 
-const TR_MONTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
-function formatDate(iso: string): string {
-  const d = new Date(iso)
-  return `${d.getDate()} ${TR_MONTHS[d.getMonth()]} ${d.getFullYear()}`
-}
-
-function RowSkeleton() {
-  return (
-    <View className="px-4 py-4 gap-3">
-      <Skeleton variant="line" width="60%" height={14} />
-      <Skeleton variant="line" width="90%" height={11} />
-      <Skeleton variant="line" width="40%" height={11} />
-    </View>
-  )
-}
+import { formatDate } from '@/core/utils/formatDate'
+import { useRefresh } from '@/core/hooks'
 
 export default function AssessmentListScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const isDark = useColorScheme() === 'dark'
 
-  const { data: assessmentList, isLoading: listLoading } = useAssessmentListQuery()
-  const { data: myResults, isLoading: resultsLoading } = useMyAssessmentResultsQuery()
+  const assessmentsQuery = useAssessmentListQuery()
+  const { data: assessmentList, isLoading: listLoading } = assessmentsQuery
+  const myResultsQuery = useMyAssessmentResultsQuery()
+  const { isLoading: resultsLoading } = myResultsQuery
+  const myResults = myResultsQuery.data?.data
+  const { isRefreshing, onRefresh } = useRefresh(assessmentsQuery, myResultsQuery)
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
@@ -47,16 +39,15 @@ export default function AssessmentListScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-10"
         contentContainerStyle={{ paddingTop: insets.top + 8 }}
+        refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
       >
-        {/* Header — ortalanmış küçük sayfa başlığı */}
         <ScreenTitle title="Testler" />
 
-        {/* ── SONUÇLARIM ── */}
         <Divider spacing="none" className="mx-4 mt-4" />
         <SectionHeader title="Sonuçlarım" />
 
         {resultsLoading ? (
-          <RowSkeleton />
+          <ListRowSkeleton />
         ) : !myResults || myResults.length === 0 ? (
           <View className="px-4 py-6 items-center gap-2">
             <Icon name="ClipboardList" size={28} color="#A3A3A3" />
@@ -70,7 +61,6 @@ export default function AssessmentListScreen() {
               <View key={result.id}>
                 {index > 0 && <Divider spacing="none" className="mx-4" />}
                 <View className="px-4 py-4 gap-2">
-                  {/* Başlık + seviye */}
                   <View className="flex-row items-center gap-2.5">
                     <Text variant="label" className="flex-1 font-semibold text-neutral-900 dark:text-[#F5F5F7]" numberOfLines={1}>
                       {result.assessmentTitle}
@@ -80,15 +70,13 @@ export default function AssessmentListScreen() {
                     </Text>
                   </View>
 
-                  {/* Özet */}
                   <Text variant="caption" color="secondary" numberOfLines={2} className="leading-relaxed">
                     {result.summary}
                   </Text>
 
-                  {/* Alt satır: puan + tarih */}
                   <View className="flex-row items-center justify-between pt-1">
                     <Text variant="caption" color="tertiary">Puan: {result.score}</Text>
-                    <Text variant="caption" color="tertiary">{formatDate(result.createdAt)}</Text>
+                    <Text variant="caption" color="tertiary">{formatDate(result.createdAt, 'long')}</Text>
                   </View>
                 </View>
               </View>
@@ -96,12 +84,11 @@ export default function AssessmentListScreen() {
           })
         )}
 
-        {/* ── MEVCUT TESTLER ── */}
         <Divider spacing="none" className="mx-4 mt-4" />
         <SectionHeader title="Mevcut Testler" />
 
         {listLoading ? (
-          <RowSkeleton />
+          <ListRowSkeleton />
         ) : (
           assessmentList?.map((test, index) => (
             <View key={test.id}>

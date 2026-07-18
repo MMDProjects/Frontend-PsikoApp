@@ -6,12 +6,19 @@ import { get } from '@/lib/api'
 import { assessmentKeys } from '../assessment.constants'
 import { MyAssessmentResultSchema } from '../schemas/assessment.schema'
 
+const MyResultsResponseSchema = z.object({
+  data: z.array(MyAssessmentResultSchema),
+  meta: z.object({ page: z.number(), total: z.number(), perPage: z.number() }),
+})
+
 export function useMyAssessmentResultsQuery() {
   return useQuery({
     queryKey: assessmentKeys.myResults(),
     queryFn: async () => {
       const raw = await get('/assessment/results/my')
-      return z.array(MyAssessmentResultSchema).parse((raw as any).data)
+      const result = MyResultsResponseSchema.safeParse(raw)
+      if (!result.success) throw result.error
+      return result.data
     },
     staleTime: 5 * 60 * 1000,
   })

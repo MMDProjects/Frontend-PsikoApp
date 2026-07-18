@@ -2,23 +2,26 @@ import { FlatList, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Divider } from '@/core/components/atoms/Divider'
 import { Skeleton } from '@/core/components/atoms/Skeleton'
 import { BackButton } from '@/core/components/molecules/BackButton'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
+import { useRefresh } from '@/core/hooks'
 import { useBlogListQuery, BlogCard } from '@/domains/blog'
 
 export default function BlogFeedScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
 
-  const { data, isLoading, isError, refetch } = useBlogListQuery()
+  const blogsQuery = useBlogListQuery()
+  const { data, isLoading, isError, refetch } = blogsQuery
+  const { isRefreshing, onRefresh } = useRefresh(blogsQuery)
   const blogs = data?.data ?? []
 
   return (
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
-      {/* Sabit geri butonu — scroll'dan etkilenmez */}
       <BackButton />
 
       <FlatList
@@ -26,6 +29,7 @@ export default function BlogFeedScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }}
+        refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
         ListHeaderComponent={<ScreenTitle title="Psikoloji Blogu" />}
         ItemSeparatorComponent={() => <Divider spacing="none" className="mx-4" />}
         ListEmptyComponent={

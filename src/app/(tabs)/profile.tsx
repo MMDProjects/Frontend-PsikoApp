@@ -5,8 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
+import { MenuRow } from '@/core/components/molecules/MenuRow'
 import { useThemeColors } from '@/core/theme'
 import { getFullName, getInitials } from '@/core/utils/personName'
+import { env } from '@/lib/env'
 import { useAuthStore, useLogoutMutation } from '@/domains/auth'
 import { useThemeStore } from '@/store/themeStore'
 
@@ -17,37 +19,12 @@ type MenuItem = {
   label: string
   onPress: () => void
   value?: string
-  /** false ise satır bir sayfaya değil, doğrudan bir aksiyona (Alert, Share, vb.) bağlıdır — ok gösterilmez */
   hasArrow?: boolean
 }
 
 type MenuSection = {
   title: string
   items: MenuItem[]
-}
-
-function SectionCard({ items }: { items: MenuItem[] }) {
-  const colors = useThemeColors()
-  return (
-    <View>
-      {items.map((item, i) => (
-        <Pressable
-          key={i}
-          onPress={item.onPress}
-          className="px-4 py-4 flex-row items-center gap-3 active:opacity-90"
-        >
-          <Icon name={item.icon} size={18} color={colors.contentSecondary} />
-          <Text variant="body" className="flex-1 dark:text-[#F5F5F7]">{item.label}</Text>
-          {item.value ? (
-            <Text variant="caption" color="tertiary">{item.value}</Text>
-          ) : null}
-          {item.hasArrow !== false && (
-            <Icon name="ChevronRight" size={16} color={colors.contentDisabled} />
-          )}
-        </Pressable>
-      ))}
-    </View>
-  )
 }
 
 const THEME_LABELS: Record<string, string> = {
@@ -163,12 +140,10 @@ export default function SettingsScreen() {
     <View className="flex-1 bg-surface-base dark:bg-dark-bg">
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-10">
 
-        {/* ── Header — Tab 2 & 3 ile aynı yapı ── */}
         <View className="px-4 pb-3" style={{ paddingTop: insets.top + 8 }}>
           <Text variant="heading">Ayarlar</Text>
         </View>
 
-        {/* ── Profil Kartı ── */}
         <View className="px-4 py-4 flex-row items-center gap-4">
           <Avatar size="xl" initials={initials} isVerified={isExpert} />
           <View className="flex-1 gap-1">
@@ -179,7 +154,6 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* ── Sections ── */}
         {sections.map((section) => (
           <View key={section.title}>
             <View className="mx-4 mt-4 h-px bg-neutral-200 dark:bg-neutral-800" />
@@ -188,11 +162,21 @@ export default function SettingsScreen() {
                 {section.title}
               </Text>
             </View>
-            <SectionCard items={section.items} />
+            <View>
+              {section.items.map((item) => (
+                <MenuRow
+                  key={item.label}
+                  icon={item.icon}
+                  label={item.label}
+                  value={item.value}
+                  hasArrow={item.hasArrow}
+                  onPress={item.onPress}
+                />
+              ))}
+            </View>
           </View>
         ))}
 
-        {/* ── Çıkış Yap ── */}
         <View className="mx-4 mt-4 h-px bg-neutral-200 dark:bg-neutral-800" />
         <Pressable
           onPress={() => logout()}
@@ -205,9 +189,8 @@ export default function SettingsScreen() {
           </Text>
         </Pressable>
 
-        {/* ── Versiyon ── */}
         <View className="px-5 pt-6">
-          <Text variant="caption" color="secondary" align="center">PsikoAl v1.0.0</Text>
+          <Text variant="caption" color="secondary" align="center">{`PsikoAl v${env.EXPO_PUBLIC_APP_VERSION}`}</Text>
         </View>
 
       </ScrollView>

@@ -1,6 +1,5 @@
 import { z } from 'zod'
 
-// Reviewer kimliği kasıtlı olarak modellenmiyor — yorumlar her zaman anonim gösterilir.
 export const ReviewSchema = z.object({
   id:          z.string().uuid(),
   expertId:    z.string().uuid(),
@@ -8,6 +7,7 @@ export const ReviewSchema = z.object({
   comment:     z.string(),
   sessionType: z.enum(['online', 'yüz_yüze', 'yüz_yüze_online']).optional(),
   createdAt:   z.string().datetime(),
+  createdAtRelative: z.string().optional(),
 })
 
 export type Review = z.infer<typeof ReviewSchema>

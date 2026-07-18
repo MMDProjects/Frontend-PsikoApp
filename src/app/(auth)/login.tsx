@@ -13,14 +13,12 @@ import { useOnboardingStore } from '@/store/onboardingStore'
 
 import type { LoginRequest } from '@/domains/auth'
 
-// TODO: gerçek marka logosu gelince değiştirilecek
 const LOGO_PLACEHOLDER = require('../../../assets/images/brand/logo-placeholder.png')
 
 export default function LoginScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const { mutate: login, isPending, error } = useLoginMutation()
-  // Dev: bayrak sıfırlanınca (auth) layout'u otomatik olarak welcome'a yönlendirir
   const resetWelcome = useOnboardingStore((s) => s.resetWelcome)
   const setOnboardIntent = useOnboardingStore((s) => s.setOnboardIntent)
 
@@ -31,18 +29,16 @@ export default function LoginScreen() {
 
   const onSubmit = (data: LoginRequest) => {
     login(data, {
-      onSuccess: () => router.replace('/(tabs)/'),
+      onSuccess: () => router.replace('/(tabs)'),
     })
   }
 
   const quickLogin = (email: string) => {
     login({ email, password: 'password123' }, {
-      onSuccess: () => router.replace('/(tabs)/'),
+      onSuccess: () => router.replace('/(tabs)'),
     })
   }
 
-  /** Dev: rol onboarding akışını ilk giriş gibi test etmek için giriş yapıp onboarding'e yönlendirir.
-   *  Intent, (auth) layout'unun auth sonrası tabs yerine onboarding'e yönlendirmesini sağlar. */
   const quickOnboard = (email: string, target: string) => {
     setOnboardIntent(target)
     login({ email, password: 'password123' })
@@ -64,7 +60,6 @@ export default function LoginScreen() {
           contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: bottomBarHeight + 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Brand — anasayfa hero'sundaki beyaz pill dili */}
           <View className="items-center mb-10 gap-3">
             <View className="bg-white rounded-xl px-4 py-2">
               <Image
@@ -79,7 +74,6 @@ export default function LoginScreen() {
             </Text>
           </View>
 
-          {/* Form */}
           <View className="gap-4">
             <Controller
               control={control}
@@ -131,7 +125,6 @@ export default function LoginScreen() {
             )}
           </View>
 
-          {/* Footer */}
           <View className="flex-row items-center justify-center mt-8 gap-1">
             <Text variant="body" className="text-sky-100">Hesabın yok mu?</Text>
             <Pressable onPress={() => router.push('/(auth)/register')}>
@@ -139,7 +132,6 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
-          {/* DEV: Hızlı giriş */}
           {process.env.EXPO_PUBLIC_APP_ENV !== 'production' && (
             <View className="mt-8 gap-2">
               <View className="flex-row items-center gap-3">
@@ -166,7 +158,6 @@ export default function LoginScreen() {
                 </Pressable>
               </View>
 
-              {/* İlk giriş (onboarding) akışlarını test etmek için */}
               <View className="flex-row gap-3">
                 <Pressable
                   onPress={() => quickOnboard('uzman@psikoal.com', '/(auth)/onboarding/expert')}

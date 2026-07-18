@@ -2,6 +2,7 @@ import { Alert, Pressable, ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Chip } from '@/core/components/atoms/Chip'
 import { Icon } from '@/core/components/atoms/Icon'
@@ -11,14 +12,15 @@ import { BackButton } from '@/core/components/molecules/BackButton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
-import { getFullName } from '@/core/utils/personName'
+import { useRefresh } from '@/core/hooks'
+import { getFullName, getInitials } from '@/core/utils/personName'
 import { useAuthStore } from '@/domains/auth'
 import {
   useListingDetailQuery,
   useCloseListingMutation,
   ListingDetail,
 } from '@/domains/listing'
-import { useListingOffersQuery, OFFER_STATUS_CONFIG } from '@/domains/offer'
+import { useListingOffersQuery, useOfferDetailQuery, OFFER_STATUS_CONFIG } from '@/domains/offer'
 
 export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -28,22 +30,19 @@ export default function ListingDetailScreen() {
   const isClient = role === 'client'
   const insets = useSafeAreaInsets()
 
-  const { data: listing, isLoading, isError } = useListingDetailQuery(id ?? '')
+  const listingQuery = useListingDetailQuery(id ?? '')
+  const { data: listing, isLoading, isError } = listingQuery
 
-  // Client: tüm teklifler (section 4 için)
-  const { data: offersResponse, isLoading: offersLoading } = useListingOffersQuery(
-    isClient && !!id ? id : ''
+  const listingOffersQuery = useListingOffersQuery(isClient && !!id ? id : '')
+  const { isLoading: offersLoading } = listingOffersQuery
+  const offers = listingOffersQuery.data?.data ?? []
+
+  const { isRefreshing, onRefresh } = useRefresh(listingQuery, listingOffersQuery)
+
+  const hasAlreadySentOffer = !isClient && (listing?.viewerHasOffered ?? false)
+  const { data: myOffer } = useOfferDetailQuery(
+    !isClient ? (listing?.viewerOfferId ?? '') : ''
   )
-  const offers = offersResponse?.data ?? []
-
-  // Expert: kendi teklifi (bottom bar için)
-  const { data: myOffersResponse } = useListingOffersQuery(!isClient && !!id ? id : '')
-  const hasAlreadySentOffer =
-    !isClient &&
-    (myOffersResponse?.data ?? []).some((o) => o.expertId === user?.id)
-  const myOffer = !isClient
-    ? (myOffersResponse?.data ?? []).find((o) => o.expertId === user?.id)
-    : undefined
 
   const { mutate: closeListing, isPending: isClosing } = useCloseListingMutation()
 
@@ -107,25 +106,21 @@ export default function ListingDetailScreen() {
           <ScrollView
             contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: bottomBarHeight + 16 }}
             showsVerticalScrollIndicator={false}
+            refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
           >
-            {/* Sayfa başlığı — scroll içinde */}
             <ScreenTitle title="İlan Detayı" />
 
-            {/* Sections 1, 2, 3 */}
             <ListingDetail
               listing={listing}
               viewerRole={isClient ? 'client' : 'expert'}
             />
 
-            {/* ── Section 4: Teklifler ─────────────────── */}
             <View className="mx-4 h-px bg-neutral-200 dark:bg-neutral-800" />
             <View className="px-4 py-5">
-              {/* Başlık */}
               <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest mb-4">
                 Teklifler
               </Text>
 
-              {/* Client: uzman listesi */}
               {isClient && (
                 <>
                   {offersLoading && (
@@ -155,9 +150,7 @@ export default function ListingDetailScreen() {
                   {!offersLoading && offers.length > 0 && (
                     <View>
                       {offers.map((offer, idx) => {
-                        const expertInitials = offer.expert?.name
-                          ? offer.expert.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-                          : '?'
+                        const expertInitials = offer.expert?.initials ?? '?'
                         return (
                           <View key={offer.id}>
                             <Pressable
@@ -200,7 +193,6 @@ export default function ListingDetailScreen() {
                 </>
               )}
 
-              {/* Expert: sadece bilgi */}
               {!isClient && (
                 <Text variant="body" color="secondary">
                   {listing.offerCount === 0
@@ -210,10 +202,9 @@ export default function ListingDetailScreen() {
               )}
             </View>
 
-            {/* ── Section 5: Teklif Özeti (expert, gönderilmişse) ── */}
             {myOffer && (() => {
               const expertName = myOffer.expert?.name || getFullName(user) || 'Uzman'
-              const expertInitials = expertName.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
+              const expertInitials = myOffer.expert?.initials ?? getInitials(user) ?? '?'
               const statusCfg = OFFER_STATUS_CONFIG[myOffer.status]
               return (
                 <>
@@ -253,7 +244,6 @@ export default function ListingDetailScreen() {
             })()}
           </ScrollView>
 
-          {/* ── Pill Bottom Bar ──────────────────────── */}
           {listing.status === 'OPEN' && (
             !isClient && hasAlreadySentOffer ? (
               <BottomActionBar>

@@ -2,6 +2,7 @@ import { Alert, ScrollView, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { AppRefreshControl } from '@/core/components/atoms/AppRefreshControl'
 import { Avatar } from '@/core/components/atoms/Avatar'
 import { Chip } from '@/core/components/atoms/Chip'
 import { Divider } from '@/core/components/atoms/Divider'
@@ -12,8 +13,9 @@ import { BackButton } from '@/core/components/molecules/BackButton'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
 import { EmptyState } from '@/core/components/molecules/EmptyState'
 import { BottomActionBar } from '@/core/components/organisms/BottomActionBar'
+import { useRefresh } from '@/core/hooks'
 import { useAuthStore } from '@/domains/auth'
-import { RESULT_LEVEL_CONFIG } from '@/domains/assessment'
+import { AssessmentResultSummary } from '@/domains/assessment'
 import { SESSION_TYPE_LABELS } from '@/domains/listing'
 import {
   useOfferDetailQuery,
@@ -29,7 +31,9 @@ export default function OfferDetailScreen() {
   const role = useAuthStore((s) => s.role)
   const isClient = role === 'client'
 
-  const { data: offer, isLoading, isError } = useOfferDetailQuery(id ?? '')
+  const offerQuery = useOfferDetailQuery(id ?? '')
+  const { data: offer, isLoading, isError } = offerQuery
+  const { isRefreshing, onRefresh } = useRefresh(offerQuery)
   const { mutate: acceptOffer, isPending: isAccepting } = useAcceptOfferMutation()
   const { mutate: rejectOffer, isPending: isRejecting } = useRejectOfferMutation()
   const { mutate: withdrawOffer, isPending: isWithdrawing } = useWithdrawOfferMutation()
@@ -38,9 +42,7 @@ export default function OfferDetailScreen() {
   const insets = useSafeAreaInsets()
   const bottomBarHeight = 56 + insets.bottom
 
-  const expertInitials = offer?.expert?.name
-    ? offer.expert.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-    : 'U'
+  const expertInitials = offer?.expert?.initials ?? 'U'
 
   const statusCfg = offer ? OFFER_STATUS_CONFIG[offer.status] : null
 
@@ -51,7 +53,7 @@ export default function OfferDetailScreen() {
       'İletişim bilgileriniz uzman ile paylaşılacaktır. Devam etmek istiyor musunuz?',
       [
         { text: 'Vazgeç', style: 'cancel' },
-        { text: 'Kabul Et', onPress: () => acceptOffer(id, { onSuccess: () => router.replace('/(tabs)/' as never) }) },
+        { text: 'Kabul Et', onPress: () => acceptOffer(id, { onSuccess: () => router.replace('/(tabs)' as never) }) },
       ]
     )
   }
@@ -110,11 +112,10 @@ export default function OfferDetailScreen() {
         <ScrollView
           contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: offer.status === 'PENDING' ? bottomBarHeight + 16 : 48 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={<AppRefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
         >
-          {/* Sayfa başlığı */}
           <ScreenTitle title="Teklif Detayı" />
 
-          {/* ── Section 1: Uzman + İlan başlığı + Meta ── */}
           <View className="px-4 py-5 gap-4">
             <View className="flex-row items-center gap-3">
               <Avatar
@@ -140,7 +141,6 @@ export default function OfferDetailScreen() {
               </Text>
             ) : null}
 
-            {/* Meta: status + konum */}
             <View className="flex-row flex-wrap items-center gap-3">
               {statusCfg && (
                 <View className="flex-row items-center gap-1.5 shrink-0">
@@ -163,7 +163,6 @@ export default function OfferDetailScreen() {
             </View>
           </View>
 
-          {/* ── Section 2: Teklif Detayları ── */}
           <Divider spacing="none" className="mx-4" />
           <View className="px-4 py-5 gap-5">
             {offer.description ? (
@@ -200,50 +199,15 @@ export default function OfferDetailScreen() {
             </View>
           </View>
 
-          {/* ── Section 2b: Test Sonucu (varsa) ── */}
-          {offer.listing?.assessmentResult ? (() => {
-            const r = offer.listing!.assessmentResult!
-            const cfg = RESULT_LEVEL_CONFIG[r.level]
-            const headerBg = r.level === 'low' ? '#F0FDF4' : r.level === 'moderate' ? '#FFFBEB' : '#FEF2F2'
-            return (
-              <>
-                <Divider spacing="none" className="mx-4" />
-                <View className="px-4 py-5 gap-3">
-                  <View className="flex-row items-center gap-1.5">
-                    <Text variant="caption" color="secondary" className="font-semibold uppercase tracking-widest">
-                      Test Sonucu
-                    </Text>
-                    <Icon name="Paperclip" size={12} color="#A3A3A3" />
-                  </View>
-                  <View className="rounded-xl overflow-hidden border border-neutral-200">
-                    <View className="px-4 py-3 flex-row items-center justify-between" style={{ backgroundColor: headerBg }}>
-                      <View className="flex-row items-center gap-2">
-                        <Icon name="ClipboardList" size={14} color={cfg.color} />
-                        <Text variant="label" className="font-semibold" style={{ color: cfg.color }}>
-                          {r.assessmentTitle}
-                        </Text>
-                      </View>
-                      <View className="flex-row items-center gap-2">
-                        <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: cfg.color + '20' }}>
-                          <Text variant="caption" className="font-semibold" style={{ color: cfg.color }}>
-                            {cfg.label}
-                          </Text>
-                        </View>
-                        <Text variant="caption" color="tertiary">Puan: {r.score}</Text>
-                      </View>
-                    </View>
-                    <View className="px-4 pt-3 pb-3 bg-white">
-                      <Text variant="caption" color="secondary" className="leading-relaxed">{r.summary}</Text>
-                    </View>
-                  </View>
-                </View>
-              </>
-            )
-          })() : null}
+          {offer.listing?.assessmentResult ? (
+            <>
+              <Divider spacing="none" className="mx-4" />
+              <AssessmentResultSummary result={offer.listing.assessmentResult} />
+            </>
+          ) : null}
 
         </ScrollView>
 
-        {/* ── Fixed Bottom Bar ── */}
         {offer.status === 'PENDING' && (
           <BottomActionBar
             actions={

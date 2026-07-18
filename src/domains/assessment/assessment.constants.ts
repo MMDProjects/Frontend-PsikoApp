@@ -8,7 +8,7 @@ export const assessmentKeys = {
 } as const
 
 export const RESULT_LEVEL_CONFIG = {
-  low:      { label: 'Düşük',  color: '#16A34A', badgeVariant: 'sage'    },
-  moderate: { label: 'Orta',   color: '#D97706', badgeVariant: 'warning' },
-  high:     { label: 'Yüksek', color: '#DC2626', badgeVariant: 'error'   },
+  low:      { label: 'Düşük',  color: '#16A34A', headerBg: '#F0FDF4', badgeVariant: 'sage'    },
+  moderate: { label: 'Orta',   color: '#D97706', headerBg: '#FFFBEB', badgeVariant: 'warning' },
+  high:     { label: 'Yüksek', color: '#DC2626', headerBg: '#FEF2F2', badgeVariant: 'error'   },
 } as const

@@ -11,11 +11,9 @@ export function useLogoutMutation() {
 
   return useMutation({
     mutationFn: async () => {
-      // Best-effort server-side invalidation — ignore errors (local state always cleared)
       try {
         await post('/auth/logout')
       } catch {
-        // ignore
       }
     },
     onSettled: async () => {

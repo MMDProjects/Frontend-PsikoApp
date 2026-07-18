@@ -5,7 +5,6 @@ import { Text } from '@/core/components/atoms/Text'
 
 export type SectionHeaderProps = {
   title: string
-  /** Sağdaki aksiyon linki (örn. "Tümünü Gör") */
   actionLabel?: string
   onAction?: () => void
   className?: string

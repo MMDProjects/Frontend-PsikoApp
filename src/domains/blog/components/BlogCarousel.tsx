@@ -74,7 +74,6 @@ export function BlogCarousel({ blogs, isLoading, onPressBlog, onPressAll }: Blog
         ))
       )}
 
-      {/* Keşif kartı — akıştaki bir blog kartı gibi görünür */}
       {!isLoading && blogs.length > 0 && (
         <DiscoverMore
           variant="tile"

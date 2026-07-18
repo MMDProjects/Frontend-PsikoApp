@@ -17,7 +17,6 @@ describe('Skeleton', () => {
   it('applies given dimensions via style', () => {
     const { UNSAFE_getByProps } = render(<Skeleton width={200} height={40} />)
     const el = UNSAFE_getByProps({ accessibilityLabel: 'Loading' })
-    // style is [animatedStyle, dimensionStyle]
     const dimStyle = (el.props.style as [unknown, { width: unknown; height: unknown }])[1]
     expect(dimStyle.width).toBe(200)
     expect(dimStyle.height).toBe(40)
@@ -70,7 +69,6 @@ describe('SkeletonGroup', () => {
       </SkeletonGroup>
     )
     const { View } = require('react-native')
-    // first View in tree is the SkeletonGroup container
     const groupView = UNSAFE_getAllByType(View)[0]!
     expect(groupView.props.className).toContain('gap-4')
   })

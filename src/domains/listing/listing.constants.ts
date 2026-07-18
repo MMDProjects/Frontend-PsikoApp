@@ -3,8 +3,8 @@ import type { ListingStatus } from './types/listing.types'
 
 export const listingKeys = {
   all:    ['listings'] as const,
-  lists:  () => [...listingKeys.all, 'list'] as const,
-  my:     () => [...listingKeys.all, 'my'] as const,
+  lists:  (params?: unknown) => [...listingKeys.all, 'list', params ?? {}] as const,
+  my:     (status?: string) => [...listingKeys.all, 'my', status ?? 'all'] as const,
   detail: (id: string) => [...listingKeys.all, 'detail', id] as const,
 } as const
 

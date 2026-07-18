@@ -32,7 +32,6 @@ export function MatchCodeBanner({ match, onRelease, isReleasing = false, classNa
         className
       )}
     >
-      {/* Başlık satırı */}
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <Icon
@@ -52,7 +51,6 @@ export function MatchCodeBanner({ match, onRelease, isReleasing = false, classNa
         </View>
       </View>
 
-      {/* Diğer taraf bilgisi */}
       {otherPartyName && (
         <View className="flex-row items-center justify-between">
           <Text variant="caption" color="secondary">
@@ -71,7 +69,6 @@ export function MatchCodeBanner({ match, onRelease, isReleasing = false, classNa
         </View>
       )}
 
-      {/* Eşleşmeyi sonlandır (ACTIVE) */}
       {isActive && onRelease && (
         <Pressable
           onPress={onRelease}

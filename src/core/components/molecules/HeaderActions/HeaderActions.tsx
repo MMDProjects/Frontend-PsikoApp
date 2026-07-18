@@ -13,13 +13,11 @@ export type HeaderActionItem = {
 }
 
 export type HeaderActionsProps = {
-  /** Sağ üstte sabit duran aksiyon butonları (bildirim, yeni ilan vb.) */
   actions: HeaderActionItem[]
 }
 
 const HIT_SLOP = { top: 8, right: 8, bottom: 8, left: 8 }
 
-/** BackButton ile birebir aynı görsel dil: w-10 daire, aynı zemin ve tema bazlı ikon rengi */
 export function HeaderActions({ actions }: HeaderActionsProps) {
   const insets = useSafeAreaInsets()
   const { colorScheme } = useColorScheme()

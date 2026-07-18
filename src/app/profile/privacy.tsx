@@ -1,36 +1,11 @@
-import { Alert, Pressable, ScrollView, View } from 'react-native'
+import { Alert, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Divider } from '@/core/components/atoms/Divider'
-import { Icon } from '@/core/components/atoms/Icon'
 import { Text } from '@/core/components/atoms/Text'
 import { BackButton } from '@/core/components/molecules/BackButton'
+import { MenuRow } from '@/core/components/molecules/MenuRow'
 import { ScreenTitle } from '@/core/components/molecules/ScreenTitle'
-import { useThemeColors } from '@/core/theme'
-
-import type { IconName } from '@/core/components/atoms/Icon'
-
-type PrivacyRowProps = {
-  icon: IconName
-  label: string
-  danger?: boolean
-  onPress: () => void
-}
-
-function PrivacyRow({ icon, label, danger = false, onPress }: PrivacyRowProps) {
-  const colors = useThemeColors()
-  const iconColor = danger ? colors.error : colors.contentSecondary
-
-  return (
-    <Pressable onPress={onPress} className="px-4 py-4 flex-row items-center gap-3 active:opacity-90">
-      <Icon name={icon} size={18} color={iconColor} />
-      <Text variant="body" className={danger ? 'flex-1 text-red-600 dark:text-red-400' : 'flex-1 dark:text-[#F5F5F7]'}>
-        {label}
-      </Text>
-      <Icon name="ChevronRight" size={16} color={colors.contentDisabled} />
-    </Pressable>
-  )
-}
 
 export default function PrivacyScreen() {
   const insets = useSafeAreaInsets()
@@ -89,8 +64,8 @@ export default function PrivacyScreen() {
             Hesap Yönetimi
           </Text>
         </View>
-        <PrivacyRow icon="PauseCircle" label="Hesabımı Dondur" onPress={handleFreeze} />
-        <PrivacyRow icon="Trash2" label="Hesabımı Sil" danger onPress={handleDelete} />
+        <MenuRow icon="PauseCircle" label="Hesabımı Dondur" onPress={handleFreeze} />
+        <MenuRow icon="Trash2" label="Hesabımı Sil" danger onPress={handleDelete} />
 
         <Divider spacing="none" className="mx-4 mt-4" />
 
@@ -99,7 +74,7 @@ export default function PrivacyScreen() {
             Gizlilik
           </Text>
         </View>
-        <PrivacyRow icon="ShieldCheck" label="Gizlilik Politikası" onPress={handlePrivacyPolicy} />
+        <MenuRow icon="ShieldCheck" label="Gizlilik Politikası" onPress={handlePrivacyPolicy} />
       </ScrollView>
     </View>
   )
